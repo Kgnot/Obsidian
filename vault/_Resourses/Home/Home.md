@@ -10,8 +10,8 @@ Bienvenido a Obsidiana.
 - [[Python (Curso)]]
 - [[Java SpringBoot (Curso)]]
 - [[Git (Curso)]]
-- [[Flutter (Curso)(Futuro)]]]
-
+- [[Flutter (Curso)(Futuro)]]
+- [[Java (Curso)]]
 - [[Angular (Curso)]]
 - [[SpringBoot ACM (Curso)]]
 ## Conceptos: 

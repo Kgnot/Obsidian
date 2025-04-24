@@ -4,35 +4,24 @@
     "type": "split",
     "children": [
       {
-        "id": "0013016c1261f6a8",
+        "id": "60052c3ebf9a19ad",
         "type": "tabs",
         "children": [
           {
-            "id": "b71e167af59b9f8d",
+            "id": "7c0b2f70de40fbec",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Courses/Github Actions , Jenkins (CI CD) (Curso).md",
+                "file": "Roadmap/Arquitectura de Software (Roadmap).md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Github Actions , Jenkins (CI CD) (Curso)"
-            }
-          },
-          {
-            "id": "5fda02c847c0530d",
-            "type": "leaf",
-            "state": {
-              "type": "graph",
-              "state": {},
-              "icon": "lucide-git-fork",
-              "title": "Graph view"
+              "title": "Arquitectura de Software (Roadmap)"
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "vertical"
@@ -105,6 +94,7 @@
             "state": {
               "type": "backlink",
               "state": {
+                "file": "Roadmap/Arquitectura de Software (Roadmap).md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -114,7 +104,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks"
+              "title": "Backlinks for Arquitectura de Software (Roadmap)"
             }
           },
           {
@@ -123,11 +113,12 @@
             "state": {
               "type": "outgoing-link",
               "state": {
+                "file": "Roadmap/Arquitectura de Software (Roadmap).md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Outgoing links"
+              "title": "Outgoing links from Arquitectura de Software (Roadmap)"
             }
           },
           {
@@ -161,12 +152,13 @@
             "state": {
               "type": "outline",
               "state": {
+                "file": "Roadmap/Arquitectura de Software (Roadmap).md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline"
+              "title": "Outline of Arquitectura de Software (Roadmap)"
             }
           },
           {
@@ -180,7 +172,7 @@
             }
           }
         ],
-        "currentTab": 5
+        "currentTab": 4
       }
     ],
     "direction": "horizontal",
@@ -199,13 +191,28 @@
       "homepage:Open homepage": false
     }
   },
-  "active": "5fda02c847c0530d",
+  "active": "7c0b2f70de40fbec",
   "lastOpenFiles": [
+    "Courses/src/Github Actions , Jenkins (CI CD)/Pasted image 20250424171726.png",
     "Courses/Github Actions , Jenkins (CI CD) (Curso).md",
+    "Courses/src/Github Actions , Jenkins (CI CD)/Pasted image 20250424172604.png",
+    "Courses/src/Github Actions , Jenkins (CI CD)/Pasted image 20250424172539.png",
     "_Resourses/Home/Home.md",
+    "Courses/src/Github Actions , Jenkins (CI CD)/Pasted image 20250424170406.png",
+    "Courses/src/Github Actions , Jenkins (CI CD)/Pasted image 20250424170430.png",
+    "Courses/src/Github Actions , Jenkins (CI CD)/Pasted image 20250424170424.png",
+    "Courses/src/Github Actions , Jenkins (CI CD)/Pasted image 20250424170255.png",
+    "Courses/src/Github Actions , Jenkins (CI CD)/Pasted image 20250424165005.png",
+    "Courses/src/Github Actions , Jenkins (CI CD)/Pasted image 20250424164302.png",
+    "Courses/src/Github Actions , Jenkins (CI CD)/Pasted image 20250424155745.png",
+    "Courses/Java (Curso).md",
+    "Proyecto/Joah.md",
+    "Proyecto",
     "Roadmap/Arquitectura de Software (Roadmap).md",
-    "_Resourses",
+    "Grafico de contribución.md",
     "Roadmap/Backend (Roadmap).md",
+    "Courses/Ciberseguridad (Curso).md",
+    "_Resourses",
     "SpringBoot ACM.md",
     "Courses/Angular (Curso).md",
     "Courses/SpringBoot ACM (Curso).md",
@@ -221,32 +228,17 @@
     "Courses/Git (Curso).md",
     "Courses/Flutter (Curso)(Futuro).md",
     "Courses/Flutter (Curso) [ Por ahora pausado].md",
-    "Courses/Ciberseguridad (Curso).md",
     "Concepto/Patrones de diseño (Concepto).md",
     "Concepto/src",
     "Concepto",
     "Courses/Java semi-avanzado curso.md",
-    "Courses/Java Avanzado Curso.md",
-    "Courses/Github Actions , Jenkins (CI CD) Curso.md",
-    "Courses/Git curso.md",
     "Roadmap/src",
     "Roadmap",
     "_Resourses/Home",
-    "Courses/src/Java SpringBoot/Untitled 14.png",
-    "Courses/src/Flutter/Untitled 1.png",
-    "Courses/src/Flutter/Untitled.png",
     "Untitled 1.canvas",
     "Untitled.canvas",
-    "Courses/src/Angular/Untitled.png",
-    "Courses/src/Rust Curso-Google/image.png",
-    "Courses/src/Rust Curso-Google/image 7.png",
-    "Courses/src/Rust Curso-Google/image 6.png",
-    "Courses/src/Rust Curso-Google/image 5.png",
-    "Courses/src/Rust Curso-Google/image 4.png",
-    "Courses/src/Rust Curso-Google/image 3.png",
     "Concepto/src/Patrones de diseño/Patrones_de_diseo_bien_-_Erich_Gamma.pdf",
     "Courses/src/Rust Curso-Google",
-    "Courses/src/React",
-    "Courses/src/QT con C++"
+    "Courses/src/React"
   ]
 }

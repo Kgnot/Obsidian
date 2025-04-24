@@ -1,14 +1,14 @@
 # Arquitectura de Software
 
-Una de las cosas mas importantes es poder escoger uno o dos lenguajes. Los mios por ahora solo voy en JAVA. 
+Una de las cosas mas importantes es poder escoger uno o dos lenguajes. Los míos por ahora solo voy en JAVA. 
 
 # Herramientas
 
-Las primeras herramientas son Github, Jenkis, Jira, ELK, SonarQube. Abajo espero crear una pagina donde pondré eso o solo aprenderlo.  Haciendo por categorías de herramientas tenemos: 
+Las primeras herramientas son Github, Jenkins, Jira, ELK, SonarQube. Abajo espero crear una pagina donde pondré eso o solo aprenderlo.  Haciendo por categorías de herramientas tenemos: 
 
 ## Controles de versiones:
 
-- Github, Gitlab, Bitbucker,Git
+- Github, Gitlab, Bitbucket, Git
     
     Diseñado para gestionar ramas, código y colaboradores.
     [[Git (Curso)]]    
@@ -17,17 +17,18 @@ Las primeras herramientas son Github, Jenkis, Jira, ELK, SonarQube. Abajo espero
 
 - Jenkins
     - Orquestador de pipelines, muy flexible y algo viejo
-- GithubActions:
+- Github Actions:
     - CI/CD integrada con github
-- GitLab CI/CD
+- Gitlab CI/CD
     - Alternativa moderna a Jenkins
 - CircleCI/ TravisCI
     - Creada para proyectos pequeños
 
 El CI/CD nos permite compilar, testear, y desplegar automáticamente.
 
-Aqui el apartado va a ser para github Actions y quiza Jenkins: 
+Aqui el apartado va a ser para github Actions y Jenkins: 
 [[Github Actions , Jenkins (CI CD) (Curso)]] 
+Los demás tipos y formas Integración y despliegue puede verse a profundidad medida se va trabajando, puesto que no podemos abarcar todo, absolutamente todo en solo archivos. 
 
 ## Calidad de código y análisis estático:
 

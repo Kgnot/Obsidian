@@ -2,7 +2,7 @@
 
 # CI/CD
 
-### CI – **Continuous Integration (Integración Continua)**
+### CI – **Continuos Integration (Integración Continua)**
 
 **¿Qué es?**
 
@@ -18,9 +18,9 @@ Detectar errores rápido y facilitar la integración del trabajo de todos.
 - Ejecución automática de tests (unitarios, de integración, etc.).
 - Validación del build (compilación, empaquetado, etc.).
 
-### CD – **Continuous Delivery vs Continuous Deployment**
+### CD – **Continuos Delivery vs Continuos Deployment**
 
-**Continuous Delivery (Entrega Continua)**
+**Continuos Delivery (Entrega Continua)**
 
 **¿Qué es?**
 
@@ -34,7 +34,7 @@ Después de pasar por CI, el software es **empaquetado, probado y dejado listo p
 
 ---
 
-**Continuous Deployment (Despliegue Continuo)**
+**Continuos Deployment (Despliegue Continuo)**
 
 **¿Qué es?**
 
@@ -48,7 +48,7 @@ Va un paso más allá: cada cambio que pasa los tests y validaciones del pipelin
 
 # Que son las github actions:
 
-Es un sistema de continuous integration and continuous delivery (CI/CD), es decir integrar nuestra aplicación constantemente. Un sistema de automatización para verificar la integridad y calidad del código , y ademas se puede añadir en producción.  También se pueden hacer despliegues. Aqui mostraremos el como se despliega en Heroku .
+Es un sistema de continuos integration and Continuos delivery (CI/CD), es decir integrar nuestra aplicación constantemente. Un sistema de automatización para verificar la integridad y calidad del código , y ademas se puede añadir en producción.  También se pueden hacer despliegues. Aqui mostraremos el como se despliega en Heroku .
 
 Pagina : 
 
@@ -70,7 +70,7 @@ También podemos referenciar un workflow dentro de otro workflow
 
 ## Events
 
-Un evento es una actividad especifica de el repositorio que activa un `run` del workflow. Por ejemplo, una actividad puede originarse desde gtihub cuando alguien crea un `pull request` , abre un `issue` o hace un `push` de un `commit` al repositorio, también podemos colocarle horarios a los workflows o hacerlo manualmente.
+Un evento es una actividad especifica de el repositorio que activa un `run` del workflow. Por ejemplo, una actividad puede originarse desde github cuando alguien crea un `pull request` , abre un `issue` o hace un `push` de un `commit` al repositorio, también podemos colocarle horarios a los workflows o hacerlo manualmente.
 
 ## Jobs:
 
@@ -160,7 +160,7 @@ Existe algo llamado el Marketplace de github , por ejemplo, si necesitamos usar 
 
 Marketplace: 
 
-[](https://github.com/marketplace)
+[Marketplace](https://github.com/marketplace)
 
 Apartado del marketplace: 
 
@@ -896,10 +896,7 @@ Es una sola tarea. Fundamentalmente, un step le dice a Jenkins que se quiere hac
 
 En los pipelines declarativos, se definen de la siguiente forma en un archivo Groovy: 
 
-<aside>
-📁
-
-Groovy file: | Declarativo
+>Groovy file: | Declarativo
 
 ```groovy
 pipeline {
@@ -933,10 +930,7 @@ pipeline {
 7. Realiza algunos pasos [steps] relacionados con la etapa "Deploy".
 </aside>
 
-<aside>
-📁
-
-Groovy file: | Scipted:
+> Groovy file: | Scipted:
 
 ```groovy
 node {  // - |1| -
@@ -1210,4 +1204,195 @@ Podemos añadir tambien SonarQube que nos ayuda a verificar todo el código etc.
 
 ## Crear un Pipeline:
 
-El video se quedo re corto jajaj, vamos a leer lo que es la documentación 
+El video se quedo re corto jajaj, vamos a leer lo que es la documentación.
+Dentro de la documentación nos lo define como un conjunto de plugins que admiten implementar e integrar CD dentro de Jenkins (continuos delivery).
+La documentación nos comenta sobre lo mismo que en github actions, pero más allá de eso dicen que la manera de definir un Pipelines de Jenkins es mediante un archivo `JenkinsFile` que a su vez puede ser comprometido al control de versiones del repositorio. Algo similar como los `DockerFile`
+Nos habla sobre los beneficios de un `JenkinsFile`:
+	- Automáticamente crear Pipelines de producción para todas las ramas y pull request.
+	- Automatizar una revisión de código mediante un Pipeline.
+	- Camino de pasos para el Pipeline
+	- Una sola fuente de la verdad en los Pipelines que puede ser vista y editada por múltiples miembros de el proyecto.
+Se puede hacer el Pipeline tanto de forma visual "UI" como en un archivo, un `JenkinsFile`. Aunque se consideran buenas prácticas el archivo.
+Ahora, que diferencias hay entre un "Freestyle" y una "Pipeline". Como vimos anteriormente fueron solo proyectos "Freestyle", entonces: 
+[Diferencia entre Pipeline y Freestyle](https://www.youtube.com/watch?embeds_referring_euri=https%3A%2F%2Fwww.jenkins.io%2F&source_ve_path=Mjg2NjQsMTY0NTAz&v=IOUm1lw7F58&feature=youtu.be)
+Dentro del video se nos es creado las dos formas. 
+En el primer ejemplo usamos los Freestyle , creamos 3 proyectos: f1, f2, f3 . Cada uno de estos hace una acción, por el momento es algo simple, como por ejemplo decir algo en el terminal, entonces:
+- f1 dice "hola1"
+- f2 espera o duerme por 60 segundos
+- f3 dice "hola3"
+Es algo simple y sencillo. Ahora pasa a hacerlo mediante los pipelines y mediante un apartado de código: 
+``` Groovy
+pipeline {
+	agent any
+	stages {
+		stage('Hello1') {
+			steps {
+				sh 'echo hello'
+			}
+		}
+		stage('sleep') {
+			steps {
+				sh 'sleep 60'
+			}
+		}
+		stage('Hello2') {
+			steps{
+				sh 'echo hello2'
+			}
+		}
+	}
+}
+```
+Con este apartado de código recrea todo lo que anteriormente se hacía, todo en un mismo bloque. 
+Luego nos habla de, entonces que diferencias hay? Nos comenta que una de las mayores diferencias es la durabilidad, esto se refiere a esa durabilidad de cuando se reinicia el controlador de Jenkins. Todos los trabajos de Jenkins esta corriendo, una vez el controlador se apaga, automáticamente se reinicia y empieza a correr desde donde lo dejaron. Por otro lado, los "Freestyle Jobs" no hace eso. Este lo demuestra matando a mitad de un "run" el servidor. Al volverlo a levantar, los "Freestyle" se quedan sin seguir nada mientras que el Pipeline muestra los siguientes logs: 
+![[Pasted image 20250423221140.png]]
+Aqui observamos que en un apartad de `Resuming build at Tue Feb 01 ...` es decir que vuelve a seguir ejecutando desde donde se dejo sin importar si se cierra el servidor.
+Además de esto hay varios videos donde sigue explicando los conceptos en los que se diferencian, aunque básicamente:
+> - **Durabilidad**: Pipelines sobreviven al apagado del servidor
+> - **Pausable**: Los pipelines pueden parase y esperar algún input humano antes de completar el trabajo por el cual fue creado
+> - **Versatilidad**:Estos entienden el mundo real de los requerimientos de CD, incluyendo la habilidad de `fork, join, loop` y trabajar en paralelo con algún otro Pipeline.
+> - **Eficiencia**: Estos puede reestablecerse desde cualquier punto de guardado
+> - **Extensible**:Tiene muchos plugins y extensiones customizadas que se puede integrar. 
+
+Esas son los puntos en los que más se diferencia entre un Pipeline y un "Freestyle Job".
+
+---
+### Empezar con los pipelines
+Como primera parte necesitamos unos requisitos, estos son: 
+> - Jenkins 2.x o después, en versiones antiguas es posible no trabaje bien
+> - El plugin del Pipeline el cual se instala en los "Plugins sugeridos"
+
+Recordemos que hay dos maneras de crear un Pipeline, tanto de manera declarativa como de un script (Que hablamos arriba). Nos comenta los diferentes caminos en que un Pipeline puede ser escrito: 
+- A través de Blue Ocean (que es la interfaz de Jenkins)
+- A través del clásico UI
+- En un SCM -> donde podemos escribir un `Jenkinsfile` manualmente que puede asegurar en tu repositorio.
+### Empecemos con un Script: 
+![[Pasted image 20250424143638.png]]
+Aquí vamos a Pipeline. 
+![[Pasted image 20250424152509.png]]
+Vamos a ver algo similar a esto. Aqui podemos encontrar una descripción, aunque la parte más importante la encontramos como: 
+![[Pasted image 20250424152940.png]]
+Aqui vemos un script que podemos modificar, entonces para crear un Pipeline de formato script podemos colocar: 
+``` Groovy
+node {
+    stage('Results') {
+        echo 'Hello world'
+        
+    }
+}
+
+```
+Esto nos da a nosotros lo que ya hemos visto antes, un mensaje de "Hello world" en la consola. El output es el siguiente: 
+![[Pasted image 20250424153409.png]]
+Como observamos tenemos quien empezó el Pipeline, El stage que corre, etc. Está toda la información ahi. 
+Entonces ¿Cómo es la forma declarativa? es muy similar y ahora veremos que diferencias tienen: 
+```Groovy
+pipeline {
+    agent any
+
+    stages {
+        stage('Hello') {
+            steps {
+                echo 'Hello World'
+            }
+        }
+    }
+}
+
+```
+Como vemos, son muy similares pero tenemos una diferencia y es que en la forma declarativa asignamos un `agent` que es una maquina virtual, luego en vez de dar por supuesto un apartado de pasos, aqui si los enumeramos, ahora bien, adentro colocamos cada uno de los pasos y ademas, le damos un nombre al paso. Ambos generan exactamente el mismo output. 
+En la documentación hay mucha información sobre esto. 
+### Y el JenkinsFile?
+Para esto vamos a realizar los siguientes pasos, entrando en nuestro github y luego a opciones , vamos a `Developer settings` : 
+![[Pasted image 20250424155633.png]]
+Y vamos al apartado de Personal Access Token en la cual creamos un Token (classic). 
+![[Pasted image 20250424155745.png]]
+Le colocamos un nombre, como por ejemplo "Ajedrez Repository - Jenkins" , a continuación le brindamos todos los que necesitamos, en nuestro caso: 
+![[Pasted image 20250424160152.png]]
+Nos da un token, en este caso es un token semanal y toca guardarla porque solo se muestra una sola vez. 
+ahora vamos al repositorio y vamos al apartado de Webhooks que hemos ya visto y enlazamos al servidor de Jenkins. 
+Ahora en nuestra carpeta de archivos vamos a crear el archivo Jenkins:
+``` Groovy
+pipeline {
+
+    agent any
+    // Este apartado de tools coje lo que se esta por predeterminado en el servidor de Jenkins, como lo tenemos global no lo ponemos, pero es algo a tomar en cuenta
+    tools {  
+        maven 'Maven 3.6.3'
+        jdk 'JDK 18'
+    }
+
+    stages {
+        stage ('Checkout') {
+            steps {
+                git 'https://github.com/Kgnot/Ajedrez.git'
+            }
+        }
+        stage ('Test') {
+            steps {
+                echo 'Ejecutando pruebas...'
+            }
+        }
+        stage ('Build') {
+            steps {
+                echo 'Construyendo el proyecto...'
+                sh 'mvn clean package'
+            }
+        }
+    }
+     post {
+        success {
+            echo '¡Build completado con éxito!'
+        }
+        failure {
+            echo 'Ocurrió un error en el pipeline.'
+        }
+    }
+}
+```
+Después de esto ya podemos subirlo a nuestro repositorio: ![[Pasted image 20250424164302.png]]
+Ahora entramos en nuestro Servidor de Jenkins y que me cree una tarea. Esta tarea va a ser la siguiente, creamos una nueva Pipeline y le configuramos lo siguiente: ![[Pasted image 20250424165005.png]]
+Como nuestro Jenkins esta enlazado con nuestro github entonces no nos genera error y no es necesario el token de acceso, de lo contrario o normalmente se coloca el token de acceso en el repositorio de esa forma, es decir -> `https://<token>@github.com/Kgnot/Ajedrez#` 
+
+> ==Como anotación importante, el archivo se llama "JenkinsFile" no "JenkinsFile" , error mío.==
+
+Ahora, después de hacer todo eso, solo debemos correr el Pipeline que inmediatamente aparecerá:
+![[Pasted image 20250424170255.png]]
+Esto significa que pudo identificar el archivo ==Jenkinsfile== y podemos ver al final: 
+![[Pasted image 20250424170406.png]]![[Pasted image 20250424170424.png]]![[Pasted image 20250424170430.png]]
+
+Cada una de los pasos que realizo y como todo quedó bien. Podemos tambien entrar a cada uno de los nodos y revisar como lo hizo, etc. 
+
+Recordemos que nosotros activamos lo que era que escuchara los trigers de github, entonces, si hacemos un push por ejemplo: 
+![[Pasted image 20250424171726.png]]
+![[Pasted image 20250424172539.png]]
+Aqui vemos que la corre y si vamos al github: 
+![[Pasted image 20250424172604.png]]
+Entonces entendemos como es el flujo de todo esto.
+> Como una nota adicional, tenemos que tener en cuenta que si hacemos Ngrok de forma local o un formato local, siempre hay que estar actualizando el webhook ya que este no siempre es el mismo al desplegarse 
+
+Siendo no más, hasta aqui el curso introductorio de CI/CD de github actions y Jenkins usando videos y documentación.
+
+---
+Quizá algún termino que podemos ver es este: SCM 
+En el contexto de **Jenkins** y los **Pipelines**, **SCM** significa **Source Control Management** o también conocido como **Version Control System (VCS)**.
+#### ¿Cómo se relaciona con Jenkins?
+Cuando configuras un **Pipeline** en Jenkins, muchas veces le dices:
+
+> “Ey Jenkins, el código está en este repositorio Git. Cuando haya un cambio, haz esto…”
+
+Ahí es donde entra **SCM**. Jenkins **se conecta a tu repositorio de código** (SCM) y desde ahí empieza a trabajar: compilar, probar, desplegar, etc.
+##### En español simple:
+
+Es **el sistema que se encarga de guardar, versionar y gestionar el código fuente de tu proyecto**.
+
+# Bibliografía
+- [GitHub Actions documentation - GitHub Docs](https://docs.github.com/en/actions)
+- [Marketplace](https://github.com/marketplace)
+- [Checkout - GitHub Marketplace](https://github.com/marketplace/actions/checkout)
+- [Running variations of jobs in a workflow - GitHub Docs](https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/running-variations-of-jobs-in-a-workflow)
+- [Caching dependencies to speed up workflows - GitHub Docs](https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/caching-dependencies-to-speed-up-workflows)
+- En el canal de midudev sobre Github Actions
+- [Jenkins Bibliografía](https://www.jenkins.io/doc/book/pipeline/jenkinsfile/)
+- [Curso Completo de Jenkins Para Principiantes con Docker, Git, Spring Boot, Slack y SonarQube](https://www.youtube.com/watch?v=LZDmM_t4XRg)
+- [Canal de YouTube sobre Jobs con Jenkins y JenkinsFile](https://www.youtube.com/watch?v=mnuEWQuWNeo)
