@@ -4,21 +4,21 @@
     "type": "split",
     "children": [
       {
-        "id": "60052c3ebf9a19ad",
+        "id": "c81afeb7bad173a2",
         "type": "tabs",
         "children": [
           {
-            "id": "7c0b2f70de40fbec",
+            "id": "aa9e7e97d7accc82",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Roadmap/Arquitectura de Software (Roadmap).md",
+                "file": "Courses/Calidad de Código (SonarQube y Codacy ) (Curso).md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Arquitectura de Software (Roadmap)"
+              "title": "Calidad de Código (SonarQube y Codacy ) (Curso)"
             }
           }
         ]
@@ -94,7 +94,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Roadmap/Arquitectura de Software (Roadmap).md",
+                "file": "Courses/Calidad de Código (SonarQube y Codacy ) (Curso).md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -104,7 +104,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for Arquitectura de Software (Roadmap)"
+              "title": "Backlinks for Calidad de Código (SonarQube y Codacy ) (Curso)"
             }
           },
           {
@@ -113,12 +113,12 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Roadmap/Arquitectura de Software (Roadmap).md",
+                "file": "Courses/Calidad de Código (SonarQube y Codacy ) (Curso).md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Outgoing links from Arquitectura de Software (Roadmap)"
+              "title": "Outgoing links from Calidad de Código (SonarQube y Codacy ) (Curso)"
             }
           },
           {
@@ -152,23 +152,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Roadmap/Arquitectura de Software (Roadmap).md",
+                "file": "Courses/Calidad de Código (SonarQube y Codacy ) (Curso).md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of Arquitectura de Software (Roadmap)"
-            }
-          },
-          {
-            "id": "bd952a9ef5463481",
-            "type": "leaf",
-            "state": {
-              "type": "calendar",
-              "state": {},
-              "icon": "calendar-with-checkmark",
-              "title": "Calendar"
+              "title": "Outline of Calidad de Código (SonarQube y Codacy ) (Curso)"
             }
           }
         ],
@@ -191,24 +181,30 @@
       "homepage:Open homepage": false
     }
   },
-  "active": "7c0b2f70de40fbec",
+  "active": "47832f3c14739538",
   "lastOpenFiles": [
-    "Courses/src/Github Actions , Jenkins (CI CD)/Pasted image 20250424171726.png",
-    "Courses/Github Actions , Jenkins (CI CD) (Curso).md",
-    "Courses/src/Github Actions , Jenkins (CI CD)/Pasted image 20250424172604.png",
-    "Courses/src/Github Actions , Jenkins (CI CD)/Pasted image 20250424172539.png",
+    "Courses/src/Calidad de Código (SonarQube y Codacy/Pasted image 20250425204028.png",
+    "Courses/src/Calidad de Código (SonarQube y Codacy/Pasted image 20250425200532.png",
+    "Courses/Calidad de Código (SonarQube y Codacy ) (Curso).md",
     "_Resourses/Home/Home.md",
-    "Courses/src/Github Actions , Jenkins (CI CD)/Pasted image 20250424170406.png",
-    "Courses/src/Github Actions , Jenkins (CI CD)/Pasted image 20250424170430.png",
-    "Courses/src/Github Actions , Jenkins (CI CD)/Pasted image 20250424170424.png",
-    "Courses/src/Github Actions , Jenkins (CI CD)/Pasted image 20250424170255.png",
-    "Courses/src/Github Actions , Jenkins (CI CD)/Pasted image 20250424165005.png",
-    "Courses/src/Github Actions , Jenkins (CI CD)/Pasted image 20250424164302.png",
-    "Courses/src/Github Actions , Jenkins (CI CD)/Pasted image 20250424155745.png",
+    "Libros/Recomendaciones iniciales.md",
+    "Courses/src/Calidad de Código (SonarQube y Codacy/Pasted image 20250425193046.png",
+    "Courses/src/Calidad de Código (SonarQube y Codacy/Pasted image 20250425192249.png",
+    "Courses/src/Calidad de Código (SonarQube y Codacy/Pasted image 20250425192139.png",
+    "Courses/src/Calidad de Código (SonarQube y Codacy/Pasted image 20250425192053.png",
+    "Courses/src/Calidad de Código (SonarQube y Codacy/Pasted image 20250425192021.png",
+    "Courses/src/Calidad de Código (SonarQube y Codacy/Pasted image 20250425191958.png",
+    "Courses/src/Calidad de Código (SonarQube y Codacy/Pasted image 20250425185714.png",
+    "Courses/src/Calidad de Código (SonarQube y Codacy/Pasted image 20250425184308.png",
+    "Courses/src/Calidad de Código (SonarQube y Codacy/Pasted image 20250425183750.png",
+    "Roadmap/Arquitectura de Software (Roadmap).md",
+    "Libros/src",
+    "Libros",
+    "Courses/src/Calidad de Código (SonarQube y Codacy",
+    "Courses/Github Actions , Jenkins (CI CD) (Curso).md",
     "Courses/Java (Curso).md",
     "Proyecto/Joah.md",
     "Proyecto",
-    "Roadmap/Arquitectura de Software (Roadmap).md",
     "Grafico de contribución.md",
     "Roadmap/Backend (Roadmap).md",
     "Courses/Ciberseguridad (Curso).md",
@@ -228,17 +224,12 @@
     "Courses/Git (Curso).md",
     "Courses/Flutter (Curso)(Futuro).md",
     "Courses/Flutter (Curso) [ Por ahora pausado].md",
-    "Concepto/Patrones de diseño (Concepto).md",
     "Concepto/src",
     "Concepto",
-    "Courses/Java semi-avanzado curso.md",
     "Roadmap/src",
     "Roadmap",
     "_Resourses/Home",
     "Untitled 1.canvas",
-    "Untitled.canvas",
-    "Concepto/src/Patrones de diseño/Patrones_de_diseo_bien_-_Erich_Gamma.pdf",
-    "Courses/src/Rust Curso-Google",
-    "Courses/src/React"
+    "Untitled.canvas"
   ]
 }

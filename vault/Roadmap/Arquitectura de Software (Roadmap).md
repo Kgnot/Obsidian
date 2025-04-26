@@ -39,6 +39,8 @@ Los demás tipos y formas Integración y despliegue puede verse a profundidad me
 - Codacy / CodeClimate
     - Alternativas más automáticas, a veces con visuales más simples.
 
+Dentro de todo esto de la calidad del código vamos a tocar Codacy y SonarQube, esté último lo usaremos mediante Docker y al final vamos a conectarlo a nuestro repositorio mediante Jenkins. 
+[[Calidad de Código (SonarQube y Codacy ) (Curso)]]
 ## Observabilidad y monitoreo
 
 - ELK Stack (Elasticksearch, Logstash, Kibana)

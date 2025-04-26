@@ -14,6 +14,7 @@ Bienvenido a Obsidiana.
 - [[Java (Curso)]]
 - [[Angular (Curso)]]
 - [[SpringBoot ACM (Curso)]]
+- [[Calidad de Código (SonarQube y Codacy ) (Curso)]]
 ## Conceptos: 
 - [[Principios SOLID (Concepto)]]
 - [[Patrones de diseño (Concepto)]]
