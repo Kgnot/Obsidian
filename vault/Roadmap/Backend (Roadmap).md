@@ -289,6 +289,19 @@ Allow: GET, POST, PUT, DELETE
 Access-Control-Allow-Methods: GET, POST, PUT, DELETE
 ```
 
+En HTTP, [Idempotencia](http://tools.ietf.org/html/rfc2616#section-9.1.2) significa que los efectos secundarios de múltiples solicitudes idénticas son los mismos que para una sola solicitud. `GET`, `PUT` y `DELETE` son los métodos HTTP idempotentes relevantes a la guía de estilo. Ten en cuenta que la idempotencia solo se expresa en términos de efectos secundarios del servidor y no especifica nada sobre la respuesta. En particular, `DELETE` para recursos no existentes **debería** mostrar `404 (Not Found)`.
+1. Métodos Idempotentes: 
+	1. GET
+	2. PUT
+	3. DELETE
+	4. HEAD
+	5. OPTION
+	6. TRACE
+2. Métodos no idempotentes:
+	1. POST
+	2. PATCH
+
+![[Pasted image 20250519155822.png]]
 # Controlador de Versionado de Sistemas
 
 Git es un sistema de control de versiones distribuido diseñado para manejar proyectos de cualquier tamaño con velocidad y eficiencia.

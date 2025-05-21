@@ -1,3 +1,10 @@
 {
-  "alwaysUpdateLinks": true
+  "alwaysUpdateLinks": true,
+  "spellcheckDictionary": [
+    "node",
+    "daemon",
+    "cli",
+    "Dockerhub",
+    "POO"
+  ]
 }

@@ -1,6 +1,6 @@
 # Java SpringBoot
 
-# REST CRUD APIs:
+## REST CRUD APIs:
 
 REST, que significa Representational State Transfer, es un estilo arquitectónico utilizado en el desarrollo web para construir aplicaciones web ligeras, mantenibles y escalables. Una API REST, también conocida como servicio web REST, se basa en este estilo arquitectónico y se utiliza para crear aplicaciones web que pueden interactuar y comunicarse con otras aplicaciones web a través de Internet. Estas APIs REST están diseñadas para aprovechar los protocolos existentes, lo que las hace fáciles de usar y desarrollar.
 
@@ -8,7 +8,7 @@ Por otro lado, los servicios REST son un conjunto de principios de arquitectura 
 
 En resumen, REST API, REST Web Services y REST Services se refieren a servicios basados en la arquitectura REST que permiten la comunicación entre diferentes aplicaciones a través de la web.
 
-## REST sobre HTTP:
+### REST sobre HTTP:
 
 Como primera instancia, lo más común es unas rest sobre operaciones HTTP. HTTP tiene varios métodos sobre las CRUD los cuales tenemos: 
 
@@ -35,11 +35,11 @@ Para el HTTP Response Message:
 - Header variables: tipo de los metadatos (si es JSON o XML, la longitud de los datos).
 - Message Body: Contenido del mensaje en la configuración dada. (JSON XML , etc.).
 
-### HTTP Response - Status Code:
+#### HTTP Response - Status Code:
 
 ![Untitled](src/Java%20SpringBoot/Untitled%201.png)
 
-## Sobre el código Java Spring:
+### Sobre el código Java Spring:
 
 Tal como se ve al inicio del curso se hace algo totalmente simple: 
 
@@ -76,7 +76,7 @@ NOTA: Algo a tener en cuenta es las conversiones, mapeo, etc. que existen de JSO
 
 Jackson es una biblioteca popular en Java para procesar datos JSON. Proporciona funcionalidades para convertir objetos Java a JSON y viceversa, lo que se conoce como "data binding" (enlace de datos). Aquí te explico los conceptos clave relacionados con Jackson, JSON y Java POJO, así como los términos de mapeo, serialización, marshalling, unmarshalling y deserialización.
 
-### Jackson Data Binding
+#### Jackson Data Binding
 
 **Jackson** es una biblioteca para procesar JSON en Java. Proporciona varias funcionalidades, incluyendo:
 
@@ -84,13 +84,13 @@ Jackson es una biblioteca popular en Java para procesar datos JSON. Proporciona 
 - **Tree Model**: Manipulación de JSON como un árbol de nodos (similar a DOM para XML).
 - **Streaming API**: Lectura y escritura de JSON como una secuencia de tokens.
 
-### JSON y Java POJO
+#### JSON y Java POJO
 
 **JSON (JavaScript Object Notation)** es un formato ligero de intercambio de datos que es fácil de leer y escribir para humanos y fácil de analizar y generar para máquinas.
 
 **Java POJO (Plain Old Java Object)**: Un POJO es un objeto Java simple que no depende de ninguna tecnología o marco específico. Los POJOs suelen utilizarse para representar datos que se pueden convertir a y desde JSON.
 
-### Mapeo, Serialización, Marshalling, Unmarshalling, Deserialización
+#### Mapeo, Serialización, Marshalling, Unmarshalling, Deserialización
 
 1. **Mapeo**:
     - **Definición**: Es el proceso de relacionar los campos de un objeto Java (POJO) con las claves y valores de un JSON.
@@ -115,7 +115,7 @@ Las demás, es decir Marshalling, Unmarshalling, Deserialización las veremos de
 
 La manera mas sencilla para dar a entender este Jackson es enviando una `List<Object>` como `@GetMapping` y automáticamente se vera como un JSON.
 
-## Variables del Path o de Ruta
+### Variables del Path o de Ruta
 
 Tenemos el ejemplo: 
 
@@ -295,7 +295,7 @@ La idea es:
     }
 ```
 
-### Para hacer las excepciones de cualquier forma, es decir EXCEPCIONES GENERICAS ESPECIFICAS:
+#### Para hacer las excepciones de cualquier forma, es decir EXCEPCIONES GENERICAS ESPECIFICAS:
 
 ```java
 @ExceptionHandler
@@ -312,7 +312,7 @@ La idea es:
 
 La diferencia entre ambas radica en el tipo de excepción que nosotros estamos recibiendo como argumento .
 
-### Para hacer las excepciones como:  EXCEPCIONES GENERICAS GLOBALES:
+#### Para hacer las excepciones como:  EXCEPCIONES GENERICAS GLOBALES:
 
 Es decir de cualquier @RestController que se haga dentro del aplicativo va a generar esas mismas excepciones, la idea es usar la anotación `@ControllerAdvice` 
 
@@ -356,7 +356,7 @@ public class StudentRestExceptionHandler {
 
 La idea aqui es solo usar esta clase para todo tipo de excepciones que pueden ocurrir, como observamos aqui solo es meramente necesario el código del segundo método debido a que maneja excepciones de la clase `Student` .
 
-## REST API Design
+### REST API Design
 
 Para crear un REST API Design debemos tener en cuenta 3 cosas:
 
@@ -375,13 +375,13 @@ Cosas que no se deben hacer:
 
 ![Untitled](src/Java%20SpringBoot/Untitled%208.png)
 
-### Ejemplo PAYPAL:
+#### Ejemplo PAYPAL:
 
 ![Untitled](src/Java%20SpringBoot/Untitled%209.png)
 
-## Completitud
+### Completitud
 
-### Capa de servicios
+#### Capa de servicios
 
 La capa de servicios es una implementación del patrón de diseño **«Service Fecade»** la cual sirve para implementar múltiples fuentes de datos (data sources) 
 
@@ -412,7 +412,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 
 @Service habilita el escaneo del componente. Tambien recordar que la capa de servicio es la que debe hacer los tramites transaccionales.
 
-### Añadir o actualizar un dato en la base de datos
+#### Añadir o actualizar un dato en la base de datos
 
 Para añadir o actualizar un elemento nosotros debemos usar el `merge` es decir:
 
@@ -426,7 +426,7 @@ public Employee save(Employee theEmployee){
 
                                              SI EL ID == 0 ENTONCES SE GUARDA O SE INSERTA, DE LO CONTRARIO SE ACTUALIZA
 
-## Spring Data JPA (Simplifica las cosas)
+### Spring Data JPA (Simplifica las cosas)
 
 Nosotros anteriormente debíamos usar: 
 
@@ -451,7 +451,7 @@ Y `EmployeeServiceImpl` quedaría de la siguiente forma:  (añadir @Service)
 
 De esta manera se implementan El CRUD básico y algunos más que se pueden observar en la implementación. 
 
-## Spring Data REST (Simplifica las cosas de la parte del REST)
+### Spring Data REST (Simplifica las cosas de la parte del REST)
 
 El Spring Data REST , al igual que el Spring Data JPA usamos interfaces para establecer el CRUD minimo, y los endpoints necesarios, de forma natural vendrían siendo : 
 
@@ -495,13 +495,13 @@ El código de arriba nos produce que cambiemos el `path` o la manera en que loca
 Básicamente el URL queda: [http://localhost:8080/magi-api/employees](http://localhost:8080/magi-api/employees) . 
 A la hora de hacer un Put:
 
-### Put :
+#### Put :
 
 Para este nosotros usamos: [http://localhost:8080/magi-api/employees](http://localhost:8080/magi-api/employees)/{id} donde “id” es el lugar donde nosotros debemos colocar y en el cuerpo todo normal menos el id, eso de paso lo ignorara. 
 
 ![Untitled](src/Java%20SpringBoot/Untitled%2017.png)
 
-## Configuración del Spring Data & Paginación:
+### Configuración del Spring Data & Paginación:
 
 Dentro de java spring boot , cuando usamos el Data REST , la ubicación de los endpoints es conocida por ser el plural de las clases, es decir, para el siguiente código: 
 
@@ -513,7 +513,7 @@ public interface EmployeeRepository extends JpaRepository<Employee,Integer> {
 
 Tenemos que el endpoint es dado por `../employees`  que es el plural, pero al ser tan variado y no usarse siempre en el mismo idioma, podemos usar la siguiente anotación: 
 
-### RepositoryRestResource(path=”…”)
+#### RepositoryRestResource(path=”…”)
 
 En este nosotros podemos poner el path que nosotros queramos a la clase, por ejemplo: 
 
@@ -526,14 +526,14 @@ public interface EmployeeRepository extends JpaRepository<Employee,Integer>{
 
 Esto significa que el endpoint es dado por: `../members`  
 
-### Paginación:
+#### Paginación:
 
 Por defecto Spring Data REST usa paginación de cada 20 elementos. 
 Es decir que el tamaño de la pagina es de 20 elementos creando un link de la siguiente forma: `../employees?page=0`  o `../employees?page=1` etc. siendo 0 el base. Tiene las siguientes propiedades: 
 
 ![Untitled](src/Java%20SpringBoot/Untitled%2018.png)
 
-### Sorting (Ordenamiento):
+#### Sorting (Ordenamiento):
 
 Podemos ordenar los elementos de una pagina automáticamente , en el ejemplo de Employee tenemos las propiedades como:  firstName, lastName y email. por lo que podemos usar: 
 
@@ -541,7 +541,7 @@ Podemos ordenar los elementos de una pagina automáticamente , en el ejemplo de 
 - `.../employees?sort=fistName,desc`
 - `.../employees?sort=firstName,asc`
 
-# Ciclo dos y uno | Spring Core:
+## Ciclo dos y uno | Spring Core:
 
 Lo primero que debemos saber es como crear el directorio, debería quedar de esta manera: 
 
@@ -1121,15 +1121,15 @@ Un ejemplo mas concreto sería:
 
 ---
 
-# Hibernate/JPA CRUD:
+## Hibernate/JPA CRUD:
 
-## ¿Qué es Hibernate?
+### ¿Qué es Hibernate?
 
 Es básicamente un framework en el cual guarda o persiste objetos de java en una base de datos: 
 
 ![Untitled](src/Java%20SpringBoot/Untitled%2034.png)
 
-## Beneficios de Hibernate
+### Beneficios de Hibernate
 
 Hibernate ofrece una serie de beneficios para los proyectos de desarrollo, entre los cuales se incluyen:
 
@@ -1139,17 +1139,17 @@ Hibernate ofrece una serie de beneficios para los proyectos de desarrollo, entre
 - **Optimización de rendimiento**: Hibernate también ofrece numerosas características para mejorar el rendimiento de las aplicaciones, como el soporte para el almacenamiento en caché de segundo nivel y la capacidad de optimizar las consultas SQL.
 - **Soporte para transacciones**: Hibernate proporciona un marco para manejar las transacciones de la base de datos de forma segura y eficiente.
 
-## ¿Qué es JPA?
+### ¿Qué es JPA?
 
 Es conocido como Java Persistence API (JPA) , es una API estándar para el mapeo Objeto-Relacional o ORM.
 JPA es una lista de Interfaces para implementar. 
 La implementaciones que tiene es en Hibernate y otra llamada EclipseLink. Aunque hay muchísimos más. 
 
-## Beneficios de JPA
+### Beneficios de JPA
 
 Los beneficios es que, al ser interfaces listas para implementar, no es necesario algún implementador nato, cualquiera sirve y se puede usar o transcribir a cualquier otro sin ningún problema
 
-## Código de JPA
+### Código de JPA
 
 Este seria el código simple para guardar una variable: 
 
@@ -1180,7 +1180,7 @@ TypedQuery<Student> theQuery =  entityManager.createQuery("from Student", Stunde
 List<Student> students = theQuery.getResultList(); 
 ```
 
-## Construcción:
+### Construcción:
 
 Lo primero que debemos construir es el apartado del main, algo que debemos de saber es que podemos crear un @Bean antes que todos en el cual pondremos nuestro propio código, este código nos puede servir para, por ejemplo, conectar a la base de datos o una simple línea de comando: 
 
@@ -1203,7 +1203,7 @@ public class CruddemoApplication {
 }
 ```
 
-## Tablas y mas anotaciones de Spring Boot.
+### Tablas y mas anotaciones de Spring Boot.
 
 Nosotros en JPA usamos las clases de java como forma de comparación a las tablas de la base de datos. Asi usa anotaciones que se necesitan para mapear la clase java a las tablas relacionales.
 
@@ -1244,7 +1244,7 @@ public class Student{
 * */
 ```
 
-## JPA CRUD
+### JPA CRUD
 
 Para empezar con el CRUD nosotros hacemos lo que es, como vimos anteriormente , un Data Access Object o un DAO el cual cuenta con métodos como: 
 
@@ -1277,7 +1277,7 @@ Los pasos a seguir para crear el DAO son:
     1. Inyectar la Entity manager
 3. Actualizar la aplicación principal
 
-### Definiendo la interfaz DAO:
+#### Definiendo la interfaz DAO:
 
 ```java
 public interface StudentDAO{
@@ -1285,7 +1285,7 @@ public interface StudentDAO{
 }      
 ```
 
-### Definiendo la implementación DAO
+#### Definiendo la implementación DAO
 
 ```java
 public class StudentDAOImpl implements StudentDAO{
@@ -1335,7 +1335,7 @@ public class StudentDAOImpl implements StudentDAO{
 
 Usamos @Repository para marcar la clase como un repositorio de datos, y luego marcamos @Transactional para marcar que estamos haciendo una transacción, en este caso, guardar el estudiante.
 
-### Actualizamos la aplicación principal:
+#### Actualizamos la aplicación principal:
 
 ```java
 @SpringBootApplication
@@ -1420,7 +1420,7 @@ int numRowDeleted2 =  entityManager
 
 El código total del CRUD debe verse de esta manera: 
 
-### Estudiante DAO:
+#### Estudiante DAO:
 
 ```java
 public interface StudentDAO {
@@ -1434,7 +1434,7 @@ public interface StudentDAO {
 }
 ```
 
-### Estudiante DAO Imp:
+#### Estudiante DAO Imp:
 
 ```java
 @Repository
@@ -1502,7 +1502,7 @@ public class StudentDAOImp implements StudentDAO {
 }
 ```
 
-### Apartado para el Main:
+#### Apartado para el Main:
 
 ```java
 public class CruddemoApplication {
@@ -1574,7 +1574,7 @@ public class CruddemoApplication {
 }
 ```
 
-## Crear una tabla desde java-code
+### Crear una tabla desde java-code
 
 JPA/Hibernate nos provee una opción de crear de manera automática tablas.
 Para esto usamos las propiedades de la aplicación `application.properties` , y usamos: `spring.jpa.hibernate.ddl-auto=PROPERTIE_VALUE` :
@@ -1600,7 +1600,7 @@ Sin embargo hay que tener cuidado porque las bases de datos se configuran con el
 
 ---
 
-# Seguridad:
+## Seguridad:
 
 En esta sección se verá :
 
@@ -1609,7 +1609,7 @@ En esta sección se verá :
 - URL Protegidas en base al rol.
 - Almacenar usuarios, contraseñas y roles en una BD (texto plano → Encriptado).
 
-## Spring Security Model:
+### Spring Security Model:
 
 Se define un framework de seguridad para Spring Security. Se implementa usando filtros Servlet en el background.
 Existen dos métodos:  declarativo y programático. 
@@ -1681,7 +1681,7 @@ Luego podemos ir a postman para ingresar a nuestro endpoint , para esto usamos p
 
 Aqui al rellenar el Usuario y Contraseña con lo que configuramos arriba, podemos acceder a los datos desde postman.
 
-### Roles:
+#### Roles:
 
 Los roles, como ya vimos en el código de arriba se pueden añadir a cada uno de los usuarios que estamos creando. Estos roles nos pueden ayudar a gestionar dentro de nuestra aplicaciones, por ejemplo, quien tiene los derechos necesarios para poder borrar a los empleados, o borrar en la base de datos, por ejemplo. 
 
@@ -1717,7 +1717,7 @@ En el código de arriba observamos varias cosas, una de ellas es el uso de los e
 Automáticamente nos protege de los CORS,  asi que debemos deshabilitarlos en la siguiente línea: 
 `http.csrf(csrf -> csrf.disable());` 
 
-### Para ahora hacer ese tipo de autenticación en la base de datos debemos:
+#### Para ahora hacer ese tipo de autenticación en la base de datos debemos:
 
 ```java
 @Configuration
@@ -1745,11 +1745,11 @@ Este código lo que hace es buscar directamente en la base de datos, o automáti
             - `username` (tipo `VARCHAR`): El nombre de usuario asociado al rol.
             - `authority` (tipo `VARCHAR`): El rol o permiso asignado al usuario (por ejemplo, `ROLE_ADMIN`, `ROLE_USER`).
 
-## Bcrypt:
+### Bcrypt:
 
 ---
 
-# Apartado de Mi aplicativo sobre seguridad
+## Apartado de Mi aplicativo sobre seguridad
 
 Aqui habrá un apartado para explicar que estoy haciendo con mi aplicativo de spring para la seguridad, explicaré cositas, y miraremos documentación y otras páginas:
 
@@ -1797,8 +1797,8 @@ Ya hora veremos que hace cada uno a un poquito más de detalle, por ahora:
 - `userDetailsService`: 
 En **Spring Security**, `UserDetailsService` es una interfaz que proporciona una forma estándar de recuperar información del usuario para el proceso de autenticación y autorización. Su implementación es un componente clave cuando se necesita autenticar usuarios y gestionar sus roles y permisos.
 Por lo que el método lo que hace es generar un usuario para manejar, lo que usan en la documentación oficial es:
-    
-    ```java
+
+```java
     @Bean
     	public UserDetailsService userDetailsService() {
     		UserDetails userDetails = User.withDefaultPasswordEncoder()
@@ -1810,6 +1810,7 @@ Por lo que el método lo que hace es generar un usuario para manejar, lo que usa
     		return new InMemoryUserDetailsManager(userDetails);
     	}
     ```
+
     
     Aqui determinan un usuario por defecto y lo guardan en memoria para asi poder usarlo de manera normal, esto tambien lo vemos en el curso de spring asi que no es necesario ahondar aqui. 
     
@@ -2006,7 +2007,7 @@ Ya que por alguna razón por defecto falla, y pues ya jaja, daticos.
 
 Otro dato importante es sobre los dto.
 
-## DTO
+### DTO
 
 Los DTO básicamente me dice que quiere que le muestre al endpoint?, es facil, mira: 
 
@@ -2063,7 +2064,7 @@ public class UsersServiceImpl implements UsersService{
 
 Con toda esta configuración damos por sentado un ejemplo de como usar seguridad. 
 
-# Apartado 2, JWT , autenticación y autorización
+## Apartado 2, JWT , autenticación y autorización
 
 Hablemos acerca de JWT, básicamente es un Json Web Token que permite la autenticación de un usuario mas no su autorización.
 
@@ -2079,7 +2080,7 @@ El proceso de Autenticación sigue el curso que vemos arriba. Un tema es que el 
 
 Vamos a explicar paso a paso que se hace en este proceso de autenticación/registro.
 
-## Proceso completo con código:
+### Proceso completo con código:
 
 Primero sabemos que el cliente hace una petición, por lo que entonces debemos crear los endpoints: 
 
@@ -2279,7 +2280,7 @@ Volviendo a lo que era el AuthService manejamos el login con un `AuthenticationM
 
 Ahora tenemos el apartado de `register` que realmente solo crea el usuario y perfil [aqui iria alguna logica para crear, quiza podemos usar algun servicio extra para no delegar tanto código ahi] y luego obtenemos el token con el servicio de Jwt que ya digimos
 
-### Y la configuración?
+#### Y la configuración?
 
 Esta es la configuración que manejamos para que se inyecten las dependencias:
 
@@ -2357,7 +2358,7 @@ Para pasar a la siguiente instancia debemos ver:
 
 Aquí se explica como es el proceso de validación de un token que está siendo pasado por la httprequest y como nos puede dar erroes o no puesde brindar la pagina que estámos queriendo acceder
 
-## Proceso de Validación JWT
+### Proceso de Validación JWT
 
 para esto vamos a ahora si a declarar el `JwtAuthenticationFilters` este extiende de `OncePerRequestFilter` que es una clase abstracta que nos ayuda a establecer filtros personalizados que usaremos, la clase se vería algo asi: 
 
@@ -2500,7 +2501,7 @@ Con lo que explicamos anteriormente no es necesario ahondar mucho en el, ahora b
 
 Como vemos hay un `addFilterBefore()` que es donde llamamos al JwtAuthenticationFilters, ya que terminsmo ahora sigue con el filtro en cadena de la sesion Manejada que por defecto es una sesion con politica “ sin estado” que no guarda la autenticación y necesita pedir el token en cada llamado.
 
-# Apartado 3, HttpOnly y cookies.
+## Apartado 3, HttpOnly y cookies.
 
 Con lo que observamos anteriormente vemos que al usuario se le es pasado el JWT, pero esto debe ser guardado en 3 lugares deiferentes, en las cookies, en al localstorage o en la sessionStorage.
 
@@ -2513,9 +2514,9 @@ Lo primero que haremos será instalar
 
 ---
 
-# Diferencias entre JWT y Session:
+## Diferencias entre JWT y Session:
 
-## Autenticación basada en Sesiones:
+### Autenticación basada en Sesiones:
 
 El diagrama de flujo es el siguiente
 
@@ -2523,7 +2524,7 @@ El diagrama de flujo es el siguiente
 
 Aqui nosotros observamos que lo más importante es el manejo de sesiones en el servidor, ahi es donde se controla basicamente todo, puede ser dentro de una base de datos. 
 
-### Ventajas:
+#### Ventajas:
 
 - Revocar una sesión es sencillo
 - Almacenamiento separado necesario para guardar la información de la sesión
@@ -2535,7 +2536,7 @@ Uno de los grandes problemas de esto es:
 
 Que a la hora de tener multiples servidores necesitamos centralizar esta sesión generando cierta latencia en cada petición.
 
-## Autenticación basada en JWT:
+### Autenticación basada en JWT:
 
 El Flujo es el siguiente: 
 
@@ -2543,7 +2544,7 @@ El Flujo es el siguiente:
 
 Aqui observamos como ahora no depende de almacenar alguna sesión que es de sus principales diferencias, además de que se almacená en una cookie localmente. Y las principales diferencias son:
 
-### Diferencias:
+#### Diferencias:
 
 - No necesita un almacenamiento separado
 - La invalidación de un JWT no es para nada sencillo
@@ -2563,12 +2564,12 @@ Esto hace que sea más segura y sin afectar la experiencia del usuario si se lle
 
 Es importante recalcar que el token de refresco o actualización se envía cada que el token de acceso termina, no en cada petición, mientras que el token de acceso si se envía en cada petición
 
-### **¿Qué token expira en 15 min y cuál en 1 mes?**
+#### **¿Qué token expira en 15 min y cuál en 1 mes?**
 
 - **`token` (Access Token)** → Expira en **15 minutos** y se usa en cada petición para acceder a los recursos protegidos.
 - **`refreshToken` (Refresh Token)** → Expira en **1 mes** y se usa solo cuando el `token` expira, para obtener uno nuevo sin necesidad de hacer login otra vez.
 
-# TIPS:
+## TIPS:
 
 Cuando estemos trabajando los post, por lo general debemos tener en cuenta si nuestra clase tiene un `@JsonBackReference` o un `@JsonManageReference` , si tiene la primera significa que nuestro querido POST lo evitará, si tiene el otro entonces debemos añadirlo, entendemos?, esta cuestión nos hace pensar y decidirnos por los clásicos `@JsonIgnore` .  Algo que podemos hacer es crear solo un `EntityDTO` para este POST. Esto nos ayuda a que el GET obtengamos todo lo que necesitamos manejando las relaciones cíclicas con los dos primeros comandos
 
@@ -2734,7 +2735,7 @@ Aqui mostramos el InvoiceDTO simplemente para dar a entender mejor eso y como fi
 
 ;D.
 
-# Excepciones aqui :D
+## Excepciones aqui :D
 
 Para manejar excepciones podemos crear las nuestras, hacerlo es bastante facil, al menos no de manera tan detallada y especifica . Luego de esto a la hora de hacer las queridas excepciones en los controladores, ya que digamos, hicimos una clase excepción como **`BrandException`** entonces le colocan a su servicio la excepción a la hora de buscar el id, entonces: usan el `throws BrandException` , y toca manejarlo en el controlador, se puede hacer de diferentes maneras. 
 
@@ -2806,3 +2807,45 @@ public class GlobalExceptionHandler {
 Yo lo haré de la tercera forma en un ejercicio que estoy realizando :D. Asi que un dato de excepciones wuju. 
 
 [https://www.notion.so](https://www.notion.so)
+
+---
+
+# Java Spring Cloud
+Aquí vamos a manejar lo que son los microservicios, seguiremos un video para ello. Manejaremos un microservicio de departamentos junto con un microservicio de empleados y otro microservicio de configuracion que es un config server. Todos configurados con un Service Discovery para tener los microservicios localizados y para tenerlos todos en un solo punto usaremos API Getaway que a su vez tendra un balanceador de cargas. 
+Es un proyecto que combinaremos con documentación y más: 
+## Spring Cloud
+**Spring Cloud** es un conjunto de herramientas dentro del ecosistema Spring que te ayuda a construir **sistemas distribuidos y microservicios** de manera más sencilla, robusta y escalable.
+La arquitectura por la documentación: 
+
+![[Pasted image 20250513214651.png]]
+
+Aqui encontramos como esta funcionando la arquitectura principal. Luego de enviar alguna peticion mediante un movil, un navegador o un IoT entrá a un 
+#### **ApiGetaway**:
+En pocas palabras es el único punto de entrada para los clientes, este se encarga de: 
+- Enrutar peticiones a los microservicios
+- Hacer la autenticación , logging, rate limit, etc
+- Oculta la complejidad de los microservicios internos
+#### **Service Registry**:
+Este es: 
+- Un registro central de servicios
+- Cada microservicio se registra aqui (nombre, IP, puerto)
+- Otros servicios pueden descrubrirse aqui dinamicamente
+#### **Config Server**:
+- Proporciona **configuración centralizada** a todos los microservicios.
+- La config suele estar en un **repositorio Git**.
+- Permite:
+    - Modificar configuración sin tener que recompilar.
+    - Mantener consistencia entre entornos (dev, qa, prod). 
+#### Distributed Tracing
+Sirve mucho para debugging y monitorización.
+
+---
+
+Antes de seguir con un proyecto de springcloud vamos a empezar con un curso de [spring cloud](https://www.youtube.com/watch?v=U_rPO2ILMFU&list=PLxy6jHplP3Hi_W8iuYSbAeeMfaTZt49PW&index=2) . 
+
+
+# Bibliografía: 
+- [Spring Cloud Video](https://www.youtube.com/watch?v=EWqAY_-R57A)
+- [Spring Cloud Documentación](https://spring.io/cloud)
+- [Spring Cloud curso](https://www.youtube.com/watch?v=U_rPO2ILMFU&list=PLxy6jHplP3Hi_W8iuYSbAeeMfaTZt49PW&index=2)
+- 

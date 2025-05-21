@@ -4,21 +4,21 @@
     "type": "split",
     "children": [
       {
-        "id": "c81afeb7bad173a2",
+        "id": "4509724f8bf84da7",
         "type": "tabs",
         "children": [
           {
-            "id": "aa9e7e97d7accc82",
+            "id": "e7a7b303c61786dc",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Courses/Calidad de Código (SonarQube y Codacy ) (Curso).md",
+                "file": "Courses/Docker (Curso).md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Calidad de Código (SonarQube y Codacy ) (Curso)"
+              "title": "Docker (Curso)"
             }
           }
         ]
@@ -44,7 +44,7 @@
                 "autoReveal": false
               },
               "icon": "lucide-folder-closed",
-              "title": "Files"
+              "title": "Explorador de archivos"
             }
           },
           {
@@ -94,7 +94,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Courses/Calidad de Código (SonarQube y Codacy ) (Curso).md",
+                "file": "Courses/Docker (Curso).md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -104,7 +104,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for Calidad de Código (SonarQube y Codacy ) (Curso)"
+              "title": "Enlaces entrantes de Docker (Curso)"
             }
           },
           {
@@ -113,12 +113,12 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Courses/Calidad de Código (SonarQube y Codacy ) (Curso).md",
+                "file": "Courses/Java SpringBoot (Curso).md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Outgoing links from Calidad de Código (SonarQube y Codacy ) (Curso)"
+              "title": "Outgoing links from Java SpringBoot (Curso)"
             }
           },
           {
@@ -152,13 +152,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Courses/Calidad de Código (SonarQube y Codacy ) (Curso).md",
+                "file": "Courses/Docker (Curso).md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of Calidad de Código (SonarQube y Codacy ) (Curso)"
+              "title": "Esquema de Docker (Curso)"
             }
           }
         ],
@@ -166,37 +166,45 @@
       }
     ],
     "direction": "horizontal",
-    "width": 406.5
+    "width": 394.5
   },
   "left-ribbon": {
     "hiddenItems": {
-      "switcher:Open quick switcher": false,
-      "canvas:Create new canvas": false,
-      "graph:Open graph view": false,
-      "daily-notes:Open today's daily note": false,
-      "templates:Insert template": false,
-      "command-palette:Open command palette": false,
+      "switcher:Abrir selector rápido": false,
+      "graph:Abrir vista gráfica": false,
+      "canvas:Crear nuevo lienzo": false,
+      "daily-notes:Abrir la nota de hoy": false,
+      "templates:Insertar plantilla": false,
+      "command-palette:Abrir paleta de comandos": false,
+      "workspaces:Gestionar disposiciones de espacio de trabajo": false,
       "table-editor-obsidian:Advanced Tables Toolbar": false,
-      "obsidian-git:Open Git source control": false,
-      "homepage:Open homepage": false
+      "homepage:Open homepage": false,
+      "obsidian-git:Open Git source control": false
     }
   },
   "active": "47832f3c14739538",
   "lastOpenFiles": [
+    "Courses/src/Docker/Pasted image 20250520214906.png",
+    "Pasted image 20250520214258.png",
+    "Courses/Docker (Curso).md",
+    "Courses/src/Docker/Pasted image 20250520214316.png",
+    "Courses/src/Docker/Pasted image 20250520213828.png",
+    "Courses/src/Docker/Pasted image 20250520205548.png",
+    "Courses/src/Docker/Pasted image 20250520212705.png",
+    "_Resourses/Home/Home.md",
+    "Courses/src/Docker/Pasted image 20250520202843.png",
+    "Grafico de contribución.md",
+    "Courses/src/Docker",
+    "Tabla.md",
+    "Roadmap/Backend (Roadmap).md",
+    "Roadmap/src/Backend RoadMap/Pasted image 20250519155822.png",
+    "Courses/Java SpringBoot (Curso).md",
+    "Courses/SpringBoot ACM (Curso).md",
+    "Courses/src/Java SpringBoot/Pasted image 20250513214651.png",
+    "Courses/Calidad de Código (SonarQube y Codacy ) (Curso).md",
     "Courses/src/Calidad de Código (SonarQube y Codacy/Pasted image 20250425204028.png",
     "Courses/src/Calidad de Código (SonarQube y Codacy/Pasted image 20250425200532.png",
-    "Courses/Calidad de Código (SonarQube y Codacy ) (Curso).md",
-    "_Resourses/Home/Home.md",
     "Libros/Recomendaciones iniciales.md",
-    "Courses/src/Calidad de Código (SonarQube y Codacy/Pasted image 20250425193046.png",
-    "Courses/src/Calidad de Código (SonarQube y Codacy/Pasted image 20250425192249.png",
-    "Courses/src/Calidad de Código (SonarQube y Codacy/Pasted image 20250425192139.png",
-    "Courses/src/Calidad de Código (SonarQube y Codacy/Pasted image 20250425192053.png",
-    "Courses/src/Calidad de Código (SonarQube y Codacy/Pasted image 20250425192021.png",
-    "Courses/src/Calidad de Código (SonarQube y Codacy/Pasted image 20250425191958.png",
-    "Courses/src/Calidad de Código (SonarQube y Codacy/Pasted image 20250425185714.png",
-    "Courses/src/Calidad de Código (SonarQube y Codacy/Pasted image 20250425184308.png",
-    "Courses/src/Calidad de Código (SonarQube y Codacy/Pasted image 20250425183750.png",
     "Roadmap/Arquitectura de Software (Roadmap).md",
     "Libros/src",
     "Libros",
@@ -205,30 +213,23 @@
     "Courses/Java (Curso).md",
     "Proyecto/Joah.md",
     "Proyecto",
-    "Grafico de contribución.md",
-    "Roadmap/Backend (Roadmap).md",
     "Courses/Ciberseguridad (Curso).md",
     "_Resourses",
     "SpringBoot ACM.md",
     "Courses/Angular (Curso).md",
-    "Courses/SpringBoot ACM (Curso).md",
     "Courses/Rust C-Google (Curso).md",
     "Courses/React (Curso).md",
     "Courses/React Native (Curso).md",
     "Courses/QT con C++ (Curso).md",
     "Courses/Python (Curso).md",
     "Concepto/Principios SOLID (Concepto).md",
-    "Courses/Java SpringBoot (Curso).md",
     "Courses/Java semi-avanzado (Curso).md",
     "Courses/Java Avanzado (Curso).md",
     "Courses/Git (Curso).md",
-    "Courses/Flutter (Curso)(Futuro).md",
-    "Courses/Flutter (Curso) [ Por ahora pausado].md",
     "Concepto/src",
     "Concepto",
     "Roadmap/src",
     "Roadmap",
-    "_Resourses/Home",
     "Untitled 1.canvas",
     "Untitled.canvas"
   ]
