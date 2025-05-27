@@ -5,6 +5,20 @@
     "daemon",
     "cli",
     "Dockerhub",
-    "POO"
-  ]
+    "POO",
+    "docker",
+    "pull",
+    "logs",
+    "loggeamos",
+    "log",
+    "TTY",
+    "TY."
+  ],
+  "newFileLocation": "root",
+  "newFileFolderPath": "courses/src/images",
+  "attachmentFolderPath": "./images",
+  "showLineNumber": false,
+  "rightToLeft": false,
+  "spellcheck": false,
+  "vimMode": false
 }

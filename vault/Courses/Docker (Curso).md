@@ -72,9 +72,105 @@ sudo docker run -p 8080:80 httpd
 Al ejecutarlo tenemos:![[Pasted image 20250520214906.png]]
 
 # Módulo 2  
+Bien. Ya ejecutamos nuestro primer contenedor, ahora ejecutaremos más.  Ahora lo haremos con Nginx que es un software libre para servidor web, reverse proxy, caching, balanceador de carga, media streaming y más. 
+Podemos hacer el pull mediante la recomendación del dockerhub: `docker pull nginx`, también podemos hacer un `docker run -p 8080:80 nginx` inmediatamente, esto hace dos cosas:
+Si la imagen no está en nuestro local, hará un docker pull y posteriormente el docker run. 
+![[Pasted image 20250526091215.png]] 
+Como vemos en la imagen dice que no encuentra la imagen a lo que procede a descargar o hacer pull a esa imagen. 
+![[Pasted image 20250526091321.png]]
+Obteniendo de esa forma, si vamos al `localhost:8080` este mensaje de "Welcome to nginx ..." .
+Si seguimos mirando, usando `docker container` nos muestra una lista de muchos de los comandos que podemos hacer, ahora, dentro de cada uno de ellos podemos ver más comandos que podemos realizar, como por ejemplo tenemos el comando de `docker container`donde si lo ejecutamos vemos un apartado de más comandos de combinación dentro de este. Y aquí encontramos el `docker container ls` que lista todos los contenedores que se estén ejecutando en el momento, si usamos el flag de `--help` vemos que dentro de ese `docker container ls` hay más comandos, en este caso podemos visualizar algo así: 
+![[Pasted image 20250526092108.png]]
+Por ejemplo, para ver todos los contenedores usamos la abreviatura que se nos indica que es: 
+`docker container ls -a`
+Podemos seguir mirando y encontrar que tenemos el `--name`que nos ayuda a colocarle un nombre al contenedor. 
+![[Pasted image 20250526110543.png]]
+y si miramos en otra terminal: 
+![[Pasted image 20250526110643.png]]
+vemos que el nombre que le hemos dado es "test", como observamos es un identificador único, al intentar ejecutar el comando con el mismo nombre, se ve un error.
+Dentro de docker hay muchísimos comandos que deberían ser usados y vistos desde la terminal, por lo que no se notaran todos aquí, sin embargo la siguiente imagen muestra otro importante que es la eliminación de un contenedor:![[Pasted image 20250526111459.png]]
 
+---
+Ya con esto nosotros podemos decir que entendemos como usar los contenedores o al menos estamos asociados a ellos, entonces, ya sabiendo eso vamos a realizar el comando: 
+`docker run --help` aquí nosotros vemos el siguiente comando![[Pasted image 20250526115514.png]]
+En ese comando vemos que nos sirve para inicializar contenedores en segundo plano y al tiempo nos imprime el ID del contenedor. 
+![[Pasted image 20250526120302.png]]
+Y podemos ver que nuestro contenedor se está ejecutando :D.
+En docker están los comandos normales y los comandos "alias", una tabla que refleja eso es: 
 
+| Comando largo            | Alias equivalente     |
+| ------------------------ | --------------------- |
+| docker container run     | docker run            |
+| docker container ls      | docker ps             |
+| docker container stop    | docker stop           |
+| docker container start   | docker start          |
+| docker container rm      | docker rm             |
+| docker container exec    | docker exec           |
+| docker container inspect | docker inspect        |
+| docker image ls          | docker images         |
+| docker image rm          | docker rmi            |
+| docker image pull        | docker pull           |
+| docker image push        | docker push           |
+| docker image build       | docker build          |
+## Docker interactivo. 
+Dentro del modo interactivo que nos muestra docker es cuando podemos entrar a uno de esos contenedores para "interactuar" directamente con estos, entonces estamos en nuestro `docker ps`, y usamos el comando: `docker execute <container_id>` y el comando que queramos ejecutar. 
+![[Pasted image 20250526124717.png]]
+de esta manera podemos entrar dentro del contenedor y ver qué hay.
+De esta forma podemos ejecutar comandos, pero no es tan intuitivo, el modo interactivo como tal es poder conectar nuestra terminal con la del contenedor, lo que nos permite ingresar comandos como si estuviéramos trabajando en una máquina virtual o dentro de nuestro host, es útil para varias tareas como observar logs, instalar software, etc. 
+![[Pasted image 20250526125118.png]]
+Nos está situando en la terminal del controlador. Para salir de esa terminal usamos la palabra `exit` 
+## Puertos y logs: 
+Los puertos son importantes, ya que de esta manera podemos "evidenciar" el que está cargando de manera visual, como hemos visto a lo largo del curso, tenemos que usar el flag `-p 8080:80` donde significa que estamos mapeando en nuestro puerto 8080 el puerto 80 del contenedor, de esta manera lo podemos observar, sin embargo, también podemos hacer el `docker run nginx` sin necesidad de mapearlo, este funcionará; sin embargo, no tendremos una manera visual de verla, ya que no se está mapeando en ningún lugar. También existe la forma en que genera un puerto aleatorio con `-P` , que es usando la misma 'p' pero de forma mayúscula. Para ver el puerto que usa basta con usar el `docker container ls` o su alias equivalente y podemos observar donde se está mapeando.
+También nosotros loggeamos cada que necesitamos observar cosas y el porqué de esas cosas.  Por ejemplo con MySQL. 
+Cuando intentamos iniciar MySQL tenemos el siguiente error: 
+![[Pasted image 20250526193746.png]]
+Todo normal, pero cuando lo iniciamos en segundo plano, la única manera de ver los logs es con `docker logs <id_container>` : 
+![[Pasted image 20250526193929.png]] Aquí observamos que el comando de segundo plano nos da el ID, pero claramente no se inició, a continuación queremos saber que paso?, entonces hacemos los logs. 
+Uno de los comandos más importantes para esto de logs es el `-f` de esta forma podemos ver los logs en tiempo real:![[Pasted image 20250526194859.png]]
+Aquí vemos los logs, pero al final vemos:![[Pasted image 20250526194914.png]]
+Que se ve que acabe de ingresar a la página y se ve el log de ello.
+## El comando inspect (inspeccionar): 
+El comando inspect nos ayuda a inspeccionar un contenedor o ver la configuración por defecto que tiene un contenedor. 
+Nos da toda  la información en un JSON, ahi podemos ir indagando :D
+## Variables de entorno: 
+Cómo podemos pasar variables de entorno que son importantes para ejecutar ciertos contenedores como el de MySQL. 
+![[Pasted image 20250526223218.png]]
+Aquí como vemos se está ejecutando el contenedor de MySQL , le agregamos dos variables de entorno que se concatenan. 
 
+### Contenedores sin servicios
+
+Cuando ejecutamos imágenes base como `ubuntu` en Docker, estamos trabajando con **contenedores sin servicios**. Esto significa que no incluyen un sistema de inicialización (como `systemd` o `init`) ni tienen procesos corriendo en segundo plano por defecto.
+
+Estas imágenes están pensadas para ser **simples, minimalistas y enfocadas en ejecutar una tarea específica**, como correr un script o lanzar una terminal. Por eso, si ejecutamos `docker run ubuntu` El contenedor arranca, ejecuta el comando por defecto (que generalmente es `bash`), pero como **no tiene terminal asignada ni servicios corriendo**, el proceso termina de inmediato y el contenedor se apaga. Es por eso que **no aparece en** `docker container ls`, ya que este solo muestra los contenedores activos.
+
+Para que un contenedor basado en `ubuntu` se mantenga en ejecución, es necesario:
+- Usar `-it` para abrir una sesión interactiva con TTY.
+- O ejecutar un comando que no termine, como `tail -f /dev/null`.
+Estos contenedores son muy útiles para tareas puntuales, pruebas, scripts, o como base para construir imágenes más complejas, pero **no están diseñados para actuar como servidores por sí solos**. 
+En ese caso debemos hacer lo siguiente, usar `-dit` o `-it` para poder colocarlo como "servicio": 
+![[Pasted image 20250526224252.png]]
+Aquí nosotros podemos ingresar al contenedor y realizar lo que queremos.
+
+## ¿Qué son los volúmenes en docker?
+Los volúmenes en Docker son una forma de almacenar datos de manera persistente fuera del ciclo de vida de un contenedor. Normalmente, cuando un contenedor se elimina, todos sus datos internos también se pierden. Pero con volúmenes, esos datos se guardan en una ubicación específica gestionada por Docker y puede sobrevivir reinicios o eliminaciones de contenedores.  Estos se guardan o se persisten el sistema de archivos del host.
+![[Pasted image 20250527152338.png]]
+## Volúmenes en Docker
+Docker permite crear volúmenes de varias formas, pero la más común es usando el flag `-v` o `--mount` al ejecutar un contenedor:
+```bash
+docker run -v mi_volumen:/ruta/en/contenedor imagen
+```
+Esto lo que hace es: 
+- Crea (si no existe) un volumen llamado `mi_volumen`.
+- Lo monta dentro del contenedor en la ruta especificada
+También puedes ver y administrar volúmenes con: 
+- `docker volume ls` → lista todos los volúmenes.
+- `docker volume inspect <nombre>` → muestra información detallada.
+- `docker volume rm <nombre>` → elimina un volumen.
+
+Como un ejemplo de todo lo anterior tenemos:![[Pasted image 20250527154350.png]]
+
+---
+ 
 # Módulo 3  
 *(Contenido aquí...)*  
 
@@ -94,10 +190,13 @@ Al ejecutarlo tenemos:![[Pasted image 20250520214906.png]]
 # Comandos: 
 Este apartado será para colocar todos los comandos que a lo largo del curso se vayan poniendo con su respectiva definición: 
 - `docker ps `: Ver las imágenes y contenedores de Docker
-- `docker ls`: Obetener todas las imagenes/repositorios que tiene Docker
-- `sudo docker run -p 8080:80 <nombre_imagen>`: Para crear una imagen y mapear el puerto en el que la documentacion nos dice al puerto en el que queremos, se entienden mejor en el Módulo 1, Instalación.
+- `docker ls`: Obtener todas las imágenes/repositorios que tiene Docker
+- `sudo docker run -p 8080:80 <nombre_imagen>`: Para crear una imagen y mapear el puerto en el que la documentación nos dice al puerto en el que queremos, se entienden mejor en el Módulo 1, Instalación.
+- `docker` : Usar solo el comando de docker nos lleva a todos los comandos o al menos los más comunes, generales y de administración que podemos encontrar, por ejemplo `docker container` que es otro comando para ver una lista de comandos dentro de esa
 
 ---
 # Bibliografía
 - [Documentación Docker](https://docs.docker.com/)
 - [Curso código facilito](https://codigofacilito.com/videos/introduccion-5bf332ad-3a9e-46b2-9928-a869eb1bb4cb)
+- [Video de programación en español](https://www.youtube.com/watch?v=DIDel70dFlI)
+- 

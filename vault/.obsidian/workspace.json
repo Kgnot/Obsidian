@@ -78,7 +78,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 321.5
+    "width": 321.5,
+    "collapsed": true
   },
   "right": {
     "id": "ca31238cd924bf6a",
@@ -161,12 +162,12 @@
               "title": "Esquema de Docker (Curso)"
             }
           }
-        ],
-        "currentTab": 4
+        ]
       }
     ],
     "direction": "horizontal",
-    "width": 394.5
+    "width": 394.5,
+    "collapsed": true
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -182,28 +183,29 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "47832f3c14739538",
+  "active": "e7a7b303c61786dc",
   "lastOpenFiles": [
-    "Courses/src/Docker/Pasted image 20250520214906.png",
-    "Pasted image 20250520214258.png",
-    "Courses/Docker (Curso).md",
-    "Courses/src/Docker/Pasted image 20250520214316.png",
-    "Courses/src/Docker/Pasted image 20250520213828.png",
-    "Courses/src/Docker/Pasted image 20250520205548.png",
-    "Courses/src/Docker/Pasted image 20250520212705.png",
+    "Courses/images/Pasted image 20250527154350.png",
+    "Courses/images/Pasted image 20250527152338.png",
     "_Resourses/Home/Home.md",
-    "Courses/src/Docker/Pasted image 20250520202843.png",
+    "Courses/Docker (Curso).md",
+    "Courses/images/Pasted image 20250526224252.png",
+    "Courses/images/Pasted image 20250526223218.png",
+    "Courses/images/Pasted image 20250526194914.png",
+    "Courses/images/Pasted image 20250526194859.png",
+    "Courses/images/Pasted image 20250526193929.png",
+    "Courses/images/Pasted image 20250526193746.png",
+    "Courses/images/Pasted image 20250526125118.png",
+    "Courses/images/Pasted image 20250526124717.png",
+    "Courses/images/Pasted image 20250526120302.png",
+    "Courses/images",
     "Grafico de contribución.md",
     "Courses/src/Docker",
     "Tabla.md",
     "Roadmap/Backend (Roadmap).md",
-    "Roadmap/src/Backend RoadMap/Pasted image 20250519155822.png",
     "Courses/Java SpringBoot (Curso).md",
     "Courses/SpringBoot ACM (Curso).md",
-    "Courses/src/Java SpringBoot/Pasted image 20250513214651.png",
     "Courses/Calidad de Código (SonarQube y Codacy ) (Curso).md",
-    "Courses/src/Calidad de Código (SonarQube y Codacy/Pasted image 20250425204028.png",
-    "Courses/src/Calidad de Código (SonarQube y Codacy/Pasted image 20250425200532.png",
     "Libros/Recomendaciones iniciales.md",
     "Roadmap/Arquitectura de Software (Roadmap).md",
     "Libros/src",
@@ -229,7 +231,6 @@
     "Concepto/src",
     "Concepto",
     "Roadmap/src",
-    "Roadmap",
     "Untitled 1.canvas",
     "Untitled.canvas"
   ]
