@@ -8,8 +8,7 @@ El curso consta de 7 modulos:
 4. [Módulo 4](#módulo-4)  
 5. [Módulo 5](#módulo-5)  
 6. [Módulo 6](#módulo-6)  
-7. [Módulo 7](#módulo-7)  
-8. [Bibliografía](#bibliografía)  
+7. [Bibliografía](#bibliografía)  
 
 ---  
 
@@ -169,10 +168,30 @@ También puedes ver y administrar volúmenes con:
 
 Como un ejemplo de todo lo anterior tenemos:![[Pasted image 20250527154350.png]]
 
----
- 
+## Redes: 
+Docker usa un sistema de redes virtuales para permitir que los contenedores se comuniquen entre sí y con el mundo exterior. Al crear o ejecutar contenedores, puedes decidir como se conectan, con quién pueden hablar y por qué medio. 
+### Tipos de redes en docker: 
+1. **Bridge**: *- por defecto*: 
+   Crea una red privada donde los contenedores pueden comunicarse entre ellos usando sus nombres. Es útil para aplicaciones que corren en varios contenedores
+2. **host**: *- usa la red del host directamente*:
+   El contenedor comparte la red del sistema anfitrión. No hay aislamiento de red. Solo funciona en Linux
+3. **none:** *- sin red*
+   El contenedor no tiene acceso a ninguna red. Se usa para aislamiento total.
+4. **Redes personalizadas**: *- Definidas por el usuario*:
+   Permiten más control, como asignar subredes, nombres DNS entre contenedores y mayor seguridad-
+
+¿Cómo podemos crear una red personalizada?: 
+```bash
+docker network create mi_red
+docker run -d --name contenedor1 --network mi_red imagen1
+docker run -d --name contenedor1 --networt mi_red imagen2
+```
+En este ejemplo, tanto `contenedor1` como `contenedor2` pueden comunicarse por su nombre, como si fueran máquinas de la misma LAN.
+
+Las redes en docker son bastante importantes para servicios múltiples, un ejemplo de ello es el `docker-compse`, que permite que todo esté conectado y controlado sin exponer cada contenedor al exterior, es decir, sin mapearlo directamente, si no entre ellos. 
+
 # Módulo 3  
-*(Contenido aquí...)*  
+En este módulo se explicará que son las imágenes, nuestra primera imagen, copiar archivos, las variables de entorno de imágenes, ejecutar servicios, Entrypoint vs. CMD a dockerizar script de python, docker hub y dockerizar script de node. 
 
 # Módulo 4  
 *(Contenido aquí...)*  
@@ -182,9 +201,6 @@ Como un ejemplo de todo lo anterior tenemos:![[Pasted image 20250527154350.png]]
 
 # Módulo 6  
 *(Contenido aquí...)*  
-
-# Módulo 7  
-*(Contenido aquí...)*
 
 
 # Comandos: 

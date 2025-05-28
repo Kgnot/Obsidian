@@ -162,12 +162,12 @@
               "title": "Esquema de Docker (Curso)"
             }
           }
-        ]
+        ],
+        "currentTab": 4
       }
     ],
     "direction": "horizontal",
-    "width": 394.5,
-    "collapsed": true
+    "width": 394.5
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -183,12 +183,12 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "e7a7b303c61786dc",
+  "active": "47374833085f9090",
   "lastOpenFiles": [
+    "Courses/Docker (Curso).md",
+    "_Resourses/Home/Home.md",
     "Courses/images/Pasted image 20250527154350.png",
     "Courses/images/Pasted image 20250527152338.png",
-    "_Resourses/Home/Home.md",
-    "Courses/Docker (Curso).md",
     "Courses/images/Pasted image 20250526224252.png",
     "Courses/images/Pasted image 20250526223218.png",
     "Courses/images/Pasted image 20250526194914.png",
@@ -197,7 +197,6 @@
     "Courses/images/Pasted image 20250526193746.png",
     "Courses/images/Pasted image 20250526125118.png",
     "Courses/images/Pasted image 20250526124717.png",
-    "Courses/images/Pasted image 20250526120302.png",
     "Courses/images",
     "Grafico de contribución.md",
     "Courses/src/Docker",

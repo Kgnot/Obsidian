@@ -12,7 +12,9 @@
     "loggeamos",
     "log",
     "TTY",
-    "TY."
+    "TY.",
+    "none",
+    "Entrypoint"
   ],
   "newFileLocation": "root",
   "newFileFolderPath": "courses/src/images",
