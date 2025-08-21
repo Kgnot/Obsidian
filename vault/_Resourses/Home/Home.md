@@ -16,6 +16,7 @@ Bienvenido a Obsidiana.
 - [[SpringBoot ACM (Curso)]]
 - [[Calidad de Código (SonarQube y Codacy ) (Curso)]]
 - [[Docker (Curso)]]
+- [[ESP32 (intento de guía)]]
 ## Conceptos: 
 - [[Principios SOLID (Concepto)]]
 - [[Patrones de diseño (Concepto)]]

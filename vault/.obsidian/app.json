@@ -14,7 +14,11 @@
     "TTY",
     "TY.",
     "none",
-    "Entrypoint"
+    "Entrypoint",
+    "pinout",
+    "pinout",
+    "TOUCH",
+    "reconfigurables"
   ],
   "newFileLocation": "root",
   "newFileFolderPath": "courses/src/images",

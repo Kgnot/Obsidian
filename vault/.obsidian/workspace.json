@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Courses/Docker (Curso).md",
-                "mode": "source",
+                "file": "_Resourses/Home/Home.md",
+                "mode": "preview",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Docker (Curso)"
+              "title": "Home"
             }
           }
         ]
@@ -44,7 +44,7 @@
                 "autoReveal": false
               },
               "icon": "lucide-folder-closed",
-              "title": "Explorador de archivos"
+              "title": "Files"
             }
           },
           {
@@ -78,8 +78,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 321.5,
-    "collapsed": true
+    "width": 321.5
   },
   "right": {
     "id": "ca31238cd924bf6a",
@@ -143,8 +142,8 @@
             "state": {
               "type": "advanced-tables-toolbar",
               "state": {},
-              "icon": "spreadsheet",
-              "title": "Advanced Tables"
+              "icon": "lucide-file",
+              "title": "Plugin no longer active"
             }
           },
           {
@@ -153,13 +152,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Courses/Docker (Curso).md",
+                "file": "Courses/ESP32 (intento de guía).md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Esquema de Docker (Curso)"
+              "title": "Outline of ESP32 (intento de guía)"
             }
           }
         ],
@@ -167,26 +166,30 @@
       }
     ],
     "direction": "horizontal",
-    "width": 394.5
+    "width": 220.5,
+    "collapsed": true
   },
   "left-ribbon": {
     "hiddenItems": {
-      "switcher:Abrir selector rápido": false,
-      "graph:Abrir vista gráfica": false,
-      "canvas:Crear nuevo lienzo": false,
-      "daily-notes:Abrir la nota de hoy": false,
-      "templates:Insertar plantilla": false,
-      "command-palette:Abrir paleta de comandos": false,
-      "workspaces:Gestionar disposiciones de espacio de trabajo": false,
+      "bases:Create new base": false,
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false,
+      "workspaces:Manage workspace layouts": false,
       "table-editor-obsidian:Advanced Tables Toolbar": false,
       "homepage:Open homepage": false,
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "47374833085f9090",
+  "active": "e7a7b303c61786dc",
   "lastOpenFiles": [
-    "Courses/Docker (Curso).md",
+    "Courses/images/doc-esp32-pinout-reference-wroom-devkit.webp",
+    "Courses/ESP32 (intento de guía).md",
     "_Resourses/Home/Home.md",
+    "Courses/Docker (Curso).md",
     "Courses/images/Pasted image 20250527154350.png",
     "Courses/images/Pasted image 20250527152338.png",
     "Courses/images/Pasted image 20250526224252.png",
@@ -196,7 +199,6 @@
     "Courses/images/Pasted image 20250526193929.png",
     "Courses/images/Pasted image 20250526193746.png",
     "Courses/images/Pasted image 20250526125118.png",
-    "Courses/images/Pasted image 20250526124717.png",
     "Courses/images",
     "Grafico de contribución.md",
     "Courses/src/Docker",
@@ -226,7 +228,6 @@
     "Concepto/Principios SOLID (Concepto).md",
     "Courses/Java semi-avanzado (Curso).md",
     "Courses/Java Avanzado (Curso).md",
-    "Courses/Git (Curso).md",
     "Concepto/src",
     "Concepto",
     "Roadmap/src",
