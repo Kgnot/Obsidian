@@ -17,6 +17,8 @@ Bienvenido a Obsidiana.
 - [[Calidad de Código (SonarQube y Codacy ) (Curso)]]
 - [[Docker (Curso)]]
 - [[ESP32 (intento de guía)]]
+- [[Angular Youtube(Curso)]]
+- [[Kotlin (Curso)]]
 ## Conceptos: 
 - [[Principios SOLID (Concepto)]]
 - [[Patrones de diseño (Concepto)]]

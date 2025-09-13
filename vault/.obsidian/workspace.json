@@ -14,7 +14,7 @@
               "type": "markdown",
               "state": {
                 "file": "_Resourses/Home/Home.md",
-                "mode": "preview",
+                "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
@@ -152,13 +152,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Courses/ESP32 (intento de guía).md",
+                "file": "_Resourses/Home/Home.md",
                 "followCursor": false,
-                "showSearch": false,
-                "searchQuery": ""
+                "showSearch": true,
+                "searchQuery": "si"
               },
               "icon": "lucide-list",
-              "title": "Outline of ESP32 (intento de guía)"
+              "title": "Outline of Home"
             }
           }
         ],
@@ -166,8 +166,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 220.5,
-    "collapsed": true
+    "width": 325.5
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -186,9 +185,15 @@
   },
   "active": "e7a7b303c61786dc",
   "lastOpenFiles": [
-    "Courses/images/doc-esp32-pinout-reference-wroom-devkit.webp",
     "Courses/ESP32 (intento de guía).md",
     "_Resourses/Home/Home.md",
+    "Grafico de contribución.md",
+    "Courses/Kotlin (Curso).md",
+    "Courses/Angular Youtube(Curso).md",
+    "Concepto/Patrones de diseño (Concepto).md",
+    "Courses/Calidad de Código (SonarQube y Codacy ) (Curso).md",
+    "Courses/Angular (Curso).md",
+    "Courses/images/doc-esp32-pinout-reference-wroom-devkit.webp",
     "Courses/Docker (Curso).md",
     "Courses/images/Pasted image 20250527154350.png",
     "Courses/images/Pasted image 20250527152338.png",
@@ -200,13 +205,11 @@
     "Courses/images/Pasted image 20250526193746.png",
     "Courses/images/Pasted image 20250526125118.png",
     "Courses/images",
-    "Grafico de contribución.md",
     "Courses/src/Docker",
     "Tabla.md",
     "Roadmap/Backend (Roadmap).md",
     "Courses/Java SpringBoot (Curso).md",
     "Courses/SpringBoot ACM (Curso).md",
-    "Courses/Calidad de Código (SonarQube y Codacy ) (Curso).md",
     "Libros/Recomendaciones iniciales.md",
     "Roadmap/Arquitectura de Software (Roadmap).md",
     "Libros/src",
@@ -219,15 +222,12 @@
     "Courses/Ciberseguridad (Curso).md",
     "_Resourses",
     "SpringBoot ACM.md",
-    "Courses/Angular (Curso).md",
     "Courses/Rust C-Google (Curso).md",
     "Courses/React (Curso).md",
     "Courses/React Native (Curso).md",
     "Courses/QT con C++ (Curso).md",
     "Courses/Python (Curso).md",
     "Concepto/Principios SOLID (Concepto).md",
-    "Courses/Java semi-avanzado (Curso).md",
-    "Courses/Java Avanzado (Curso).md",
     "Concepto/src",
     "Concepto",
     "Roadmap/src",

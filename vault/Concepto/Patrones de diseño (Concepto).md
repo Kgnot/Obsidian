@@ -1,3 +1,5 @@
+
+
 # Patrones de diseño:
 
 Como elegir que patrón usar? : 
@@ -164,6 +166,10 @@ El código va a constar de dos partes, la primera en python y la segunda en java
     
 2. Código Java
 
+3. Código Typescript:
+	```typescript
+	
+	```
 ## Factory Method
 
 Define una interfaz para crear  un objeto, pero deja que sean las subclases quienes decidan que clases instanciar. Permite que una clase delegue en sus subclases la creación de objetos.
