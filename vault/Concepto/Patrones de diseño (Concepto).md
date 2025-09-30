@@ -164,7 +164,94 @@ El código va a constar de dos partes, la primera en python y la segunda en java
            
     ```
     
-2. Código Java
+1. Código Java
+```java
+// Primero haremos el abtract : 
+public abstract class CanalComunicacionFactory {  
+  
+    public abstract Mensajero crearMensaje();  
+  
+    public abstract FormateadorMensaje formateadorMensaje();  
+  
+    public abstract GestorPrioridad gestorPrioridad();  
+  
+  
+}
+
+// Luego haremos las interfaces, abran 3 familias
+  
+public interface FormateadorMensaje {  
+}
+  
+public interface GestorPrioridad {  
+}
+public interface Mensajero {  
+}
+
+// ----- Luego implementaciones de las familias: 
+  
+public class EmailFormato implements FormateadorMensaje {  
+}  
+public class SlackFormato implements FormateadorMensaje {  
+} 
+public class SMSFormato implements FormateadorMensaje {  
+}
+// gestorPrioridad: 
+  
+public class EmailManejadorPrioridad implements GestorPrioridad {  
+}
+  
+public class SlackManejadorPrioridad implements GestorPrioridad {  
+}
+public class SMSManejadorPrioridad implements GestorPrioridad {  
+}
+
+// Mensajero
+public class EmailMensaje implements Mensajero {  
+}
+public class SlackMensaje implements Mensajero {  
+}
+public class SMSMensaje implements Mensajero {  
+}
+
+// ---- Ahora una vez creada las implementaciones creamos la implementación dle factory: 
+public class CanalComunicacionEmail extends CanalComunicacionFactory {  
+  
+    @Override  
+    public Mensajero crearMensaje() {  
+        return new EmailMensaje();  
+    }  
+    @Override  
+    public FormateadorMensaje formateadorMensaje() {  
+        return new EmailFormato();  
+    }  
+    @Override  
+    public GestorPrioridad gestorPrioridad() {  
+        return new EmailManejadorPrioridad();  
+    }
+}
+
+// Este seria una sola, para Mensaje, se implementaría las demas 
+// En el main encontrariamos algo como: 
+public class Main {  
+    public static void main(String[] args) {  
+  
+        CanalComunicacionFactory canalEmail = new CanalComunicacionEmail();  
+  
+        var mensajero = canalEmail.crearMensaje();  
+        var gestorPrioridad = canalEmail.gestorPrioridad();  
+        var formateador = canalEmail.formateadorMensaje();  
+                  
+  
+  
+    }  
+}
+    
+ 
+
+// y lueog implementariamos los metodos   
+    
+```
 
 3. Código Typescript:
 	```typescript
@@ -850,7 +937,8 @@ public class MenuComposite implements MenuComponent {
         components.add(component);
     }
 
-    public void remove(MenuComponent component) {
+    public void remo
+    ve(MenuComponent component) {
         components.remove(component);
     }
 

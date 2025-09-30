@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "_Resourses/Home/Home.md",
-                "mode": "preview",
+                "file": "Concepto/Patrones de diseño (Concepto).md",
+                "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Home"
+              "title": "Patrones de diseño (Concepto)"
             }
           }
         ]
@@ -152,13 +152,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "_Resourses/Home/Home.md",
+                "file": "Concepto/Patrones de diseño (Concepto).md",
                 "followCursor": false,
                 "showSearch": true,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of Home"
+              "title": "Outline of Patrones de diseño (Concepto)"
             }
           }
         ],
@@ -185,8 +185,8 @@
   },
   "active": "e7a7b303c61786dc",
   "lastOpenFiles": [
-    "Concepto/Clean Architecture (Concepto).md",
     "_Resourses/Home/Home.md",
+    "Concepto/Clean Architecture (Concepto).md",
     "Courses/Kotlin (Curso).md",
     "Courses/Javascript (Curso).md",
     "Concepto/Arquitectura de aplicaciones web.md",
