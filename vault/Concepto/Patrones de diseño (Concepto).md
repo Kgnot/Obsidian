@@ -2358,6 +2358,15 @@ class Pipeline<I, O> {
 
 ```
 
+## CQRS
+
+### Aplicabilidad:
+### Estrucura:
+### Participantes:
+### Código: 
+
+
+
 # Bibliografía:
 
 [Patrones de diseño bien - Erich Gamma.pdf](Patrones_de_diseo_bien_-_Erich_Gamma.pdf)

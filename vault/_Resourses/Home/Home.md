@@ -19,9 +19,13 @@ Bienvenido a Obsidiana.
 - [[ESP32 (intento de guía)]]
 - [[Angular Youtube(Curso)]]
 - [[Kotlin (Curso)]]
+- [[Javascript (Curso)]]
+
 ## Conceptos: 
 - [[Principios SOLID (Concepto)]]
 - [[Patrones de diseño (Concepto)]]
+- [[Clean Architecture (Concepto)]]
+- - [[Frameworks para bases de datos java u ORM.]]
 ## Roadmap: 
 - [[Arquitectura de Software (Roadmap)]]
 - [[Backend (Roadmap)]]

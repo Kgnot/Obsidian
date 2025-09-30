@@ -14,7 +14,7 @@
               "type": "markdown",
               "state": {
                 "file": "_Resourses/Home/Home.md",
-                "mode": "source",
+                "mode": "preview",
                 "source": false
               },
               "icon": "lucide-file",
@@ -142,8 +142,8 @@
             "state": {
               "type": "advanced-tables-toolbar",
               "state": {},
-              "icon": "lucide-file",
-              "title": "Plugin no longer active"
+              "icon": "lucide-ghost",
+              "title": "advanced-tables-toolbar"
             }
           },
           {
@@ -155,7 +155,7 @@
                 "file": "_Resourses/Home/Home.md",
                 "followCursor": false,
                 "showSearch": true,
-                "searchQuery": "si"
+                "searchQuery": ""
               },
               "icon": "lucide-list",
               "title": "Outline of Home"
@@ -185,25 +185,31 @@
   },
   "active": "e7a7b303c61786dc",
   "lastOpenFiles": [
-    "Courses/ESP32 (intento de guía).md",
+    "Concepto/Clean Architecture (Concepto).md",
     "_Resourses/Home/Home.md",
-    "Grafico de contribución.md",
     "Courses/Kotlin (Curso).md",
-    "Courses/Angular Youtube(Curso).md",
+    "Courses/Javascript (Curso).md",
+    "Concepto/Arquitectura de aplicaciones web.md",
+    "Concepto/images/jsf-generando-html.png",
+    "Concepto/images/ajax.png",
+    "Courses/Frameworks para bases de datos java u ORM..md",
     "Concepto/Patrones de diseño (Concepto).md",
+    "Concepto/MVC (Concepto).md",
+    "Concepto/images/mvc-sequence-diagram-example-1.png",
+    "Concepto/images/mvc-sequence-diagram-example-2.png",
+    "Concepto/images/img_6212df40ef951.png",
+    "Concepto/images/clean_architecture.png",
+    "Concepto/images/1_gNMlCdPkghf_2F8v3MGtqA.png",
+    "Concepto/images",
+    "Grafico de contribución.md",
+    "Courses/ESP32 (intento de guía).md",
+    "Courses/Angular Youtube(Curso).md",
     "Courses/Calidad de Código (SonarQube y Codacy ) (Curso).md",
     "Courses/Angular (Curso).md",
     "Courses/images/doc-esp32-pinout-reference-wroom-devkit.webp",
     "Courses/Docker (Curso).md",
     "Courses/images/Pasted image 20250527154350.png",
     "Courses/images/Pasted image 20250527152338.png",
-    "Courses/images/Pasted image 20250526224252.png",
-    "Courses/images/Pasted image 20250526223218.png",
-    "Courses/images/Pasted image 20250526194914.png",
-    "Courses/images/Pasted image 20250526194859.png",
-    "Courses/images/Pasted image 20250526193929.png",
-    "Courses/images/Pasted image 20250526193746.png",
-    "Courses/images/Pasted image 20250526125118.png",
     "Courses/images",
     "Courses/src/Docker",
     "Tabla.md",
@@ -223,14 +229,8 @@
     "_Resourses",
     "SpringBoot ACM.md",
     "Courses/Rust C-Google (Curso).md",
-    "Courses/React (Curso).md",
-    "Courses/React Native (Curso).md",
-    "Courses/QT con C++ (Curso).md",
-    "Courses/Python (Curso).md",
-    "Concepto/Principios SOLID (Concepto).md",
     "Concepto/src",
     "Concepto",
-    "Roadmap/src",
     "Untitled 1.canvas",
     "Untitled.canvas"
   ]
