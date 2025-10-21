@@ -278,6 +278,35 @@ Tambien es conocido como Constructor Virtual o *virtual constructor.*
 ### Participantes
 
 ### Código
+```java
+// En este hay varias formas de implementarse, podría ser solo implementable en la misma clase como una variable estatica que diga como crearse y que crear, y ya xd. O con todo el formato de clases que sabemos, el primero es tan simple que no lo abordaré. El otro es el siguiente: 
+
+// interfaz:; 
+public interface Conexion {  
+}
+
+//conexion concreta: 
+public class ConexionPostgresql implements Conexion {  
+}
+
+// creador abstracto: 
+public abstract class ConnectionFactory {  
+  
+    public abstract Conexion createConnection();  
+  
+  
+}
+
+// creador concreto: 
+public class PostgreSQLConnectionFactory extends ConnectionFactory {  
+  
+    @Override  
+    public Conexion createConnection() {  
+        return new ConexionPostgresql();  
+    }
+}
+
+```
 
 ## Builder
 
@@ -462,14 +491,11 @@ Este patrón de diseño separa lo que es la construcción de un objeto de su rep
     
     ---
     
-2. Código en Java: 
+1. Código en Java: 
+```java
     
-    ```python
-    
-    ```
-    
+```
     IMPORTANTE: 
-    
     > Muchas veces lo que construye el constructor es un Composite.
     > 
 

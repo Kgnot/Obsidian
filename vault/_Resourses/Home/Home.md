@@ -25,7 +25,7 @@ Bienvenido a Obsidiana.
 - [[Principios SOLID (Concepto)]]
 - [[Patrones de diseño (Concepto)]]
 - [[Clean Architecture (Concepto)]]
-- - [[Frameworks para bases de datos java u ORM.]]
+- [[Frameworks para bases de datos java u ORM.]]
 ## Roadmap: 
 - [[Arquitectura de Software (Roadmap)]]
 - [[Backend (Roadmap)]]

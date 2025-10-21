@@ -182,3 +182,34 @@ Otra pagina web es:
 https://www.mentorestech.com/resource-blog-content/arquitectura-limpia-clean-architecture
 
 Importante! , ahí habla chevere de eso en typescript.
+
+
+---
+Otra forma que yo adapte: 
+```
+📁 src
+├── 📁 configuration
+├── 📁 domain
+│   ├── 📁 models
+│   ├── 📁 services (interfaces)
+│   └── 📁 valueobjects
+│
+├── 📁 application
+│   ├── 📁 services (logica de negocio | implementación)
+│   ├── 📁 cqrs
+│   │   ├── 📁 command
+│   │   └── 📁 query
+│   ├── 📁 dto
+│   ├── 📁 mapper
+│   └── 📁 repositories
+│
+└── 📁 infrastructure
+    ├── 📁 adapters (logica de aplicacion)
+    ├── 📁 controllers
+    │   └── 📁 dto
+    ├── 📁 filters
+    ├── 📁 websockets
+    ├── 📁 entities
+    └── 📁 repositories
+
+```

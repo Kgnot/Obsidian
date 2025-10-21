@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Concepto/Patrones de diseño (Concepto).md",
+                "file": "Courses/Angular Youtube(Curso).md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Patrones de diseño (Concepto)"
+              "title": "Angular Youtube(Curso)"
             }
           }
         ]
@@ -152,13 +152,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Concepto/Patrones de diseño (Concepto).md",
+                "file": "Courses/Angular Youtube(Curso).md",
                 "followCursor": false,
                 "showSearch": true,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of Patrones de diseño (Concepto)"
+              "title": "Outline of Angular Youtube(Curso)"
             }
           }
         ],
@@ -187,13 +187,18 @@
   "lastOpenFiles": [
     "_Resourses/Home/Home.md",
     "Concepto/Clean Architecture (Concepto).md",
+    "Concepto/Patrones de diseño (Concepto).md",
+    "Courses/src/Java SpringBoot/image 10.png",
+    "Courses/Java SpringBoot (Curso).md",
+    "Concepto/Software Architecture Patterns (Concepto).md",
+    "Grafico de contribución.md",
+    "2025-10-03.md",
+    "Concepto/Arquitectura de aplicaciones web (Concepto).md",
     "Courses/Kotlin (Curso).md",
     "Courses/Javascript (Curso).md",
-    "Concepto/Arquitectura de aplicaciones web.md",
     "Concepto/images/jsf-generando-html.png",
     "Concepto/images/ajax.png",
     "Courses/Frameworks para bases de datos java u ORM..md",
-    "Concepto/Patrones de diseño (Concepto).md",
     "Concepto/MVC (Concepto).md",
     "Concepto/images/mvc-sequence-diagram-example-1.png",
     "Concepto/images/mvc-sequence-diagram-example-2.png",
@@ -201,7 +206,6 @@
     "Concepto/images/clean_architecture.png",
     "Concepto/images/1_gNMlCdPkghf_2F8v3MGtqA.png",
     "Concepto/images",
-    "Grafico de contribución.md",
     "Courses/ESP32 (intento de guía).md",
     "Courses/Angular Youtube(Curso).md",
     "Courses/Calidad de Código (SonarQube y Codacy ) (Curso).md",
@@ -209,12 +213,10 @@
     "Courses/images/doc-esp32-pinout-reference-wroom-devkit.webp",
     "Courses/Docker (Curso).md",
     "Courses/images/Pasted image 20250527154350.png",
-    "Courses/images/Pasted image 20250527152338.png",
     "Courses/images",
     "Courses/src/Docker",
     "Tabla.md",
     "Roadmap/Backend (Roadmap).md",
-    "Courses/Java SpringBoot (Curso).md",
     "Courses/SpringBoot ACM (Curso).md",
     "Libros/Recomendaciones iniciales.md",
     "Roadmap/Arquitectura de Software (Roadmap).md",
@@ -225,10 +227,7 @@
     "Courses/Java (Curso).md",
     "Proyecto/Joah.md",
     "Proyecto",
-    "Courses/Ciberseguridad (Curso).md",
     "_Resourses",
-    "SpringBoot ACM.md",
-    "Courses/Rust C-Google (Curso).md",
     "Concepto/src",
     "Concepto",
     "Untitled 1.canvas",
