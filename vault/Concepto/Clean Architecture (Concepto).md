@@ -191,25 +191,29 @@ Otra forma que yo adapte:
 ├── 📁 configuration
 ├── 📁 domain
 │   ├── 📁 models
-│   ├── 📁 services (interfaces)
-│   └── 📁 valueobjects
+│   ├── 📁 casouso (staticas | logica de negocio)
+│   └── 📁 valueobjects (enums o cosas asi)
 │
 ├── 📁 application
-│   ├── 📁 services (logica de negocio | implementación)
+│   ├── 📁 services (logica de aplicacion e interfaces)
 │   ├── 📁 cqrs
 │   │   ├── 📁 command
 │   │   └── 📁 query
 │   ├── 📁 dto
-│   ├── 📁 mapper
+│   ├── 📁 mapper (mapea de dominio a aplicacion y aplicacion dominio)
 │   └── 📁 repositories
 │
 └── 📁 infrastructure
-    ├── 📁 adapters (logica de aplicacion)
+    ├── 📁 adapters (logica de aplicacion implementada )
+	├── 📁 mapper (mapea de aplicacion a (request/response) y aplicacion a entidad )
     ├── 📁 controllers
     │   └── 📁 dto
     ├── 📁 filters
     ├── 📁 websockets
     ├── 📁 entities
     └── 📁 repositories
+	    └── 📁 adapter (implementa repository de aplicacion)
+	    └── 📁 jpa (lo que usa el adapter para buscar, jpa)
+    
 
 ```

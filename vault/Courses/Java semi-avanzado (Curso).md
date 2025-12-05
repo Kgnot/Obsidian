@@ -31,7 +31,7 @@ paises.stream().parallel().forEach(System.out::println);
 // Esto hace que cada uno de los items de paises se corra de forma paralela, o en su mayoría
 ```
 
-Recordar que esto de los Streams tambien usa un patrón de diseño llamado Pipeline [[Patrones de diseño (Concepto)]] 
+Recordar que esto de los Streams tambien usa un patrón de diseño llamado Pipeline
 
 ```java
 // Este consiste rapidamente en poder concatenear funciones: 

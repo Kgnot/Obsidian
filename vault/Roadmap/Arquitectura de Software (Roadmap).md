@@ -145,8 +145,6 @@ Es necesario entender los conceptos de:
 
 ## JWT
 
-[[Java SpringBoot (Curso)]] - Aqui hay un apartado sobre ello
-
 ## OAuth
 
 ## Gestión de credenciales

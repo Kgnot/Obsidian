@@ -1032,3 +1032,18 @@ observable$.pipe(
   take(5)                                    // Tomar solo 5 valores
 ).subscribe();
 ```
+
+## Los Observers: 
+### **Comparativa de tipos de "Observers" y Reactividad en Angular**
+
+| Tipo                | Pertenece a         | Retiene último valor          | Emite al nuevo suscriptor el último valor | Puede emitir manualmente (`.next()`)               | Ideal para...                                      | Ejemplo típico                              |
+| ------------------- | ------------------- | ----------------------------- | ----------------------------------------- | -------------------------------------------------- | -------------------------------------------------- | ------------------------------------------- |
+| **Observable**      | RxJS                | ❌ No                          | ❌ No                                      | ⚠️ No directamente (lo hace un `Subject`)          | Datos asíncronos (HTTP, sockets, streams)          | `http.get('/api')`                          |
+| **Subject**         | RxJS                | ❌ No                          | ❌ No                                      | ✅ Sí                                               | Difundir eventos (botones, señales puntuales)      | Notificar clicks, logs, etc.                |
+| **BehaviorSubject** | RxJS                | ✅ Sí                          | ✅ Sí                                      | ✅ Sí                                               | Estado compartido (carritos, sesiones, config)     | `carritoService.items$`                     |
+| **ReplaySubject**   | RxJS                | ✅ (n valores)                 | ✅ Sí (repite últimos n)                   | ✅ Sí                                               | Repetir histórico de eventos a nuevos suscriptores | “Reenviar” mensajes de chat                 |
+| **AsyncSubject**    | RxJS                | ✅ (último valor al completar) | ✅ Al completar                            | ✅ Sí                                               | Emitir el resultado final de un proceso largo      | Cálculos o procesos de una sola salida      |
+| **Signal**          | Angular (desde v16) | ✅ Sí                          | ✅ Sí (reactivo por lectura)               | ⚠️ No con `.next()`, se usa `.set()` o `.update()` | Estado reactivo local, sin RxJS                    | Estado en componentes (`count = signal(0)`) |
+| **WritableSignal**  | Angular             | ✅ Sí                          | ✅ Sí                                      | ✅ Con `.set()` o `.update()`                       | Estados modificables (similar a BehaviorSubject)   | `user = signal<User                         |
+| **ComputedSignal**  | Angular             | ✅ (derivado)                  | ✅ Automático                              | ❌ No                                               | Derivar valores de otros signals                   | `total = computed(() => items().length)`    |
+| **Effect**          | Angular             | ⚠️ (no almacena valor)        | ⚠️ (reacciona a changes)                  | ⚠️ (solo side effects)                             | Reaccionar a cambios en signals                    | `effect(() => console.log(items()))`        |
