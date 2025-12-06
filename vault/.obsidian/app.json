@@ -115,7 +115,16 @@
     "makers",
     "Queue",
     "AMQP",
-    "queue"
+    "queue",
+    "mandandose",
+    "autoAck",
+    "ack",
+    "ack",
+    "ACK",
+    "Forgotten",
+    "Acknowledgment",
+    "Acknowledgment",
+    "Forgotten"
   ],
   "newFileLocation": "root",
   "newFileFolderPath": "courses/src/images",
@@ -128,7 +137,7 @@
     "includeName": true,
     "pageSize": "Letter",
     "landscape": true,
-    "margin": "0",
-    "downscalePercent": 100
+    "margin": "2",
+    "downscalePercent": 67
   }
 }

@@ -4,11 +4,11 @@
     "type": "split",
     "children": [
       {
-        "id": "898e8caa9d9dd8f2",
+        "id": "4509724f8bf84da7",
         "type": "tabs",
         "children": [
           {
-            "id": "6101b3bfdf8185f3",
+            "id": "e7a7b303c61786dc",
             "type": "leaf",
             "state": {
               "type": "markdown",
@@ -162,12 +162,12 @@
               "title": "Outline of RabbitMQ (Curso)"
             }
           }
-        ]
+        ],
+        "currentTab": 4
       }
     ],
     "direction": "horizontal",
-    "width": 325.5,
-    "collapsed": true
+    "width": 325.5
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -184,25 +184,26 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "6101b3bfdf8185f3",
+  "active": "e7a7b303c61786dc",
   "lastOpenFiles": [
+    "Courses/images/Pasted image 20251205203353.png",
+    "Courses/RabbitMQ (Curso).md",
+    "Courses/images/Pasted image 20251205183417.png",
+    "Courses/images/Pasted image 20251205181316.png",
+    "Courses/images/Pasted image 20251205160220.png",
+    "Courses/images/Pasted image 20251205132253.png",
+    "Courses/images/Pasted image 20251205131640.png",
+    "Courses/images/Pasted image 20251205131604.png",
+    "Courses/images/Pasted image 20251205131445.png",
+    "Courses/images/Pasted image 20251205113309.png",
+    "_Resourses/Home/Internet de las cosas.md",
+    "_Resourses/Home/Home.md",
     "Courses/images/Pasted image 20251204205717.png",
     "Courses/images/Pasted image 20251204205447.png",
-    "Courses/images/Pasted image 20251204205327.png",
-    "Courses/images/Pasted image 20251204205258.png",
-    "Courses/images/Pasted image 20251204204423.png",
-    "Courses/images/Pasted image 20251204200956.png",
-    "Courses/images/Pasted image 20251204200947.png",
-    "Courses/images/Pasted image 20251204182305.png",
-    "Courses/images/Pasted image 20251204181120.png",
-    "Courses/RabbitMQ (Curso).md",
-    "Courses/RabbitMQ (Curso).md",
     "Courses/IoT (Curso).md",
     "Untitled.base",
-    "images/Pasted image 20251204180323.png",
     "images",
     "Concepto/MQTT (Concepto).md",
-    "_Resourses/Home/Home.md",
     "Concepto/Patrones de diseño (Concepto).md",
     "Courses/Java semi-avanzado (Curso).md",
     "_Resourses/Home/CI-CD.md",
@@ -210,10 +211,8 @@
     "_Resourses/Home/Programacion Frontend.md",
     "_Resourses/Home/Programación Backend.md",
     "Courses/Java (Curso).md",
-    "_Resourses/Home/Internet de las cosas.md",
     "Grafico de contribución.md",
     "Courses/Mosquitto (Curso).md",
-    "Courses/images/kskkvyrt1mnkzgasi-stages-iot-architecture.png.avif",
     "Untitled.canvas",
     "Courses/Angular Youtube(Curso).md",
     "Courses/Angular (Curso).md",

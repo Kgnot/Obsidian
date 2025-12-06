@@ -154,4 +154,217 @@ Lo más importante es que la cola se cargó con el nombre que se le había coloc
 Y en el docker desktop se puede observar: 
 ![[Pasted image 20251204205717.png]]
 Que en efecto se envia , se abre y se cierra una conexion mientras una permanece abierta.
+### Work Queues
+(Usando java client)
+En el primer apartado nosotros escribimos un programa que enviaba y recibía mensajes de una queue nombrada. En este vamos a crear un trabajo de cola o un `Work Queue` que será usada para distribuir tareas que requieren mucho tiempo entre varios `workers`.
+En palabras de la documentación: 
+"La idea principal detrás de las colas de trabajo (también conocida como: colas de tareas) es evitar hacer una tarea intensiva en recursos de inmediato y tener que esperar a que se complete. En su lugar, programamos la tarea que se realizará más adelante. Encapsulamos una tarea como mensaje y la enviamos a una cola. Un proceso de trabajo que se ejecuta en segundo plano hará estallar las tareas y, finalmente, ejecutará el trabajo. Cuando se ejecutan muchos trabajadores, las tareas se compartirán entre ellos." 
+
+Lo que estamos haciendo aqui es que la cola de trabajo es un patrón donde: 
+1. Un productor publica tareas (mensajes) en una cola.
+2. Uno o varios workers (pueden ser microservicios/scripts/contenedores/servicio de Linux/etc.) consumen las tareas de esa cola y la procesan.
+3. Cada tarea la toma UN SOLO WORKERS, no varios
+4. Si hay muchos `workers` RabbitMQ balancea la tarea entre ellos
+El objetivo principal es **no hacer el trabajo pesado en el momento**, sino **delegarlo** a procesos especializados que lo harán en segundo plano.
+
+Este concepto es especialmente útil en aplicaciones web donde es imposible manejar una tarea compleja durante una breve ventana de solicitud HTTP.
+
+#### Preparación:
+Para esta preparación solo se mostrará que este work queues es algo que viene ya incluido. Es decir, imaginemos una tarea grande, y para simularla usaremos el siguiente método: 
+```java
+private static void doWork(String recibido) throws InterruptedException {  
+    for (char a : recibido.toCharArray()) {  
+        if (a == '.') Thread.sleep(1000);  
+    }  
+}
+```
+Esto nos da la idea de que hay tareas que se demora más o menos. Entonces nuestro servicio que recibe los eventos es: 
+```java
+DeliverCallback deliverCallback = (consumerTag, delivery) -> {  
+    String message = new String(delivery.getBody(), StandardCharsets.UTF_8);  
+    // aqui vamos a agregar tareas más pesadas simulando con un sleep:  
+    try {  
+        doWork(message);  
+    } catch (InterruptedException e) {  
+        throw new RuntimeException(e);  
+    } finally {  
+        System.out.println("[x] Done ");  
+    }  
+    System.out.println("[x] Recibido: " + message);  
+};
+```
+El `doWork` es quien nos dice que una tarea dura más o menos, y en el apartado que envia solo debemos ponerle '.' a los mensajes para que sea una tarea pesada o menos pesada. Generando lo siguiente: 
+![[Pasted image 20251205113309.png]]
+Con eso vemos que sin importar cuanto dure una tarea siempre queda en la cola, y se realiza poco a poco. 
+
+#### Round Robin Dispatching:
+Una de las ventajas que nosotros tenemos es que "reparte" las cargas de los mensajes a todos los trabajadores, imaginemos lo siguiente, una serie de tareas no dependientes que se necestian realizar y le pasamos una serie de trabajadores que van a realizarla, cada trabajador obtiene una tarea y la realiza, esto mismo hace RabbitMQ, por ejemplo tengamos lo siguiente, tres trabajadores : 
+![[Pasted image 20251205131445.png]]
+Y en el código de quien envía la petición: 
+```java
+List<String> lista = List.of(  
+        "Trabajo1",  
+        "TRabajo2",  
+        "Trabajo3",  
+        "Trabajo4"  
+);  
+for(var msg : lista){  
+    channel.basicPublish("",QUEUE_NAME,null,msg.getBytes());  
+    System.out.println("[x] Sent: '"+msg+"'");  
+}
+```
+Con esto publicamos varios al tiempo, ahora bien, a la hora de publicarlos: 
+1. vemos que se envía correctamente: 
+	![[Pasted image 20251205131604.png]]
+2. Observamos que cambio tuvieron los trabajadores:  
+	![[Pasted image 20251205131640.png]]
+Ahora imaginemos 100 tareas mandandose en paralelo: 
+```java
+List<String> lista = generadorTareas(); //genera 100 tareas 
+lista.stream().parallel().forEach(msg -> {  
+    try {  
+        channel.basicPublish("", QUEUE_NAME, null, msg.getBytes());  
+    } catch (IOException e) {  
+        throw new RuntimeException(e);  
+    }  
+    System.out.println("[x] Sent: '" + msg + "'");  
+});
+```
+Obtenemos esto: 
+![[Pasted image 20251205132253.png]]
+Por lo que podemos ver que se les envía toda la cola, y se divide entre los diferentes trabajadores o workers. Que pueden ser instancias de lo que sea. 
+### Reconocimiento de Mensajes (Message acknowledgment):
+
+Imaginemos que tenemos un sistema de mensajería donde: 
+1. Un productor envia mensajes a RabbitMQ
+2. RabbitMQ los guarda en una cola
+3. Un consumidor los recibe y procesa
+Nos hacemos la pregunta de: ¿Qué pasaría si el consumidor muere durante el procesamiento? 
+Imaginemos el siguiente pipeline: 
+![[Pasted image 20251205160220.png]]
+Claramente no nos favorece que suceda, para que no pase RabbitMQ nos brinda "Reconocimiento de Mensajes" (ack). Un reconocimiento es algo que se le envía a RabbitMQ diciéndose que el mensaje ya fue recibido, procesado y que RabbitMQ es libre de liberarlo.
+Si un consumidor muere sin enviar el reconocimiento o "ack", entonces se entenderá como que el mensaje no fue procesado completamente y lo volverá a encolar.
+Los reconocimientos de los mensajes están activados de forma predeterminada. En ejemplos anteriores los desactivamos explícitamente a través de la bandera `autoAck=true`. Es hora de poner esta bandera en falso y enviar un reconocimiento adecuado del trabajador, una vez que hayamos terminado con una tarea.
+
+En el ejemplo que propone la documentación tenemos lo siguiente: 
+```java
+channel.basicQos(1); // Hey , solo dame un mensaje a la vez
+
+DeliverCallback deliverCallback = (consumerTag, delivery) -> {
+  String message = new String(delivery.getBody(), "UTF-8");
+
+  System.out.println(" [x] Received '" + message + "'");
+  try {
+                // Procesamiento LARGO (riesgo de falla)
+                doWork(message);
+                
+                // SOLO SI TODO SALIÓ BIEN: CONFIRMO
+                System.out.println(" [x] Procesamiento COMPLETO");
+                channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
+                
+            } catch (Exception e) {
+                System.err.println(" [x] ERROR procesando: " + e.getMessage());
+                
+                // SI HUBO ERROR: RECHAZO Y REENCOLO
+                // Parámetros: deliveryTag, multiple, requeue
+                channel.basicNack(delivery.getEnvelope().getDeliveryTag(), false, true);
+            }
+};
+boolean autoAck = false; // No quiero AUTOmatic ACKknwledgment . Lo manejaré yo
+channel.basicConsume(TASK_QUEUE_NAME, autoAck, deliverCallback, consumerTag -> { });
+```
+Para entender un poco más el asunto miremos esto, `basicAck` necesita dos cosas: 
+```java
+// Firma del método:
+void basicAck(long deliveryTag, boolean multiple) throws IOException;
+
+// 1. deliveryTag: ID único de la entrega
+// 2. multiple: si confirma múltiples mensajes
+```
+Y nosotros le estamos pasando el `delivery.getEnvelope().getDeliveryTag()` esto es un número secuencial que RabbitMQ asigna a cada mensaje entregado. Un flujo de como se podria esperar comportar este proceso es el siguiente: 
+![[Pasted image 20251205181316.png]]
+En código se vería algo de esta forma: 
+```java 
+DeliverCallback deliverCallback = (consumerTag, delivery) -> {  
+	String message = new String(delivery.getBody(), StandardCharsets.UTF_8);  
+	long deliveryTag = delivery.getEnvelope().getDeliveryTag();  
+
+	System.out.println("[x] Recibido: " + message);  
+
+	try {  
+		doWork(message);  
+		// Si no hay errores, confirma  
+		channel.basicAck(deliveryTag, false);  
+		System.out.println("[x] Procesado OK: " + message);  
+
+	} catch (Exception e) {  
+		System.out.println("[x] Error, reencolando: " + message);  
+		// Rechazar y reencolar (true al final = reencolar)  
+		channel.basicNack(deliveryTag, false, true);  
+	}  
+};  
+
+boolean autoAck = false; // Nosotros hacemos el ACK manual  
+channel.basicConsume(QUEUE_NAME, autoAck, deliverCallback, consumerTag -> {});  
+}  
+```
+Y como respuestas tenemos lo siguiente: 
+![[Pasted image 20251205183417.png]]
+#### Forgotten Acknowledgment - Explicación
+Un "Forgotten Acknowledgment" ocurre cuando configuras `autoAck = false` (para control manual) pero olvidas llamar a `basicAck()` después de procesar un mensaje. RabbitMQ entrega el mensaje, pero nunca recibe confirmación de que fue procesado, por lo que el mensaje queda en estado "unacknowledged" (no confirmado).
+
+Tiene consecuencias graves como por ejemplo -> 
+1. **Memoria consumida**: RabbitMQ no puede liberar mensajes no confirmados
+2. **Reenvíos aleatorios**: Si el consumidor se cae, RabbitMQ reenvía los mensajes
+3. **Bloqueo de cola**: Mensajes quedan atrapados, no disponibles para otros consumidores
+Podemos monitorear con esto: 
+```cmd
+rabbitmqctl list_queues name messages_ready messages_unacknowledged
+```
+la mejor práctica que podemos hacer es generar un límite de mensajes sin ACK simultáneamente:
+```java
+// Limita cuántos mensajes pueden estar sin ACK simultáneamente
+channel.basicQos(10); // Máximo 10 mensajes sin confirmar
+
+// Con prefetch de 1, es más fácil debuggear problemas
+channel.basicQos(1); // Solo 1 mensaje sin ACK a la vez
+```
+### Durabilidad de un mensaje
+Hemos aprendido sobre como sé intercambiar eventos o mensajes entre varios clientes mediante RabbitMQ y como asegurar que este se consuma incluso si el consumidor muere. Pero nuestras tareas en RabbitMQ se pierden si RabbitMQ para. 
+Cuando RabbitMQ se cierra o se rompe este olvidará las colas y los mensajes, a menos que le digas que no, dos cosas son requeridas para que estos mensajes no se pierdan: ==Nosotros necesitamos marcar tanto la cola como los mensajes como "durable"==.
+
+Primero, necesitamos asegurar que la cola sobreviva a un reinicio del nodo de RabbitMQ, en este orden de ideas necesitamos declarar que sea durable, de la siguiente forma: 
+
+```java
+boolean durable = true;
+channel.queueDeclare("hello",durable,false,false,null);
+```
+Recordemos que `hello` es el nombre de nuestra cola.
+Aunque este comando es correcto por sí mismo, este no funcionara en nuestra configuración actual. ¿Por qué?, porque nosotros tenemos ya definidos una cola llamada `hello` el cual NO es durable. RabbitMQ no puede redefinir una cola existente con parámetros diferentes y podría retornar un error a cualquier programa que intente esto. 
+
+Pero claramente aqui hay una solución rápida y diferente, vamos a declarar una cola con un nombre diferente, por ejemplo: 
+```java
+boolean durable = true;
+channel.queueDeclare("task_queue", durable, false, false, null);
+```
+Este método de `queueDeclare` cambia lo necesario para aplicar a tanto productores como consumidores el código.
+
+En este punto nosotros estamos asegurando que la cola `task_queue` no va a perder datos incluso si se reinicia. Ahora nosotros necesitamos marcar nuestros mensajes como persistentes
+- Mediante la configuración de `MessageProperties` (Que implementa `BasicProperties`) en el valor de `PERSISTENT_TEXT_PLAIN`.
+```java
+	import com.rabbitmq.client.MessageProperties;
+
+channel.basicPublish("", "task_queue",
+            MessageProperties.PERSISTENT_TEXT_PLAIN,
+            message.getBytes());
+```
+### Envio justo: 
+
+También llamado Fair dispatch. 
+Es posible que haya notado que el envío todavía no funciona exactamente como queríamos.
+Por ejemplo, en una situación con dos trabajadores, cuando todos los mensajes extraños son pesados e incluso los mensajes son ligeros, un trabajador estará constantemente ocupado y el otro apenas hará ningún trabajo. Bueno, RabbitMQ no sabe nada de eso y seguirá enviando mensajes de manera uniforme.
+
+Esto sucede porque RabbitMQ solo envía un mensaje cuando el mensaje entra en la cola. No se fija en la cantidad de mensajes no reconocidos para un consumidor. Simplemente envía ciegamente cada n-ésimo mensaje al n-ésimo consumidor.
+![[Pasted image 20251205203353.png]]
+
 ## Streams tutorial (flujo de datos)
