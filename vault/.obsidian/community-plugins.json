@@ -1,16 +1,16 @@
 [
   "obsidian-admonition",
-  "obsidian-minimal-settings",
   "code-styler",
-  "numerals",
   "table-editor-obsidian",
-  "obsidian-icon-folder",
   "obsidian-mind-map",
   "homepage",
   "obsidian-git",
   "contribution-graph",
-  "dataview",
   "better-export-pdf",
+  "obsidian-excalidraw-plugin",
   "obsidian-languagetool-plugin",
-  "editor-width-slider"
+  "obsidian-icon-folder",
+  "editor-width-slider",
+  "extended-markdown-syntax",
+  "hugo-codeblock-highlight"
 ]

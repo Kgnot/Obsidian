@@ -78,7 +78,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 419.5,
+    "width": 318.5,
     "collapsed": true
   },
   "right": {
@@ -143,8 +143,8 @@
             "state": {
               "type": "advanced-tables-toolbar",
               "state": {},
-              "icon": "lucide-ghost",
-              "title": "advanced-tables-toolbar"
+              "icon": "spreadsheet",
+              "title": "Advanced Tables"
             }
           },
           {
@@ -161,13 +161,24 @@
               "icon": "lucide-list",
               "title": "Outline of RabbitMQ (Curso)"
             }
+          },
+          {
+            "id": "c068a3115792dfde",
+            "type": "leaf",
+            "state": {
+              "type": "git-view",
+              "state": {},
+              "icon": "git-pull-request",
+              "title": "Source Control"
+            }
           }
         ],
         "currentTab": 4
       }
     ],
     "direction": "horizontal",
-    "width": 325.5
+    "width": 325.5,
+    "collapsed": true
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -181,27 +192,36 @@
       "workspaces:Manage workspace layouts": false,
       "table-editor-obsidian:Advanced Tables Toolbar": false,
       "homepage:Open homepage": false,
-      "obsidian-git:Open Git source control": false
+      "obsidian-git:Open Git source control": false,
+      "obsidian-excalidraw-plugin:New drawing": false
     }
   },
   "active": "e7a7b303c61786dc",
   "lastOpenFiles": [
-    "Courses/images/Pasted image 20251205203353.png",
     "Courses/RabbitMQ (Curso).md",
-    "Courses/images/Pasted image 20251205183417.png",
-    "Courses/images/Pasted image 20251205181316.png",
-    "Courses/images/Pasted image 20251205160220.png",
-    "Courses/images/Pasted image 20251205132253.png",
-    "Courses/images/Pasted image 20251205131640.png",
-    "Courses/images/Pasted image 20251205131604.png",
-    "Courses/images/Pasted image 20251205131445.png",
-    "Courses/images/Pasted image 20251205113309.png",
     "_Resourses/Home/Internet de las cosas.md",
     "_Resourses/Home/Home.md",
-    "Courses/images/Pasted image 20251204205717.png",
-    "Courses/images/Pasted image 20251204205447.png",
-    "Courses/IoT (Curso).md",
+    "Courses/images/Pasted image 20251213190224.png",
+    "Excalidraw/Drawing 2025-12-13 08.55.41.excalidraw.md",
+    "Courses/images/Pasted image 20251213122415.png",
+    "Courses/images/Pasted image 20251213110206.png",
+    "Courses/images/Pasted image 20251213085919.png",
+    "Courses/images/Pasted image 20251213085817.png",
+    "Courses/images/Pasted image 20251212114731.png",
+    "Excalidraw/Drawing 2025-12-12 08.32.51.excalidraw.md",
+    "Courses/images/Pasted image 20251212091625.png",
+    "Courses/images/Pasted image 20251212091600.png",
+    "Courses/images/Pasted image 20251212083648.png",
+    "Grafico de contribución.md",
     "Untitled.base",
+    "Courses/images/Pasted image 20251212082135.png",
+    "Excalidraw/Drawing 2025-12-12 08.11.31.excalidraw.md",
+    "Excalidraw/Drawing 2025-12-06 11.36.09.excalidraw.md",
+    "Untitled 1.base",
+    "Excalidraw/Drawing 2025-12-06 08.21.13.excalidraw.md",
+    "Excalidraw/Drawing 2025-12-06 08.20.11.excalidraw.md",
+    "Excalidraw",
+    "Courses/IoT (Curso).md",
     "images",
     "Concepto/MQTT (Concepto).md",
     "Concepto/Patrones de diseño (Concepto).md",
@@ -211,7 +231,6 @@
     "_Resourses/Home/Programacion Frontend.md",
     "_Resourses/Home/Programación Backend.md",
     "Courses/Java (Curso).md",
-    "Grafico de contribución.md",
     "Courses/Mosquitto (Curso).md",
     "Untitled.canvas",
     "Courses/Angular Youtube(Curso).md",
@@ -219,19 +238,12 @@
     "Courses/Calidad de Código (SonarQube y Codacy ) (Curso).md",
     "Courses/Ciberseguridad (Curso).md",
     "Courses/CSS (Curso).md",
-    "Courses/Frameworks para bases de datos java u ORM..md",
-    "Courses/Flutter (Curso)(Futuro).md",
-    "Concepto/Servidor Web (Concepto).md",
-    "Courses/Docker (Curso).md",
-    "Concepto/Clean Architecture (Concepto).md",
     "Concepto/images",
     "Courses/images",
     "Courses/src/Docker",
     "Libros/src",
     "Libros",
     "Courses/src/Calidad de Código (SonarQube y Codacy",
-    "Proyecto",
-    "_Resourses",
     "Untitled 1.canvas"
   ]
 }
