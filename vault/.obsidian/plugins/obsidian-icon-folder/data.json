@@ -6,11 +6,11 @@
     "emojiStyle": "native",
     "iconColor": null,
     "recentlyUsedIcons": [
+      "LiActivity",
+      "LiImages",
+      "LiExcalidrawIcon",
       "RiBook2Fill",
-      "LiBarChartHorizontalBig",
-      "OcProjectRoadmap16",
-      "FabConnectdevelop",
-      "LiHome"
+      "LiBarChartHorizontalBig"
     ],
     "recentlyUsedIconsSize": 5,
     "rules": [],
@@ -50,5 +50,7 @@
   "_Resourses/Home": "LiHome",
   "_Resourses/Home/Home.md": "LiHome",
   "_Resourses": "LiBarChartHorizontalBig",
-  "Libros": "RiBook2Fill"
+  "Libros": "RiBook2Fill",
+  "images": "LiImages",
+  "Excalidraw": "LiActivity"
 }

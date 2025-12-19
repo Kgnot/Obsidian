@@ -32,7 +32,7 @@ Dentro de la documentación también nos comenta como instalarlo en diferentes e
 Para poder observar de forma visual el RabbitMQ, podemos ir al `localhost:15672` este nos dirige al apartado visual donde el usuario y contraseña son `guest`.
 ![[Pasted image 20251204204423.png]]
 
-# RabbitMQ Tutorial:
+# RabbitMQ Tutorial principiante :
 Link: https://www.rabbitmq.com/tutorials
 La documentación nos entrega un tutorial de los conceptos básicos de creación de aplicaciones de mensajería usando RabbitMQ. Lo divide en dos tipos de tutoriales.
 ## Queue tutorial (Cola)
@@ -644,6 +644,12 @@ Es completamente válido crear múltiples colas con el mismo `binding Key`. En e
 Para conseguir lo que deseamos que es mandar y recibir un tipo de log, primero vamos a cambiar de `fanout` a `direct`. Entonces: 
 ```java
 channel.exchangeDeclare(EXCHANGE_NAME,"direct");
+// tambien tenemos esta forma
+channel.exchangeDeclare(
+    EXCHANGE,                    // 1. Nombre del exchange
+    BuiltinExchangeType.DIRECT,  // 2. Tipo de exchange
+    true                         // 3. durable - Significa que si es durable resiste a reinicios del servidor
+);
 ```
 Y luego estamos listos para enviar el mensaje de esta forma: 
 ```java
@@ -839,5 +845,1315 @@ import com.rabbitmq.client.AMQP.BasicProperties;
 > - `correlationId`: Útil para correlacionar las respuestas de RPC con las solicitudes.
 
 #### Correlation ID:
+Crear una cola callback para cada petición RCP es bastante ineficiente, lo mejor es crear una sola por cada cliente.
+
+Eso plantea un nuevo problema, después de haber recibido una respuesta en esa cola, no está claro a qué solicitud pertenece la respuesta. Es entonces cuando se utiliza la propiedad `correlationId`. Vamos a establecerlo a un valor único para cada solicitud. Más tarde, cuando recibamos un mensaje en la cola de callback, veremos esta propiedad, y con base en eso podremos hacer coincidir una respuesta con una solicitud. Si vemos un valor de desconocido de `correlationId`, podemos descartar el mensaje de forma segura, no pertenece a nuestras solicitudes.
+
+Puede preguntar, ¿por qué deberíamos ignorar los mensajes desconocidos en la cola callback, en lugar de fallar con un error? Se debe a la posibilidad de una condición de carrera en el lado del servidor. Aunque es poco probable, es posible que el servidor RPC muera justo después de enviarnos la respuesta, pero antes de enviar un mensaje de acuse de recibo para la solicitud. Si eso sucede, el servidor RPC reiniciado procesará la solicitud de nuevo. Es por eso que en el cliente debemos manejar las respuestas duplicadas con gracia, y el RPC debería ser ideal.
+
+#### Summary (resumen)
+Nuestro RCP va a trabajar de la siguiente forma:![[Pasted image 20251214121556.png]]
+
+- Cuando el cliente inicia, este crea una exclusiva callback queue.
+- Para una solicitud RPC, el cliente envía un mensaje con dos propiedades `reply_to` que nos dice a la cola a la que va dirigida y `correlation_id` que es quien da un unico valor a una petición
+- La solicitud se envía a la cola `rcp_queue`
+- El RCP worker (llamado: server) esta esperando por peticiones de esa cola. Cuando una petición aparece este hace su trabajo y envía un mensaje con el resultado hacia el cliente usando la cola con el campo de `replyTo`.
+- El cliente espera los datos de la cola de respuesta. Cuando aparece un mensaje, comprueba la propiedad `correlationId`. Si coincide con el valor de la solicitud, devuelve la respuesta a la aplicación.
+
+#### Poniendolo todo junto: 
+En la documentación nos mandan a github en un lugar donde hay este tipo de código, asi que aqui lo ponemos: 
+
+**Servidor:**
+```java title=Main.java
+package org.patterns;  
+  
+import com.rabbitmq.client.*;  
+  
+import java.nio.charset.StandardCharsets;  
+  
+public class Main {  
+  
+    private static final String RPC_QUEUE_NAME = "rpc_queue";  
+  
+    // Este será el servidor que vamos a crear  
+    public static void main(String[] args) throws Exception {  
+        ConnectionFactory connectionFactory = new ConnectionFactory();  
+        connectionFactory.setHost("localhost");  
+        /* creamos la conexión, debemos de recordar que esto toca cerrarlo, es decir:  
+         *connection.close();         */        Connection connection = connectionFactory.newConnection();  
+        Channel channel = connection.createChannel();  
+        channel.queueDeclare(  
+                RPC_QUEUE_NAME,   // 1. Nombre de la cola  
+                false,            // 2. durable: si sobrevive a reinicios del broker  
+                false,            // 3. exclusive: si es solo para esta conexión  
+                false,            // 4. autoDelete: si se elimina cuando no hay consumidores  
+                null              // 5. arguments: parámetros adicionales (Map)  
+        );  
+        // aquí aseguramos que no haya ningún mensaje y empiece con una cola vacía - purge  
+        channel.queuePurge(RPC_QUEUE_NAME);  
+        channel.basicQos(1); // le decimos que se procese un mensaje a la vez  
+        System.out.println("[x] Esperando peticiones RPC");  
+  
+        DeliverCallback deliverCallback = (consumerTag, delivery) -> {  
+            AMQP.BasicProperties replyProperties = new AMQP.BasicProperties  
+                    .Builder()  
+                    .correlationId(delivery.getProperties().getCorrelationId())  
+                    .build();  
+            String response = "";  
+  
+            try{  
+                String message = new String(delivery.getBody(), StandardCharsets.UTF_8);  
+                int n = Integer.parseInt(message); // esto debido a que sabemos que es un entero lo que recibiremos  
+                System.out.println("[.] fib ("+message+")");  
+                response+= fib(n);  
+            }catch (RuntimeException e){  
+                System.out.println(" [.] " + e);  
+            }finally {  
+                channel.basicPublish("", delivery.getProperties().getReplyTo(), replyProperties, response.getBytes("UTF-8"));  
+                channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);  
+            }  
+        };  
+        channel.basicConsume(RPC_QUEUE_NAME, // nombre de la cola  
+                false, // autoAck  
+                deliverCallback, // callback para entregas  
+                (consumerTag -> {}) // callback para cancelado y a veces hay otro callback para apagado  
+        );  
+  
+    }  
+  
+  
+    private static int fib(int n) {  
+        if (n == 0) return 0;  
+        if (n == 1) return 1;  
+        return fib(n - 1) + fib(n - 2);  
+    }  
+  
+}
+```
+**Cliente:**
+ ```java unwrap:false title:RPCClient.java {35,49,67,96} 
+// Este será el cliente:  
+public class RPCClient implements AutoCloseable {  
+  
+    private Connection connection;  
+    private Channel channel;  
+    private String requestQueueName = "rpc_queue"; // igual que en el servidor  
+  
+    public RPCClient() throws IOException, TimeoutException {  
+        ConnectionFactory factory = new ConnectionFactory();  
+        factory.setHost("localhost");  
+  
+        connection = factory.newConnection();  
+        channel = connection.createChannel();  
+    }  
+  
+    public static void main(String[] args) throws IOException, TimeoutException {  
+        try (RPCClient fibonacciRpc = new RPCClient()){  
+            for(int i = 0; i<32 ;i++){  
+                String i_str = Integer.toString(i);  
+                System.out.println(" [x] Requesting fib(" + i_str + ")");  
+                String response = fibonacciRpc.call(i_str);  
+                System.out.println(" [.] Got '" + response + "'");  
+            }  
+        } catch (Exception e) {  
+            e.printStackTrace();  
+        }  
+    }  
+  
+    public String call(String message) throws IOException, InterruptedException, ExecutionException, TimeoutException {  
+  
+        // 1. GENERAMOS UN ID ÚNICO PARA ESTA SOLICITUD  
+        // ============================================        
+        // El correlationId es como el "número de ticket" en una carnicería        
+        // Cada solicitud tiene su propio ID para saber qué respuesta corresponde a qué pedido        
+        final String corrId = UUID.randomUUID().toString();  
+  
+  
+        // 2. CREAMOS UNA COLA TEMPORAL "DE UN SOLO USO" PARA LA RESPUESTA  
+        // ================================================================        
+        // Esto es como decir: "Déjame el pollo listo en el mostrador 5"        
+        // RabbitMQ genera un nombre automático tipo "amq.gen-JzTY20BRgKO..."        
+        String replyQueueName = channel.queueDeclare().getQueue();  
+  
+  
+        // 3. PREPARAMOS EL "SOBRE" DEL MENSAJE CON INSTRUCIONES  
+        // ======================================================        
+        // Le ponemos dos etiquetas importantes:        
+        // - correlationId: "Ticket #12345" (para identificar)        
+        // - replyTo: "Déjalo en el mostrador 5" (dirección de entrega)        
+        AMQP.BasicProperties props = new AMQP.BasicProperties  
+                .Builder()  
+                .correlationId(corrId)     // ← El ticket único  
+                .replyTo(replyQueueName)   // ← Dónde queremos la respuesta  
+                .build();  
+  
+  
+        // 4. ENVIAMOS LA SOLICITUD AL SERVIDOR RPC  
+        // =========================================        
+        // Publicamos el mensaje en la cola principal del servidor        
+        // Pero ahora con las propiedades extras que acabamos de crear        
+        channel.basicPublish("", requestQueueName, props, message.getBytes(StandardCharsets.UTF_8));  
+  
+  
+        // 5. PREPARAMOS EL "BUZÓN" PARA LA RESPUESTA (ASÍNCRONO)  
+        // =======================================================        
+        // CompletableFuture es como una PROMESA o un "IOU" (I Owe You)        
+        // Es una caja que ahora está vacía, pero en el futuro tendrá un valor        
+        final CompletableFuture<String> response = new CompletableFuture<>();  
+        // Estado actual: "vacío" / "pendiente"  
+  
+  
+        // 6. PONEMOS UN "VIGILANTE" EN NUESTRA COLA TEMPORAL        
+        // ===================================================        
+        // Le decimos a RabbitMQ: "Cuando llegue algo a mi cola temporal, avísame"        
+        // El vigilante (consumer) revisa cada mensaje que llega       
+         String ctag = channel.basicConsume(replyQueueName, true, (consumerTag, delivery) -> {  
+            // 7. FILTRAMOS: ¿ESTA RESPUESTA ES PARA MÍ?  
+            // =========================================            
+            // Revisamos el correlationId del mensaje recibido            
+            // Solo aceptamos si es NUESTRO ticket            
+            if (delivery.getProperties().getCorrelationId().equals(corrId)) {  
+                // 8. ¡ES NUESTRA RESPUESTA! COMPLETAMOS LA PROMESA  
+                // ================================================                
+                // Metemos el valor en la caja CompletableFuture                
+                // Esto "cumple la promesa" y desbloquea a quien esté esperando                
+                response.complete(new String(delivery.getBody(), StandardCharsets.UTF_8));  
+            }  
+            // Si no es nuestro correlationId, simplemente ignoramos el mensaje  
+        }, consumerTag -> {}); // Callback vacío si nos cancelan el consumo  
+  
+  
+        // 9. ESPERAMOS BLOQUEANTEMENTE HASTA TENER LA RESPUESTA  
+              
+        // ======================================================        
+        // response.get() SE QUEDA PEGADO aquí hasta que:        
+        // - Alguien llame a response.complete() (línea 68) → Continúa        
+        // - O pase un timeout (no configurado aquí) → Excepción        
+        String result = response.get(30, TimeUnit.SECONDS);  
+        // Cuando llega aquí, ya tenemos el valor de la promesa cumplida  
+  
+  
+        // 10. LIMPIEZA: QUITAMOS EL VIGILANTE DE LA COLA        
+        // ===============================================        
+        // Ya recibimos lo que necesitábamos, cancelamos el consumo        
+        channel.basicCancel(ctag);  
+  
+        // 11. DEVOLVEMOS EL RESULTADO AL LLAMANTE  
+        return result;  
+    }  
+  
+  
+    @Override  
+    public void close() throws Exception {  
+        connection.close();  
+    }  
+}
+```
+
+### Reliable publishing with the publisher confirms:
+
+Los **publisher confirms** son una extensión de RabbitMQ (AMQP 0.9.1) que permite al productor saber si un mensaje fue recibido correctamente por el broker.
+- El broker envía `acks` (confirmados) o `nacks` (rechazados).
+- Son asíncronos por naturaleza, aunque el cliente puede esperar de forma síncrona.
+- Se habilitan por canal, no por mensaje.
+> Útiles cuando perder mensajes no es aceptable (como pagos, eventos críticos logs importantes)
+
+#### Habilitar publishers confirms:
+```java 
+Channel channel =  connection.createChannel();
+channel.confirmSelect();
+```
+Esto se debe hacer una sola vez por canal.
+#### Estrategias de uso: 
+##### Estrategia 1: Confirmación por mensaje
+Publica un mensaje y espera la confirmación antes de enviar el siguiente: 
+```java
+while(thereAreMessagesToPublish()){
+	channel.basicPublish(exchange, queue, properties, body);
+	channel.waitForConfirmsOrDie(5_000);
+}
+```
+
+###### Ventajas
+- Muy fácil de implementar
+- Manejo claro de errores
+###### Desventajas
+- Muy lenta
+- Bloquea el envío
+- ~ cientos de mensajes por segundo
+###### Caso de uso
+- Sistemas simples
+- Bajo volumen
+- Máxima confiabilidad sin complejidad
+##### Estrategia 2: Confirmación por lotes (Batch)
+Publica varios mensajes y espera la confirmación del lote completo.
+```java
+int batchSize = 100;
+int outstanding = 0;
+
+while (thereAreMessagesToPublish()) {
+    channel.basicPublish(exchange, queue, properties, body);
+    outstanding++;
+
+    if (outstanding == batchSize) {
+        channel.waitForConfirmsOrDie(5_000);
+        outstanding = 0;
+    }
+}
+
+if (outstanding > 0) {
+    channel.waitForConfirmsOrDie(5_000);
+}
+
+```
+###### Ventajas
+- Mucho mejor rendimiento (20–30x)
+- Implementación sencilla
+###### Desventajas
+- No sabes qué mensaje falló
+- Manejo de errores impreciso
+- Sigue siendo bloqueante
+###### Caso de uso
+- Procesos batch
+- Logs
+- Envío masivo donde no importa el mensaje exacto fallido
+
+##### Estrategia 3: Confirmaciones Asíncronas (Recomendada)
+El broker confirma mensajes en segundo plano usando **callbacks**.
+**Números de secuencia:**
+Cada mensaje tiene números de secuencia: 
+```java
+long seqNo = channel.getNextPublishSeqNo();
+channel.basicPublish(exchange, queue, properties, body);
+```
+**Seguimiento de mensajes:**
+```java
+ConcurrentNavigableMap<Long, String> outstandingConfirms =
+    new ConcurrentSkipListMap<>();
+
+outstandingConfirms.put(seqNo, body);
+```
+**Confirm Listener:**
+```java
+ConfirmCallback clean = (seqNo, multiple) -> {
+    if (multiple) {
+        outstandingConfirms.headMap(seqNo, true).clear();
+    } else {
+        outstandingConfirms.remove(seqNo);
+    }
+};
+
+channel.addConfirmListener(
+    clean,
+    (seqNo, multiple) -> {
+        String body = outstandingConfirms.get(seqNo);
+        System.err.printf(
+            "NACK message: %s (seq=%d)%n", body, seqNo
+        );
+        clean.handle(seqNo, multiple);
+    }
+);
+```
+Es importante: 
+**NO** republiques desde el callback  
+Usa una cola intermedia (`ConcurrentLinkedQueue`) y un hilo publicador
+###### Ventajas
+- Máximo rendimiento
+- Control fino de errores
+- Ideal para producción
+###### Desventajas
+- Implementación más compleja
+- Requiere manejo concurrente
+###### Caso de uso
+- Microservicios
+- Sistemas financieros
+- Event-driven architectures
+- Alta concurrencia
+
+#### Rendimiento:
+```fold title=localhost.yml
+50k mensajes individuales:   ~5,549 ms
+50k en batch:               ~2,331 ms
+50k async:                  ~4,054 ms
+```
+***
+
+
+```fold title=nodeRemoto.yml
+50k mensajes individuales:   ~231,541 ms
+50k en batch:               ~7,232 ms
+50k async:                  ~6,332 ms
+```
+
+Según la IA se puede decir: 
+![[Pasted image 20251215085123.png]]
+Y para un mejor entendimiento: 
+![[Pasted image 20251215090402.png]]
+#### Poniéndolo todo junto: 
+Vamos por dos partes, la del consumidor: 
+##### Consumidor:
+```java title=ConsumerApp.java
+public class ConsumerApp {  
+	  // este está hecho con IA xd, pero es facil de entender
+    private static final String QUEUE = "orders.queue";  
+    private static final String EXCHANGE = "orders.exchange";  
+    private static final String ROUTING_KEY = "orders.created";  
+  
+    public static void main(String[] args) throws Exception {  
+  
+        ConnectionFactory factory = new ConnectionFactory();  
+        factory.setHost("localhost");  
+  
+        Connection connection = factory.newConnection();  
+        Channel channel = connection.createChannel();  
+  
+        // Declaraciones  
+        channel.exchangeDeclare(EXCHANGE, BuiltinExchangeType.DIRECT, true);  
+        channel.queueDeclare(  
+                QUEUE,  
+                true,   // durable  
+                false,  
+                false,  
+                null  
+        );  
+        channel.queueBind(QUEUE, EXCHANGE, ROUTING_KEY);  
+  
+        // Procesar un mensaje a la vez (backpressure)  
+        channel.basicQos(1);  
+  
+        System.out.println("Esperando mensajes...");  
+  
+        DeliverCallback deliverCallback = (consumerTag, delivery) -> {  
+            String message = new String(  
+                    delivery.getBody(),  
+                    StandardCharsets.UTF_8  
+            );  
+  
+            try {  
+                System.out.println("⚙️ Procesando: " + message);  
+  
+                // Simular lógica de negocio  
+                Thread.sleep(500);  
+  
+                // 3️⃣ ACK manual                channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);  
+                System.out.println("✅ ACK enviado: " + message);  
+  
+            } catch (Exception e) {  
+                System.err.println("💥 Error procesando: " + message);  
+  
+                // Rechazar y reencolar  
+                channel.basicNack(  
+                        delivery.getEnvelope().getDeliveryTag(),  
+                        false,  
+                        true  
+                );  
+            }  
+        };  
+  
+        channel.basicConsume(  
+                QUEUE,  
+                false, // autoAck = false  
+                deliverCallback,  
+                consumerTag -> {}  
+        );  
+    }  
+}
+```
+##### Publicador:
+```java title=Publicador.java
+public class Publicador {  
+  
+    private static final String EXCHANGE = "orders.exchange";  
+    private static final String ROUTING_KEY = "orders.created";  
+  
+    public static void main(String[] args) throws IOException, TimeoutException, InterruptedException {  
+        ConnectionFactory connectionFactory = new ConnectionFactory();  
+        Connection connection = connectionFactory.newConnection();  
+        Channel channel = connection.createChannel();  
+  
+        // declaraciones idempotentes:  
+        channel.exchangeDeclare(EXCHANGE, BuiltinExchangeType.DIRECT, true);  
+        // activamos el publisher confirms:  
+        channel.confirmSelect();  
+        // Un mapa para correlacionar mensajes  
+        ConcurrentNavigableMap<Long, String> outstandingConfirms = new ConcurrentSkipListMap<>();  
+        // Ahora hacemos el callback para ack  
+        ConfirmCallback ackCallback = (seqNo, multiple) -> {  
+            if (multiple) {  
+                outstandingConfirms.headMap(seqNo, true).clear();  
+            } else {  
+                outstandingConfirms.remove(seqNo);  
+            }  
+        };  
+        // Y el callback para nack  
+        ConfirmCallback nackCallback = (seqNo, multiple) -> {  
+            String msg = outstandingConfirms.get(seqNo);  
+            System.err.println("NACK recibido para mensaje: " + msg);  
+            // aquí podrías re-encolar el mensaje para retry  
+            ackCallback.handle(seqNo, multiple);  
+        };  
+        // hacemos nuestro listener  
+        channel.addConfirmListener(ackCallback, nackCallback);  
+  
+        // publicamos los mensajes:  
+        for (int i = 1; i <= 10; i++) {  
+            String message = "Order #" + i;  
+  
+            long seqNo = channel.getNextPublishSeqNo();  
+            outstandingConfirms.put(seqNo, message);  
+  
+            AMQP.BasicProperties props = new AMQP.BasicProperties  
+                    .Builder()  
+                    .deliveryMode(2) // persistente  
+                    .build();  
+  
+            channel.basicPublish(  
+                    EXCHANGE,  
+                    ROUTING_KEY,  
+                    props,  
+                    message.getBytes(StandardCharsets.UTF_8)  
+            );  
+  
+            System.out.println("Enviado: " + message);  
+  
+        }  
+  
+        Thread.sleep(2000);  
+  
+        channel.close();  
+        connection.close();  
+  
+    }  
+  
+}
+```
 
 ## Streams tutorial (flujo de datos)
+### Offset Tracking:
+#### Setup: 
+Esta parte del tutorial consiste en escribir dos programas en Java; un productor que envía una ola de mensajes con un mensaje marcador al final, y un consumidor que recibe mensajes y se detiene cuando recibe el mensaje marcador. Muestra cómo un consumidor puede navegar a través de un flujo e incluso puede reiniciar donde lo dejó en una ejecución anterior.
+
+#### Sending:
+El programa que envia empieza instanciando `Enviroment` y creando el stream:
+```java
+// el Enviroment es similar a crear el factory y una conexión
+try(Environment environment = Environment.builder().build()){
+	String stream = "stream-offset-tracking-java";
+	environment.streamCreator()
+		.stream(stream)
+		.maxLengthBytes(ByteCapacity.GB(1))
+		.create();
+}
+```
+Cuando se crea el stream se borran los mensajes más viejos.
+Luego de esto creamos el `Producer` y publicamos 100 mensajes. El valor del cuerpo del último mensaje se establece como `marker`, este es un marcador para el consumidor para decirle que ya deje de consumir.
+> **Nota**
+> ¿Para qué el `CountDownLatch`?
+>   - Streams usa **publisher confirms**
+>   - Cada mensaje:
+		-Se confirma cuando el broker lo **persistió**
+	-El latch asegura:
+    - _“No cierres el programa hasta que TODOS estén confirmados”_
+
+```java title=ejemplo.java
+Producer producer = environment.producerBuilder()
+                               .stream(stream)
+                               .build();
+
+int messageCount = 100;
+CountDownLatch confirmedLatch = new CountDownLatch(messageCount);
+System.out.printf("Publishing %d messages%n", messageCount);
+IntStream.range(0, messageCount).forEach(i -> {
+    String body = i == messageCount - 1 ? "marker" : "hello";
+    producer.send(producer.messageBuilder()
+                          .addData(body.getBytes(UTF_8))
+                          .build(),
+                  ctx -> {
+                      if (ctx.isConfirmed()) {
+                        confirmedLatch.countDown();
+                      }
+                  }
+    );
+});
+
+boolean completed = confirmedLatch.await(60, TimeUnit.SECONDS);
+System.out.printf("Messages confirmed: %b.%n", completed);
+```
+Ahora debemos crear el programa que recibe:
+#### Receiving: 
+El programa que recibe debe crear una instancia de `Environment` y asegurar que el stream también es creado. Esta parte del código es la misma que el programa de enviado, así que se omite y se deja para el lector.
+En el programa que recibe empieza un `consumer` en el inicio de del stream (`OffsetSpecification.first()`) . Esto usa variables para generar un output a cada elemento del stream desde el inicio hasta el final.
+
+El `consumer` para cuando recibe el mensaje: "Asigna el desplazamiento a una variable, cierra al consumidor y disminuye el recuento de cierre." . Al igual que para el sender, el `CountDownLatch` le dice al programa que siga adelante cuando el consumidor haya terminado con su trabajo.
+```java
+// Indica desde qué punto del stream comenzará el consumo.
+// first() = offset 0 (primer mensaje existente en el stream)
+OffsetSpecification offsetSpecification = OffsetSpecification.first();
+
+// Guarda el offset del PRIMER mensaje recibido.
+// Se inicializa en -1 porque:
+// 1) Los offsets reales del stream SIEMPRE son >= 0
+// 2) -1 actúa como valor "sentinela" que indica:
+//    "todavía no he recibido ningún mensaje"
+AtomicLong firstOffset = new AtomicLong(-1);
+
+// Guarda el offset del ÚLTIMO mensaje recibido (el "marker").
+// Se inicializa en 0 porque:
+// 1) El valor inicial NO se usa hasta que llegue el marker
+// 2) lastOffset.set(...) sobrescribe este valor
+// 3) 0 es un valor neutro y válido para inicializar
+AtomicLong lastOffset = new AtomicLong(0);
+
+// CountDownLatch inicializado en 1 porque:
+// 1) Solo hay UN evento que nos interesa esperar:
+//    → que el consumidor termine (marker recibido)
+// 2) Cuando ese evento ocurre, llamamos countDown()
+// 3) El latch pasa de 1 → 0 y libera el hilo principal
+// Si fuera 2, necesitaríamos DOS eventos para continuar
+CountDownLatch consumedLatch = new CountDownLatch(1);
+
+// Construcción del consumidor del stream
+environment.consumerBuilder()
+    // Nombre del stream al que se conecta
+    .stream(stream)
+
+    // Offset inicial desde el que se empezará a leer
+    .offset(offsetSpecification)
+
+    // Handler que se ejecuta por cada mensaje recibido
+    .messageHandler((ctx, msg) -> {
+
+        // Guarda el offset del primer mensaje recibido
+        // compareAndSet(-1, ctx.offset()):
+        // - Solo escribe si el valor actual es -1
+        // - Garantiza que SOLO el primer mensaje lo setea
+        // - Los siguientes mensajes no sobrescriben el valor
+        if (firstOffset.compareAndSet(-1, ctx.offset())) {
+            System.out.println("First message received.");
+        }
+
+        // Convierte el cuerpo del mensaje de bytes a String
+        String body = new String(
+            msg.getBodyAsBinary(),
+            StandardCharsets.UTF_8
+        );
+
+        // Si el mensaje es el marcador final
+        if ("marker".equals(body)) {
+
+            // Guarda el offset del mensaje marker
+            // Este es el último mensaje procesado
+            lastOffset.set(ctx.offset());
+
+            // Cierra explícitamente el consumidor
+            // → deja de recibir mensajes del stream
+            ctx.consumer().close();
+
+            // Decrementa el latch:
+            // 1 → 0, desbloquea el hilo principal
+            consumedLatch.countDown();
+        }
+    })
+
+    // Crea e inicia el consumidor
+    .build();
+
+System.out.println("Started consuming...");
+
+// Bloquea el hilo principal hasta que:
+// 1) consumedLatch llegue a 0
+// 2) o pasen 60 minutos (timeout de seguridad)
+consumedLatch.await(60, TimeUnit.MINUTES);
+
+// Se ejecuta SOLO cuando el consumidor terminó correctamente
+System.out.printf(
+    "Done consuming, first offset %d, last offset %d.%n",
+    firstOffset.get(),
+    lastOffset.get()
+);
+
+```
+
+Ahi queda completamente comentado
+#### Exploring the Stream:
+Para iniciar todo primero necesitamos continuar con este comando de docker: 
+```bash
+docker run -d --rm --name rabbitmq \
+  -p 5672:5672 \
+  -p 15672:15672 \
+  -p 5552:5552 \
+  -e RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS='-rabbitmq_stream advertised_host localhost' \
+  rabbitmq:4-management
+```
+Luego de montar el puerto `5552` que es el que se usa para streams normalmente, tenemos que activar el plug-in: 
+```bash
+docker exec rabbitmq rabbitmq-plugins enable \
+  rabbitmq_stream \
+  rabbitmq_stream_management
+```
+Eso sería todo, y en el cmd/bash veriamos: 
+![[Pasted image 20251216102550.png]]
+y en la UI: 
+![[Pasted image 20251216102624.png]]
+***
+Ahora poniendo todo junto podemos ver el cómo funciona: 
+
+![[Pasted image 20251216103229.png]]
+Y del lado del productor: 
+![[Pasted image 20251216103245.png]]
+Si se vuelve a correr el consumidor: 
+![[Pasted image 20251216103304.png]]
+Vemos que ahora ya solo va al marker, porque ya consumio lo anterior :D . El código completo: 
+**Recibidor**
+```java title=ReceivingApp.java
+package org.patterns;  
+  
+  
+import com.rabbitmq.stream.Environment;  
+import com.rabbitmq.stream.OffsetSpecification;  
+  
+import java.nio.charset.StandardCharsets;  
+import java.util.concurrent.CountDownLatch;  
+import java.util.concurrent.TimeUnit;  
+import java.util.concurrent.atomic.AtomicLong;  
+  
+public class ReceivingApp {  
+  
+    private static final String STREAM = "orders.stream";  
+    private static final String CONSUMER_NAME = "orders-consumer";  
+  
+    public static void main(String[] args) {  
+        try (Environment environment = Environment.builder().build()) {  
+            OffsetSpecification offsetSpecification = OffsetSpecification.first();  
+            // Para la concurrencia:  
+            AtomicLong firstOffset = new AtomicLong(-1);  
+            AtomicLong lastOffset = new AtomicLong(0);  
+            // solo necesitamos un evento:  
+            CountDownLatch consumeLatch = new CountDownLatch(1);  
+            // vamos al environment:  
+            environment.consumerBuilder()  
+                    .stream(STREAM)  
+                    .offset(offsetSpecification)  
+                    .name(CONSUMER_NAME)  
+                    .messageHandler((ctx, msg) -> {  
+                        if (firstOffset.compareAndSet(-1, ctx.offset())) {  
+                            System.out.println("First message received.");  
+                        }  
+                        String body = new String(  
+                                msg.getBodyAsBinary(),  
+                                StandardCharsets.UTF_8  
+                        );  
+                        System.out.println(  
+                                "Offset " + ctx.offset() + " → " + body  
+                        );  
+                        // Si el mensaje es el marcador final  
+                        if ("marker".equals(body)) {  
+  
+                            // Guarda el offset del mensaje marker  
+                            // Este es el último mensaje procesado                            
+                            lastOffset.set(ctx.offset());  
+  
+                            // Cierra explícitamente el consumidor  
+                            // → deja de recibir mensajes del stream                            
+                            ctx.consumer().close();  
+  
+                            // Decrementa el latch:  
+                            // 1 → 0, desbloquea el hilo principal                           
+                             consumeLatch.countDown();  
+                        }  
+                    })  
+                    .build();  
+  
+            System.out.println("Started consuming...");  
+  
+            consumeLatch.await(60, TimeUnit.MINUTES);  
+  
+            // Se ejecuta SOLO cuando el consumidor terminó correctamente  
+            System.out.printf(  
+                    "Done consuming, first offset %d, last offset %d.%n",  
+                    firstOffset.get(),  
+                    lastOffset.get()  
+            );  
+        } catch (Exception e) {  
+  
+        }  
+    }  
+  
+  
+}
+```
+**Productor**
+```java title=Productor.java
+package org.patterns;  
+  
+  
+import com.rabbitmq.stream.ByteCapacity;  
+import com.rabbitmq.stream.Environment;  
+import com.rabbitmq.stream.Producer;  
+  
+import java.nio.charset.StandardCharsets;  
+import java.util.concurrent.CountDownLatch;  
+import java.util.concurrent.TimeUnit;  
+import java.util.stream.IntStream;  
+  
+public class Productor {  
+  
+    private static final String STREAM = "orders.stream";  
+  
+    public static void main(String[] args) {  
+  
+        try (Environment environment = Environment.builder()  
+                .build()) {  
+            environment.streamCreator()  
+                    .stream(STREAM)  
+                    .maxLengthBytes(ByteCapacity.GB(1))  
+                    .create();  
+  
+            Producer producer = environment.producerBuilder()  
+                    .stream(STREAM)  
+                    .build();  
+            int messageCount = 100;  
+            CountDownLatch confirmedLatch = new CountDownLatch(messageCount);  
+            System.out.printf("Publishing %d messages%n", messageCount);  
+            // en el intStream es lo que hará a cada uno de los mensajes  
+            IntStream.range(0,messageCount).forEach(i -> {  
+                String body = i == messageCount-1? "marker":"Order #"+i;  
+                producer.send(producer.messageBuilder()  
+                        .addData(body.getBytes(StandardCharsets.UTF_8))  
+                        .build(),  
+                        ctx->{  
+                    if(ctx.isConfirmed()){  
+                        confirmedLatch.countDown();  
+                    }  
+                        }  
+                );  
+            });  
+  
+            boolean completed = confirmedLatch.await(60, TimeUnit.SECONDS);  
+            System.out.printf("Messages confirmed: %b.%n", completed);  
+  
+        } catch (Exception e) {  
+            e.printStackTrace();  
+        }  
+    }  
+}
+```
+
+# Resumen y visión general: 
+RabbitMQ es un **broker de mensajería multiparadigma**. No se limita a colas: soporta **procesamiento de mensajes, enrutamiento, streaming de eventos e integración entre brokers y protocolos**.
+
+RabbitMQ se organiza alrededor de **modos de uso**, cada uno con responsabilidades bien definidas.
+## 1. Colas (Queues) — Procesamiento de mensajes
+
+Las colas son el mecanismo clásico de RabbitMQ (AMQP 0.9.1). Se usan para **procesar mensajes de forma confiable**, normalmente con un solo consumidor por mensaje.
+
+### Qué permite una cola
+
+- Entregar un mensaje a **un solo consumidor**
+- Confirmación manual (ACK / NACK)
+- Reintentos
+- Backpressure (`basicQos`)
+- Dead Letter Queues (DLQ)
+- Persistencia en disco
+- Orden garantizado por cola
+### Variantes de colas
+
+- **Durable queues**  
+    Persisten reinicios del broker.
+- **Lazy queues**  
+    Mantienen mensajes en disco, reducen uso de RAM.
+- **Priority queues**  
+    Permiten asignar prioridades a mensajes.
+- **Quorum queues**  
+    Replicadas (Raft), tolerantes a fallos, recomendadas en producción moderna.
+- **Exclusive / Auto-delete queues**  
+    Viven solo mientras el consumidor está conectado.
+### Ejemplo típico
+Procesamiento de órdenes:
+```fold title=procesamientoOrdenes.txt
+`OrderCreated → Queue → Worker → ACK`
+```
+### Cuándo usar colas
+
+- Trabajo distribuido
+- Procesos background
+- Microservicios
+- Reintentos y tolerancia a fallos
+- Garantía “exactly-once” a nivel aplicación
+## 2. Exchanges — Enrutamiento de mensajes
+
+Los exchanges **no almacenan mensajes**, solo los **dirigen a colas** según reglas.
+
+Un producer nunca envía directamente a una cola; siempre publica a un exchange.
+
+### Tipos principales de exchange
+- **Direct**  
+    Enrutamiento por clave exacta.
+- **Topic**  
+    Enrutamiento por patrones (`order.*`, `user.#`).
+- **Fanout**  
+    Broadcast: envía a todas las colas ligadas.
+- **Headers**  
+    Enrutamiento por headers (poco usado).
+### Qué permite un exchange
+- Desacoplar producers de consumers
+- Enviar un mismo mensaje a múltiples colas
+- Cambiar routing sin tocar código productor
+### Ejemplo típico: 
+```fold title=Ejemplo
+Producer → Exchange(topic)
+                    ├─ Queue billing
+                    ├─ Queue shipping
+                    └─ Queue audit
+
+```
+
+### Cuando usar Exchanges
+
+## 3. Streams — Event Streaming
+
+RabbitMQ Streams es un **log de eventos persistente**, similar conceptualmente a Kafka.
+
+Los mensajes **no se eliminan** cuando se consumen.
+
+### Qué permite un stream
+
+- Leer mensajes por offset
+- Releer mensajes (replay)
+- Múltiples consumidores leyendo lo mismo
+- Alta tasa de throughput
+- Persistencia fuerte
+- Seguimiento de offsets (server-side)
+
+### Características clave
+
+- Mensajes ordenados
+- Los consumidores mantienen su posición
+- El historial permanece hasta que se borra por política
+
+### Ejemplo
+```fold title=Ejemplo
+OrderCreated (event)
+→ Stream
+→ Analytics
+→ Audit
+→ FraudDetection
+```
+### Cuándo usar Streams
+
+- Event sourcing
+- Auditoría
+- Analytics
+- CDC (Change Data Capture)
+- Integraciones event-driven
+- Necesidad de replay
+## 4. Federation — Conectar brokers
+
+Federation permite **enlazar brokers RabbitMQ entre sí**, sin mover toda la topología.
+
+### Qué permite
+
+- Consumir colas/exchanges remotos
+- Replicar mensajes entre data centers
+- Escenarios multi-región
+
+### Características
+
+- Pull-based (no empuja)
+- Más simple que clustering
+- Ideal para WAN
+
+### Ejemplo
+```fold title=Ejemplo
+Broker A (EU) ← Federation ← Broker B (US)
+```
+## 5. Shovel — Movimiento de mensajes
+
+Shovel copia mensajes **activamente** entre brokers o protocolos.
+### Qué permite
+- Migrar mensajes
+- Integrar brokers heterogéneos
+- Transferir mensajes históricos
+### Diferencia con Federation
+- Federation = consumo remoto
+- Shovel = copia física de mensajes
+### Ejemplo
+
+`Queue A → Shovel → Queue B`
+## 7. Prometheus — Observabilidad
+
+RabbitMQ expone métricas compatibles con Prometheus.
+### Qué permite
+
+- Métricas de colas
+- Latencia
+- Throughput
+- Consumers activos
+- Backpressure
+
+### Uso típico
+
+`RabbitMQ → Prometheus → Grafana`
+
+***
+# Usos en proyectos
+Teniendo en cuenta los 7 apartados mencionados aquí (que existen claramente más usos pero solo mencionamos 7 en donde abordamos 3 en relativod etalle en el tutorial de principiante) vamos a generar los casos de uso de cada una de estas. Algo más especifico.
+## 1. Colas: 
+
+Se enfoca en tipo de sistemas como un sistema transaccional clásico (e-commerse, ERP, CRM, etc) .
+
+**Flujo**
+`API Compra  → Cola orders.queue  → OrderProcessor`
+
+**Qué se procesa**
+- Crear orden en base de datos
+- Reservar stock
+- Calcular totales
+
+**Por qué cola**
+- Garantía de entrega    
+- ACK/NACK
+- Reintentos
+- DLQ si falla
+
+Otro proyecto en el que se puede usar es un sistema de facturación.
+
+**Contexto**
+- Miles de facturas diarias.
+- Procesamiento Pesado
+- No importa el orden, sí la confiabilidad
+
+**Flujo**
+```
+Facturación
+ → billing.queue
+ → Workers de facturas
+```
+## 2. Exchanges
+
+**Tipo de sistema**
+Sistema basado en eventos de negocio (microservicios).
+
+**Proyecto 1**:  Plataforma de compras (event-driven)
+
+**Evento real**
+`OrderCreated
+`
+**Exchange**
+`orders.exchange (topic)`
+
+**Flujos**
+```
+OrderCreated
+ ├→ billing.queue        (facturación)
+ ├→ shipping.queue       (envíos)
+ ├→ notifications.queue  (emails / push)
+ └→ analytics.queue      (métricas)
+```
+
+**Por qué exchange**
+
+- Un evento activa múltiples flujos
+- El productor no conoce consumidores
+- Cada servicio evoluciona solo
+
+## 3. Streams: 
+**Tipo de sistema:**  
+Plataforma de eventos, analytics, auditoría o event sourcing.
+
+**Proyecto 1**: Auditoría de acciones de usuarios
+
+**Eventos**
+```
+UserLoggedIn
+UserPasswordChanged
+UserRoleUpdated
+```
+
+**Flujo**
+```
+Aplicación
+ → users.stream
+```
+**Consumen**
+
+- Seguridad (en tiempo real)
+- Auditoría (batch)
+- Analytics (replay)
+
+**Por qué stream**
+
+- No se borra el mensaje
+- Se puede volver atrás
+- Múltiples lectores independientes
+
+
+`aunque esto también se podría hacer desde bases de datos`
+
+**Proyecto 2**: Tracking de órdenes
+
+**Eventos**
+```
+OrderCreated
+OrderPaid
+OrderShipped
+OrderDelivered
+```
+Se puede reconstruir el estado completo de una orden.
+
+## 4. Federation
+
+**Tipo de sistema:**  
+Plataforma distribuida entre regiones o empresas.
+
+**Proyecto 1** SaaS multi-región
+
+**Contexto**
+- Clientes en Europa y América
+- Brokers separados
+
+**Flujo**
+`RabbitMQ US  ← Federation → RabbitMQ EU`
+
+**Uso**
+- Replicar eventos críticos
+- Evitar latencia global
+
+## 5. Shovel
+
+**Tipo de sistema:**  
+Integración puntual o migraciones.
+
+**Proyecto 1** Migración de infraestructura
+
+**Contexto**
+- Cambio de datacenter
+- Cambio de versión de RabbitMQ
+
+***
+Los demas pueden llegar a ser exagerados
+
+# RabbitMQ para SpringBoot:
+
+En este apartado vamos a ver el cómo iniciar en Springboot, lo primero es las configuraciones. Vamos a colocar la dependencia de MQTT de springboot que nos habilita de una vez RabbitMQ
+```xml
+<dependency>  
+    <groupId>org.springframework.boot</groupId>  
+    <artifactId>spring-boot-starter-amqp</artifactId>  
+</dependency>
+```
+Y la que nos configura en el `application.properties` o en el `application.yml`: 
+```yml
+spring:
+	rabbitmq:  
+	  host: localhost  
+	  port: 5672  
+	  username: guest  
+	  password: guest
+```
+En este archivo de configuración tambien podemos denominar nuestra cola, puede ser algo como![[Pasted image 20251216202147.png]].
+
+Como se usa, el uso es sencillo. Vamos a seguir el tutorial de RabbitMQ para este caso, vamos a crearlo de la siguiente forma:
+```java title=Receiver.java
+@Component  
+@RabbitListener(queues = "hello")  
+public class Receiver {  
+  
+    @RabbitHandler  
+    public void receiver(String in) {  
+        System.out.printf("[x] Recibido : %s", in);  
+    }  
+}
+```
+Esto es totalmente sencillo, obtenemos de una cola llamada "`hello`" un mensaje tipo `String`.
+Para enviar un mensaje vamos a cambiar dos cosas, primero colocaremos en la clase `Receiver
+`
+```java title=Sender.java
+@Component  
+@Profile("sender")  
+public class Sender {  
+  
+    private final RabbitTemplate template;  
+    private final Queue queue;  
+  
+    public Sender(RabbitTemplate template, Queue queue) {  
+        this.template = template;  
+        this.queue = queue;  
+    }  
+  
+    @Scheduled(fixedDelay = 1000, initialDelay = 500)  
+    public void send() {  
+        String message = "holaaa xd";  
+        this.template.convertAndSend(queue.getName(), message);  
+        System.out.println("[x] Enviado: " + message);  
+    }  
+  
+}
+```
+
+Y vamos a hacer la prueba corriendo dos veces el `jar` pero con diferente perfil:
+
+![[Pasted image 20251218150336.png]]
+Aqui en el apartado de `sender` coloqué un controlador sencillo: 
+```java title=ControllerDummy.java
+  
+@RestController  
+@RequestMapping("events")  
+@Profile("sender")  
+public class ControllerDummy {  
+  
+    private final Sender sender;  
+  
+    public ControllerDummy(Sender sender) {  
+        this.sender = sender;  
+    }  
+  
+    @GetMapping("/send")  
+    public ResponseEntity<?> enviarMensaje() {  
+        sender.send();  
+        return ResponseEntity  
+                .ok("Enviado");  
+    }  
+  
+}
+```
+Si ingresamos a ese `endpoint` tenemos: 
+![[Pasted image 20251218150348.png]] y ![[Pasted image 20251218150402.png]]
+Aquí observamos que envia y recibe en dos diferentes que tiene perfiles diferentes para simular dos aplicaciones diferentes.
+## Work Queues:
+Vamos a hablar sobre las work queues en Spring Boot. Tenemos la siguiente imagen que nos representa lo que deseamos: 
+![[Pasted image 20251219092430.png]]
+
+Para empezar vamos a crear el programa mediante los perfiles: 
+```java title=configTutorial.java
+@Configuration  
+@Profile({"tut2", "work-queues"})  
+public class ConfigTutorial {  
+  
+    @Bean  
+    public Queue hello() {  
+        return new Queue("hello");  
+    }  
+  
+    @Profile("receiver")  
+    private static class ReceiverConfig {  
+        @Bean  
+        public Receiver receiver1() {  
+            return new Receiver(1);  
+        }  
+  
+        @Bean  
+        public Receiver receiver2() {  
+            return new Receiver(2);  
+        }  
+    }  
+      
+    @Profile("sender")  
+    public Sender sender() {  
+        return new Sender();  
+    }  
+}
+```
+
+```java title=Receiver.java
+@RabbitListener(queue = "hello")
+public class Receiver {  
+  
+    private final int instance;  
+  
+    public Receiver(int instance) {  
+        this.instance = instance;  
+    }  
+  
+    @RabbitHandler  
+    public void receive(String in) throws InterruptedException {  
+        StopWatch watch = new StopWatch();  
+        watch.start();  
+        System.out.println("instance " + this.instance + " [x] Received : " + in);  
+        doWork(in);  
+        watch.stop();  
+        System.out.println("instance " + this.instance +  
+                " [x] Done in " + watch.getTotalTimeSeconds() + "s");  
+    }  
+  
+    private void doWork(String in) throws InterruptedException {  
+        for (char ch : in.toCharArray()) {  
+            if (ch == '.') {  
+                Thread.sleep(500);  
+            }  
+        }  
+    }  
+}
+```
+
+```java title=Sender.java
+public class Sender {  
+  
+    @Autowired  
+    private RabbitTemplate template;  
+    @Autowired  
+    private Queue queue;  
+  
+    AtomicInteger dots = new AtomicInteger(0);  
+    AtomicInteger count = new AtomicInteger(0);  
+  
+    @Scheduled(fixedDelay = 1000, initialDelay = 500)  
+    public void send() {  
+        StringBuilder builder = new StringBuilder("Hello");  
+        if (dots.incrementAndGet() == 4) {  
+            dots.set(1);  
+        }  
+        for (int i = 0; i < dots.get(); i++) {  
+            builder.append('.');  
+        }  
+        builder.append(count.incrementAndGet());  
+        String message = builder.toString();  
+        template.convertAndSend(queue.getName(), message);  
+        System.out.println("[x] Sent : " + message);  
+    }    
+}
+```
+
+Y por último es necesario activar un par de cosas en el main: 
+```java title=SpringEnvironmentsApplication.java
+@SpringBootApplication  
+@EnableScheduling  
+@EnableRabbit  
+public class SpringEnvironmentsApplication {  
+  
+    public static void main(String[] args) {  
+        SpringApplication.run(SpringEnvironmentsApplication.class, args);  
+    }  
+  
+}
+```
+***
+Aqui nosotros vemos las tres clases, y el uso de los perfiles para ahora iniciar mediante maven cada perfil. Cómo tenemos el `@Shedule` apenas inicie va a empezar a enviar mensajes tipo: `Hello`.
+
+![[Pasted image 20251219101155.png]]
+Aqui observamos ambos apartados junto con sus perfiles. 
+***
+En la documentación nos menciona cosas importantes, como por ejemplo el reconocimiento de menajes o el `Message acknowledge` el cual por defecto re encola si llega a haber algún tipo de problema con el procesamiento de mensajes, en el protocolo AMQP es: 
+```java
+channel.basicAck(deliveryTag, false);
+```
+Lo cual en Spring es totalmente por defecto.
+
+Luego nos comenta sobre la persistencia de los mensajes en donde nos dice que la persistencia de mensajes en Spring está por defecto. Aunque una mejor manera para determinar que sea por defecto es generando la propiedad que nos indica: 
+```java
+@Bean
+public Queue hello() {
+    return QueueBuilder
+            .durable("hello")
+            .build();
+}
+```
+### Round-Robin vs Fair dispatch:
+Hay dos formas de mandar lo que son este apartado de las colas de trabajo, digamos que existen varios workers, entonces. Cuando se usa el Round-Robin significa que se reparte de misma forma a todos los workers sin importar si esta o no ocupado. Sin embargo, el Fair dispatch evalúa si un `worker` tiene más cantidad de trabajo, mas no más cantidad de tareas. Es decir, si está desocupado que trabaje.
+
+Spring tiene por defecto `Fair dispatch` usando Spring AMQP. Este lo usa con `prefetchCount = 250` es decir: “No le des más de 250 mensajes sin ACK a un consumer”.
+Según la IA: 
+![[Pasted image 20251219124031.png]]
+
+## Publish/Subscribe:
+Aquí volvemos a ver lo que son los exchanges, esta vez vamos directamente con el código: 

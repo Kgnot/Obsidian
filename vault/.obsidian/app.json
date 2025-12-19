@@ -145,7 +145,22 @@
     "keys",
     "ruteo",
     "Callback",
-    "callback"
+    "callback",
+    "Correlation",
+    "confirms",
+    "publishers",
+    "callbacks",
+    "latch",
+    "Streams",
+    "publisher",
+    "stream",
+    "Receiving",
+    "sender",
+    "streams",
+    "maven",
+    "spring",
+    "Spring",
+    "consumer"
   ],
   "newFileLocation": "root",
   "newFileFolderPath": "courses/src/images",
@@ -159,6 +174,6 @@
     "pageSize": "Letter",
     "landscape": true,
     "margin": "2",
-    "downscalePercent": 67
+    "downscalePercent": 63
   }
 }

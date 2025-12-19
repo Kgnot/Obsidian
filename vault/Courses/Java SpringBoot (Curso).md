@@ -1,3 +1,7 @@
+# LOGS: 
+Antes de entrar en el mundo de Springboot debemos entender sobre los logs ya que mas adelante nos será útil. (Aunque ese más adelante sera mucho mucho más adelante por lo que se puede omitir este apartado).
+
+
 # Java SpringBoot
 
 ## REST CRUD APIs:
@@ -2807,6 +2811,139 @@ public class GlobalExceptionHandler {
 Yo lo haré de la tercera forma en un ejercicio que estoy realizando :D. Asi que un dato de excepciones wuju. 
 
 [https://www.notion.so](https://www.notion.so)
+
+## Manejo de ambientes y perfiles: 
+
+Una vez creado el proyecto la manera mas eficiente y sencilla para crear ambientes (Testing, produccion, dev, etc) es crear un `application.properties` o `application.yml` por cada uno de los ambientes.
+![[Pasted image 20251216144819.png]]
+En cada uno de estos archivos de propiedades se coloca todo lo relacionado a lo que nosotros deseemos de configurar. Una base de datos diferente, un puerto diferente, un nombre diferente, una tamaño de pool diferente. 
+Y en el `application.yml` vamos a colocar el perfil que deseamos:
+```yaml
+spring:  
+  profiles:  
+    active: dev # Aqui activamos dev
+```
+
+Algo que debe ser importante es que tanto `gradle` como `maven` también usan perfiles. Este es quien a nosotros nos crea el proyecto, asi que también es un apartado importante y a tener en cuenta.
+
+### **MAVEN:**
+En maven para crear un perfil basta con usar la etiqueta para esto, de la siguiente forma: 
+```xml
+<profiles>  
+    <profile>  
+	    <id>dev</id>  
+	    <activation>       <!--Este es el perfil por defecto que se usa -->  
+	       <activeByDefault>true</activeByDefault>  
+	    </activation>    
+	    <properties> <!--Estas etiquetas integran nuestro maven con nuestro springboot-->  
+	       <build.profile.id>dev</build.profile.id> <!--Este es el nombre de nuestro perfil-->  
+	       <profile.active>dev</profile.active>  
+	    </properties>    
+	    <build>       
+		    <resources> <!--Los recursos que queremos que construya-->  
+	          <resource> <!--Que recurso?-->  
+	             <directory>src/main/resources</directory> <!--Le indicamos el directorio de donde estará-->  
+	             <filtering>true</filtering> <!--Le activamos el filtro, que es lo que usa maven para facilitarle archivos-->  
+	             <!--¿Qué archivos va a incluir?-->             
+	             <includes>  
+	                <include>application-dev.yml</include>  
+	             </includes>          
+		        </resource>       
+		    </resources>    
+		</build>
+	</profile>
+</profiles>
+```
+Dentro de nuestro  ``{xml icon} <proyect> ... </proyect> `` es donde va esta categoría.
+
+Luego de ello podemos vincular nuestro archivo de propiedades de la siguiente forma: 
+```yaml
+spring:  
+  profiles:  
+    active: @profile.active@
+```
+Así le decimos que nosotros vamos a activar el perfil envuelto entre esa etiqueta.
+
+Nosotros podemos crear tantos perfiles como queramos, el tema aqui es que puede ocurrirnos un error, para ello en el `build` general de la aplicación usamos: 
+```xml 
+<build>  
+    <!--Aqui en el build general para los perfiles se identifiquen: -->  
+    <!--Activar filtrado de perfiles-->    
+    <resources>  
+       <resource>          
+       <directory>src/main/resources</directory>  
+          <filtering>true</filtering>  
+          <!--Le ponemos exclusiones-->  
+          <excludes>  
+             <exclude>application-*.yml</exclude>  
+          </excludes>       
+        </resource>    
+    </resources>
+          ...
+```
+Aquí le decimos que me excluya todos los `application-*.yml`, esto debido a que cuando haga los perfiles ya lo estoy incliyendo en: `	                <include>application-dev.yml</include>` .
+
+Para activar esto a la hora de construir se usa de la siguiente forma: 
+```cmd
+mvn clean install -P<entorno>
+```
+En nuestro caso tenemos las siguientes 3: 
+```bash
+mvn clean install -Pstg
+mvn clean install -Pdev
+mvn clean install -Pprod
+```
+Por ejemplo, haciendo la primera nos genera los siguientes logs: 
+![[Pasted image 20251216173739.png]]
+Que como vemos toma la configuración de `stg`.
+
+***
+### IMPORTANTE
+Aqui hay un tema que es importante y es que en Springboot 4.x o 3.x puede fallar ese método anterior, lo mejor es agregar esto: 
+```java
+spring:  
+  config:  
+    activate:  
+      on-profile: prod
+```
+En cada uno de los archivos de propiedades. Y luego se puede eliminar todo el tema de los perfiles en maven y delegarle eso a spring directamente.
+
+***
+### ¿Cómo usar los perfiles con anotaciones?
+Los perfiles con anotaciones se usan de la siguiente forma: 
+```java
+@Profile({"tut1","hello-world"})
+@Configuration
+public class Tut1Config {
+
+    @Bean
+    public Queue hello() {
+        return new Queue("hello");
+    }
+
+    @Profile("receiver")
+    @Bean
+    public Tut1Receiver receiver() {
+        return new Tut1Receiver();
+    }
+
+    @Profile("sender")
+    @Bean
+    public Tut1Sender sender() {
+        return new Tut1Sender();
+    }
+}
+```
+Aquí tenemos un ejemplo con RabbitMQ en el que tenemos perfiles, entonces le decimos que la clase `Tut1Config` solo se va a activar cuando estén los perfiles: `tut1` o `hello-world`, mientras que los perfiles de abajo con `receiver` y `sender` solo se activarán si también tienen ese perfil activo, es decir: 
+`(tut1 OR hello-world) AND sender`.
+Para activarlo en Spring Boot se hace por línea de comandos: `java -jar app.jar --spring.profiles.active=tut1,receiver`.  También por el `application.yml` haciendo: 
+```yml title=application.yml
+spring:
+  profiles:
+    active: tut1,receiver
+
+```
+
 
 ---
 

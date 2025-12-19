@@ -13,6 +13,20 @@
             "state": {
               "type": "markdown",
               "state": {
+                "file": "_Resourses/Home/Internet de las cosas.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Internet de las cosas"
+            }
+          },
+          {
+            "id": "ca6b2d9116a1a72b",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
                 "file": "Courses/RabbitMQ (Curso).md",
                 "mode": "source",
                 "source": false
@@ -21,7 +35,8 @@
               "title": "RabbitMQ (Curso)"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -78,8 +93,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 318.5,
-    "collapsed": true
+    "width": 318.5
   },
   "right": {
     "id": "ca31238cd924bf6a",
@@ -177,8 +191,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 325.5,
-    "collapsed": true
+    "width": 325.5
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -196,32 +209,36 @@
       "obsidian-excalidraw-plugin:New drawing": false
     }
   },
-  "active": "e7a7b303c61786dc",
+  "active": "ca6b2d9116a1a72b",
   "lastOpenFiles": [
-    "Courses/RabbitMQ (Curso).md",
     "_Resourses/Home/Internet de las cosas.md",
+    "Courses/IoT (Curso).md",
     "_Resourses/Home/Home.md",
-    "Courses/images/Pasted image 20251213190224.png",
-    "Excalidraw/Drawing 2025-12-13 08.55.41.excalidraw.md",
-    "Courses/images/Pasted image 20251213122415.png",
-    "Courses/images/Pasted image 20251213110206.png",
-    "Courses/images/Pasted image 20251213085919.png",
-    "Courses/images/Pasted image 20251213085817.png",
-    "Courses/images/Pasted image 20251212114731.png",
+    "Courses/RabbitMQ (Curso).md",
+    "Courses/images/Pasted image 20251219124031.png",
+    "Courses/images/Pasted image 20251219101155.png",
+    "Courses/images/Pasted image 20251219092430.png",
+    "Excalidraw/Drawing 2025-12-06 08.20.11.excalidraw.md",
+    "Courses/images/Pasted image 20251218150402.png",
+    "Courses/images/Pasted image 20251218150348.png",
+    "Courses/images/Pasted image 20251218150336.png",
+    "Courses/images/Pasted image 20251218144445.png",
+    "Courses/Java SpringBoot (Curso).md",
+    "_Resourses/Home/Programación Backend.md",
+    "Courses/images/Pasted image 20251216202147.png",
+    "Courses/images/Pasted image 20251216173739.png",
+    "Courses/images/Pasted image 20251216173712.png",
+    "Excalidraw/Drawing 2025-12-06 11.36.09.excalidraw.md",
     "Excalidraw/Drawing 2025-12-12 08.32.51.excalidraw.md",
-    "Courses/images/Pasted image 20251212091625.png",
-    "Courses/images/Pasted image 20251212091600.png",
-    "Courses/images/Pasted image 20251212083648.png",
+    "Excalidraw/Drawing 2025-12-06 08.21.13.excalidraw.md",
+    "Excalidraw/Drawing 2025-12-14 12.10.18.excalidraw.md",
+    "Excalidraw/images",
+    "Excalidraw/Drawing 2025-12-13 08.55.41.excalidraw.md",
     "Grafico de contribución.md",
     "Untitled.base",
-    "Courses/images/Pasted image 20251212082135.png",
     "Excalidraw/Drawing 2025-12-12 08.11.31.excalidraw.md",
-    "Excalidraw/Drawing 2025-12-06 11.36.09.excalidraw.md",
     "Untitled 1.base",
-    "Excalidraw/Drawing 2025-12-06 08.21.13.excalidraw.md",
-    "Excalidraw/Drawing 2025-12-06 08.20.11.excalidraw.md",
     "Excalidraw",
-    "Courses/IoT (Curso).md",
     "images",
     "Concepto/MQTT (Concepto).md",
     "Concepto/Patrones de diseño (Concepto).md",
@@ -229,21 +246,17 @@
     "_Resourses/Home/CI-CD.md",
     "Roadmap/Arquitectura de Software (Roadmap).md",
     "_Resourses/Home/Programacion Frontend.md",
-    "_Resourses/Home/Programación Backend.md",
     "Courses/Java (Curso).md",
     "Courses/Mosquitto (Curso).md",
     "Untitled.canvas",
     "Courses/Angular Youtube(Curso).md",
     "Courses/Angular (Curso).md",
     "Courses/Calidad de Código (SonarQube y Codacy ) (Curso).md",
-    "Courses/Ciberseguridad (Curso).md",
-    "Courses/CSS (Curso).md",
     "Concepto/images",
     "Courses/images",
     "Courses/src/Docker",
     "Libros/src",
     "Libros",
-    "Courses/src/Calidad de Código (SonarQube y Codacy",
     "Untitled 1.canvas"
   ]
 }
