@@ -2156,4 +2156,488 @@ Según la IA:
 ![[Pasted image 20251219124031.png]]
 
 ## Publish/Subscribe:
-Aquí volvemos a ver lo que son los exchanges, esta vez vamos directamente con el código: 
+Aquí volvemos a ver lo que son los exchanges, esta vez vamos directamente con el código, tenemos una clase de configuración de la siguiente forma: 
+```java title=ConfigTutorial.java
+@Configuration  
+@Profile({"tut2", "publish-subscribe"})  
+public class ConfigTutorial {  
+  
+    @Bean
+    public FanoutExchange fanout() {  
+        return new FanoutExchange("tut.fanout");  
+    }  
+  
+    @Profile("receiver")  
+    public static class ReceiverConfig {  
+        @Bean  
+        public Queue autoDeleteQueue1() {  
+            return new AnonymousQueue();  
+        }  
+        @Bean  
+        public Binding binding1(  
+                FanoutExchange exchange,  
+                @Qualifier("autoDeleteQueue1") Queue q) {  
+            return BindingBuilder.bind(q).to(exchange);  
+        }  
+    }  
+  
+    @Profile("sender")  
+    @Bean  
+    public Sender sender() {  
+        return new Sender();  
+    }    
+}
+```
+
+Luego para el sender tenemos: 
+```java title=Sender.java
+public class Sender {  
+  
+    @Autowired  
+    private RabbitTemplate template;  
+  
+    @Autowired  
+    private FanoutExchange fanout;  
+  
+    AtomicInteger dots = new AtomicInteger(0);  
+    AtomicInteger count = new AtomicInteger(0);  
+  
+    @Scheduled(fixedDelay = 1000, initialDelay = 500)  
+    public void send() {  
+        StringBuilder builder = new StringBuilder("Hello");  
+        if (dots.incrementAndGet() == 3) {  
+            dots.set(1);  
+        }  
+        for (int i = 0; i < dots.get(); i++) {  
+            builder.append('.');  
+        }  
+        builder.append(count.incrementAndGet());  
+        String message = builder.toString();  
+        // usamos este  
+        template.convertAndSend(fanout.getName(), "", message);  
+        System.out.println("Se esta enviando a : " + fanout.getName());  
+        System.out.println("[x] Sent : " + message);  
+    }  
+}
+```
+Aqui debemos notar que en el `template` usa el método `convertAndSend` que contiene 3 apartados.
+1. Nombre del fanout
+2. Routing Key
+3. El mensaje a serializar.
+
+En el apartado del recibidor: 
+```java tilte=Receiver.java
+@Profile("receiver")  
+@Component  
+@RabbitListener(queues = "#{@autoDeleteQueue1.name}")  
+public class Receiver {  
+  
+  
+    public Receiver() {  
+    }  
+  
+    @RabbitHandler  
+    public void receive(@Payload String in) throws InterruptedException {  
+        System.out.println("Recibí en spring: " + in);  
+        receive(in, 1);  
+    }  
+  
+    public void receive(String in, int receiver) throws InterruptedException {  
+        StopWatch watch = new StopWatch();  
+        watch.start();  
+        System.out.println("instance " + receiver + " [x] Received '" + in + "'");  
+        doWork(in);  
+        watch.stop();  
+        System.out.println("instance " + receiver + " [x] Done in "  
+                + watch.getTotalTimeSeconds() + "s");  
+    }  
+  
+    private void doWork(String in) throws InterruptedException {  
+        for (char ch : in.toCharArray()) {  
+            if (ch == '.') {  
+                Thread.sleep(500);  
+            }  
+        }  
+    }  
+}
+```
+
+## Routing: 
+
+Nosotros en él los códigos anteriores habíamos creado unos `bindings` de la siguiente forma: 
+```java
+@Bean
+public Binding binding1(FanoutExchange fanout,
+    Queue autoDeleteQueue1) {
+    return BindingBuilder.bind(autoDeleteQueue1).to(fanout);
+}
+```
+Ahora podemos agregar un parámetro extra a su creación, el cual consisten en darle una `key`, en este caso: 
+```java
+@Bean
+public Binding binding1a(DirectExchange direct,
+    Queue autoDeleteQueue1) {
+    return BindingBuilder.bind(autoDeleteQueue1)
+        .to(direct)
+        .with("orange");
+}
+```
+Para eso recordemos el estilo en que se trasmiten los mensajes en los exchanges de tipo `direct`: 
+![[Pasted image 20251220155524.png]]
+También debemos de saber que es completamente legal crear múltiples bindings con el mismo binding key:
+![[Pasted image 20251220155646.png]]
+### Publicando mensajes: 
+
+Para este apartado de publicación de mensajes ya no necesitamos usar la configuración de `fanout`, necesitamos la configuración de `direct`.
+```java
+@Bean
+public DirectExchange direct() {
+    return new DirectExchange("tut.direct");
+}
+```
+
+### Suscripción de mensajes:
+
+Para suscribirse a mensajes usamos el binding con el tipo de binding que nosotros deseamos, el código realizado es: 
+```java
+@Bean
+public DirectExchange direct() {
+    return new DirectExchange("tut.direct");
+}
+...
+@Bean
+public Binding binding1a(DirectExchange direct,
+    Queue autoDeleteQueue1) {
+    return BindingBuilder.bind(autoDeleteQueue1)
+        .to(direct)
+        .with("orange");
+}
+```
+
+***
+Vamos a poner todo el código: 
+
+En la configuración es donde entra el apartado diferencial: 
+```java title=ConfigTutorial.java
+@Configuration  
+@Profile({"tut2", "publish-subscribe"})  
+public class ConfigTutorial {  
+  
+    @Bean  
+    public DirectExchange direct() {  
+        return new DirectExchange("tut.fanout");  
+    }  
+  
+    @Profile("receiver")  
+    public static class ReceiverConfig {  
+        @Bean  
+        public Queue autoDeleteQueue1() {  
+            return new AnonymousQueue();  
+        }  
+  
+        @Bean  
+        public Binding binding1(  
+                DirectExchange direct,  
+                @Qualifier("autoDeleteQueue1") Queue autoDeleteQueue1) {  
+            return BindingBuilder.bind(autoDeleteQueue1)  
+                    .to(direct)  
+                    .with("orange");  
+        }  
+    }  
+  
+    @Profile("sender")  
+    @Bean  
+    public Sender sender() {  
+        return new Sender();  
+    }  
+}
+```
+En esta configuración lo que hacemos diferente es declarar el `DirectExchange` con el nombre de `tut.fanout`. Luego creamos el `binding` en el cual solo se conecta ante la key route llamada `orange`.
+En la clase `receiver` no hacemos absolutamente nada, se queda igual, como ejemplo: 
+```java
+@Profile("receiver")  
+@Component  
+@RabbitListener(queues = "#{@autoDeleteQueue1.name}")  
+public class Receiver {  
+  
+  
+    public Receiver() {  
+    }  
+  
+    @RabbitHandler  
+    public void receive(@Payload String in) throws InterruptedException {  
+        System.out.println("Recibí en spring: " + in);  
+        receive(in, 1);  
+    }  
+  
+    public void receive(String in, int receiver) throws InterruptedException {  
+        StopWatch watch = new StopWatch();  
+        watch.start();  
+        System.out.println("instance " + receiver + " [x] Received '" + in + "'");  
+        doWork(in);  
+        watch.stop();  
+        System.out.println("instance " + receiver + " [x] Done in "  
+                + watch.getTotalTimeSeconds() + "s");  
+    }  
+  
+    private void doWork(String in) throws InterruptedException {  
+        for (char ch : in.toCharArray()) {  
+            if (ch == '.') {  
+                Thread.sleep(500);  
+            }  
+        }  
+    }  
+}
+```
+
+El que cambia en este momento es el sender, ya que enviamos a cada uno de los diferentes bindings:
+```java title=Sender.java
+public class Sender {  
+  
+    @Autowired  
+    private RabbitTemplate template;  
+  
+    @Autowired  
+    private DirectExchange direct;  
+  
+    AtomicInteger index = new AtomicInteger(0);  
+  
+    AtomicInteger count = new AtomicInteger(0);  
+  
+    private final String[] keys = {"orange", "black", "green"};  
+  
+    @Scheduled(fixedDelay = 1000, initialDelay = 500)  
+    public void send() {  
+        StringBuilder builder = new StringBuilder("Hello to ");  
+        if (this.index.incrementAndGet() == 3) {  
+            this.index.set(0);  
+        }  
+        String key = keys[this.index.get()];  
+        builder.append(key).append(' ');  
+        builder.append(this.count.get());  
+        String message = builder.toString();  
+        template.convertAndSend(direct.getName(), key, message);  
+        System.out.println(" [x] Sent '" + message + "'");  
+    }  
+}
+```
+Entonces cada segundo cambiamos de binding.
+A la hora de reproducirlos vemos lo siguiente: 
+![[Pasted image 20251220170042.png]]
+También se agregó un programa con otro binding, el programa: 
+```java title=OtroPrograma
+public class Main {  
+  
+    private static String EXCHANGE = "tut.fanout";  
+  
+    public static void main(String[] args) throws IOException, TimeoutException {  
+  
+        ConnectionFactory connectionFactory = new ConnectionFactory();  
+        connectionFactory.setHost("localhost");  
+        Connection connection = connectionFactory.newConnection();  
+        Channel channel = connection.createChannel();  
+  
+        channel.exchangeDeclare(EXCHANGE, "direct", true);  
+        String queueName = channel.queueDeclare().getQueue();  
+  
+        channel.queueBind(queueName, EXCHANGE, "");  
+  
+        if (args.length < 1) {  
+            System.err.println("Usage: ReceiveLogsDirect [info] [warning] [error]");  
+            System.exit(1);  
+        }  
+  
+        for (String binding : args) {  
+            channel.queueBind(queueName, EXCHANGE, binding);  
+        }  
+  
+        System.out.println("[***] Esperando mensajes: ");  
+  
+        DeliverCallback deliverCallback = (consumerTag, delivery) -> {  
+  
+            String message = new String(delivery.getBody(), StandardCharsets.UTF_8);  
+            System.out.println("[x] Recibimos el mensaje: " + message);  
+  
+        };  
+  
+        channel.basicConsume(  
+                queueName,  
+                true,               // autoAck  
+                deliverCallback,  
+                consumerTag -> {  
+                }  
+        );  
+  
+  
+    }  
+}
+```
+
+Y los resultados: 
+![[Pasted image 20251220170157.png]]
+***
+Como conclusión, ya tenemos el cómo replicarlo en Spring Boot.
+## Topics: 
+Recordemos lo que son los topics, los topics son una forma de subdividir temas en un exchange, en este caso hay dos formas que son necesarias de entender: 
+- `*` (star) puede sustituir exactamente una palabra
+- `#` (hash) puede sustituir cero o muchas palabras.
+
+El ejemplo que dimos en tutoriales anteriores es el mismo usado aqui:
+![[Pasted image 20251220192009.png]]
+En este caso, al igual que en el tutorial de los inicios, se divide en 3 topicos: 
+`<velocidad>.<color>.<especie>`
+Un ejemplo rápido generado por la IA frente a esto de los asteriscos y hash, es por ejemplo:
+![[Pasted image 20251221152809.png]]
+Y en el apartado de hash: 
+![[Pasted image 20251221152821.png]]
+***
+¿Cómo quedaría con el código?: 
+El código queda muy, muy similar, lo único que cambia es la configuración así: 
+```java
+@Configuration  
+@Profile({"tut2", "publish-subscribe"})  
+public class ConfigTutorial {  
+  
+    @Bean  
+    public TopicExchange direct() {  
+        return new TopicExchange("tut.fanout");  
+    }  
+  
+    @Profile("receiver")  
+    public static class ReceiverConfig {  
+        @Bean  
+        public Queue autoDeleteQueue1() {  
+            return new AnonymousQueue();  
+        }  
+  
+        @Bean  
+        public Binding binding1(  
+                TopicExchange topic,  
+                @Qualifier("autoDeleteQueue1") Queue autoDeleteQueue1) {  
+            return BindingBuilder.bind(autoDeleteQueue1)  
+                    .to(topic)  
+                    .with("*.orange.*");  
+        }  
+    }  
+  
+    @Profile("sender")  
+    @Bean  
+    public Sender sender() {  
+        return new Sender();  
+    }  
+}
+```
+Y luego en el sender enviamos los topics: 
+```java
+public class Sender {  
+  
+    @Autowired  
+    private RabbitTemplate template;  
+  
+    @Autowired  
+    private TopicExchange topic;  
+  
+    AtomicInteger index = new AtomicInteger(0);  
+  
+    AtomicInteger count = new AtomicInteger(0);  
+  
+    private final String[] keys = {"quick.orange.rabbit", "lazy.orange.elephant", "quick.orange.fox",  
+            "lazy.brown.fox", "lazy.pink.rabbit", "quick.brown.fox"};  
+  
+    @Scheduled(fixedDelay = 1000, initialDelay = 500)  
+    public void send() {  
+        StringBuilder builder = new StringBuilder("Hello to ");  
+        if (this.index.incrementAndGet() == 5) {  
+            this.index.set(0);  
+        }  
+        String key = keys[this.index.get()];  
+        builder.append(key).append(' ');  
+        builder.append(this.count.get());  
+        String message = builder.toString();  
+        template.convertAndSend(topic.getName(), key, message);  
+        System.out.println(" [x] Sent '" + message + "'");  
+    }  
+}
+```
+Ahora, creamos los programas y como vemos lo que enviamos, esto es lo que recibimos: 
+![[Pasted image 20251221172951.png]]![[Pasted image 20251221173009.png]]
+
+Ahí vemos cuál es la que envía, cuáles reciben.
+
+### RCP: 
+El apartado de RCP es un DirectExchange con `callback`. Y la manera de hacerlo es sencillamente: 
+```java
+@Configuration  
+@Profile({"tut2", "publish-subscribe"})  
+public class ConfigTutorial {  
+  
+  
+    @Profile("receiver")  
+    public static class ReceiverConfig {  
+        @Bean  
+        public Queue queue() {  
+            return new Queue("tut.rcp");  
+        }  
+  
+        @Bean  
+        public DirectExchange rpcExchange() {  
+            return new DirectExchange("rpc.exchange");  
+        }  
+        @Bean  
+        public Binding binding1(  
+                @Qualifier("rpcExchange") DirectExchange ex,  
+                @Qualifier("queue") Queue queue) {  
+            return BindingBuilder.bind(queue)  
+                    .to(ex)  
+                    .with("rcp");  
+        }  
+    }  
+  
+    @Profile("sender")  
+    @Bean  
+    public Sender sender() {  
+        return new Sender();  
+    }  
+}
+```
+
+El sender : 
+```java
+public class Sender {  
+  
+    @Autowired  
+    private RabbitTemplate template;  
+  
+    @Scheduled(fixedDelay = 1000, initialDelay = 500)  
+    public void send() {  
+        String request = "Hello RCP";  
+        System.out.println("[x] Send request: " + request);  
+  
+        Object response = template.convertSendAndReceive(  
+                "rpc.exchange",  
+                "rcp",  
+                request  
+        );  
+  
+        System.out.println(" [✓] Response: " + response);  
+    }  
+}
+```
+Y el reciever:
+```java
+@Profile("receiver")  
+@Component  
+@RabbitListener(queues = "#{@queue.name}")  
+public class Receiver {  
+  
+    @RabbitHandler  
+    public String handle(String message){  
+        System.out.println(" [x] RPC received: " + message);  
+        return "Processed → " + message;  
+    }  
+}
+```
+
+Con esto ya tenemos el siguiente resultado: 
+![[Pasted image 20251221211934.png]]
+Cómo se observa hay un apartado que envia y uno que recibe. Y ... ya.

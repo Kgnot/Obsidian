@@ -160,7 +160,11 @@
     "maven",
     "spring",
     "Spring",
-    "consumer"
+    "consumer",
+    "exchanges",
+    "topics",
+    "Topics",
+    "hash"
   ],
   "newFileLocation": "root",
   "newFileFolderPath": "courses/src/images",
