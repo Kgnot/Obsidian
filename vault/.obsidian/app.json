@@ -164,7 +164,23 @@
     "exchanges",
     "topics",
     "Topics",
-    "hash"
+    "hash",
+    "mosquitto",
+    "topic",
+    "strcuts",
+    "autoinferible",
+    "lifetime",
+    "arrays",
+    "runtime",
+    "runtime",
+    "scope",
+    "RAII",
+    "RAII",
+    "enum",
+    "int",
+    "templates",
+    "thread",
+    "expressif"
   ],
   "newFileLocation": "root",
   "newFileFolderPath": "courses/src/images",
@@ -175,8 +191,8 @@
   "vimMode": false,
   "pdfExportSettings": {
     "includeName": true,
-    "pageSize": "Letter",
-    "landscape": true,
+    "pageSize": "A3",
+    "landscape": false,
     "margin": "2",
     "downscalePercent": 63
   }
