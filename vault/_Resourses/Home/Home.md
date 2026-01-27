@@ -10,7 +10,9 @@ Bienvenido a Obsidiana.
 - [[Git (Curso)]]
 - [[Docker (Curso)]]
 - [[ESP32 (intento de guía)]]
-- 
+Bases de datos: 
+- [[CDC - Bases de datos - Debezium - Eventos (Curso)]]
+- [[InfluxDB]]
 ## Conceptos: 
 - [[Principios SOLID (Concepto)]]
 - [[Patrones de diseño (Concepto)]]

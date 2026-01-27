@@ -2981,6 +2981,11 @@ Sirve mucho para debugging y monitorización.
 Antes de seguir con un proyecto de springcloud vamos a empezar con un curso de [spring cloud](https://www.youtube.com/watch?v=U_rPO2ILMFU&list=PLxy6jHplP3Hi_W8iuYSbAeeMfaTZt49PW&index=2) . 
 
 
+***
+# CACHE en Spring Boot: 
+Algunos patrones a tener en cuenta: 
+Observer, Listener, Eventos
+
 # Bibliografía: 
 - [Spring Cloud Video](https://www.youtube.com/watch?v=EWqAY_-R57A)
 - [Spring Cloud Documentación](https://spring.io/cloud)

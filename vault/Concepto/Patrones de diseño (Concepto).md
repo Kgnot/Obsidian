@@ -2472,15 +2472,1253 @@ class Pipeline<I, O> {
 
 ```
 
-## CQRS
+***
 
+## CQRS
+https://www.youtube.com/watch?v=7W4lyeZcZ1w
 ### Aplicabilidad:
 ### Estrucura:
 ### Participantes:
 ### Código: 
 
+## Transactional Outbox
+
+Es un mecanismo para catualizar la base de datos y le agrega valor ya que asegura la confiabilidad y eficiencia de esa actualización. Es decir, la data que estamos leyendo y escribiendo es efectivamente la que estamos buscando y en el menor tiempo posible. Entonces, se actualiza la base de datos y se envian eventos a esa misma transacción. Esta no requiere del protocolo 2PC -> (Commit de dos fases), es decir, no necesita que un emisor y un receptor confirmen un evento entre recibido y publicado.
+El link que vamos a seguir para esta descripción será: 
+https://medium.com/@syedharismasood4/building-reliable-microservices-with-the-transactional-outbox-pattern-in-spring-boot-952d96f8b534
+
+Este está hecho en Spring Boot, pero encontraremos otra para Python.
+
+Aquí integraremos RabbitMQ para el proceso y una base de datos en PostgreSQL.
+
+Otras referencias posibles: 
+- https://www.decodable.co/blog/revisiting-the-outbox-pattern
+
+### Aplicabilidad:
+
+Describe la salida de mensajes o eventos desde un componente hacia el exterior garantizando consistencia transaccional entre la operación local y la publicación de mensajes. Se usa cuando un componente persiste datos y debe publicar eventos de forma fiable. (Por ejemplo: event sourcing, microservicios, cola de eventos).
+### Estrucura:
+1. Entidad principal / Agregado
+2. Tabla / Estructura de outbox que guarda eventos a publicar
+3. Transaccipón átomica: persistencia + registro en outbox
+4. Dispatcher / Publicador que: 
+	1. Lee eventos pendientes
+	2. Publica a cola/event bus
+	3. Marca como publicados
+### Participantes:
+
+|Rol|Descripción|
+|---|---|
+|**Componente de dominio**|Genera eventos por cambios en estado|
+|**Outbox Store**|Almacena eventos dentro de la misma transacción de la operación de negocio|
+|**Publicador/Dispatcher**|Lee de outbox y envía a sistemas externos (Kafka, Rabbit, etc.)|
+
+### Código: 
+#### Spring boot: 
+La estructura de carpetas que usaremos será la siguiente: 
+![[Pasted image 20251230150840.png]]
+Esta es algo simple y sencillo. Lo importante es las dos entidades que tenemos: Outbox y User.
+Cómo primeras configuraciones tendremos: 
+**application.yaml**
+```yml title=application.yaml
+spring:  
+  application:  
+    name: obx  
+  
+  
+  datasource:  
+    username: postgres  
+    password: 1234  
+    url: jdbc:postgresql://localhost:5432/outboxdb  
+  jpa:  
+    hibernate:  
+      ddl-auto: create  
+  
+  rabbitmq:  
+    host: localhost  
+    port: 5672  
+    username: guest  
+    password: guest
+```
+
+**main**
+```java title:ObxApplication.java
+package pattern.obx;  
+  
+import org.springframework.boot.SpringApplication;  
+import org.springframework.boot.autoconfigure.SpringBootApplication;  
+import org.springframework.scheduling.annotation.EnableScheduling;  
+  
+@SpringBootApplication  
+@EnableScheduling  
+public class ObxApplication {  
+  
+    public static void main(String[] args) {  
+       SpringApplication.run(ObxApplication.class, args);  
+    }  
+  
+}
+```
+
+**RabbitMQ Configuración**
+```java title=RabbitMQConfig.java
+package pattern.obx.configuration;  
+  
+import org.springframework.amqp.core.DirectExchange;  
+import org.springframework.context.annotation.Bean;  
+import org.springframework.context.annotation.Configuration;  
+  
+@Configuration  
+public class RabbitMQConfig {  
+  
+    @Bean  
+    public DirectExchange direct(){  
+        return new DirectExchange("outbox");  
+    }  
+}
+```
+
+**Enum Aggregate**
+
+```java title=Aggregate.java
+package pattern.obx.enm;  
+  
+public enum Aggregate {  
+    USER  
+}
+```
+
+**Gradle**
+```yml
+plugins {  
+    id 'java'  
+    id 'org.springframework.boot' version '4.0.1'  
+    id 'io.spring.dependency-management' version '1.1.7'  
+}  
+  
+group = 'pattern'  
+version = '0.0.1-SNAPSHOT'  
+description = 'Estudio del patron outbox'  
+  
+java {  
+    toolchain {  
+        languageVersion = JavaLanguageVersion.of(21)  
+    }  
+}  
+  
+repositories {  
+    mavenCentral()  
+}  
+  
+dependencies {  
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'  
+    implementation 'org.springframework.boot:spring-boot-starter-webmvc'  
+    implementation 'jakarta.validation:jakarta.validation-api:3.1.1'  
+    implementation 'org.springframework.boot:spring-boot-starter-amqp'  
+    implementation 'org.springframework.boot:spring-boot-starter-validation'  
+  
+    compileOnly 'org.projectlombok:lombok'  
+    annotationProcessor 'org.projectlombok:lombok'  
+  
+    testCompileOnly 'org.projectlombok:lombok'  
+    testAnnotationProcessor 'org.projectlombok:lombok'  
+  
+    runtimeOnly 'org.postgresql:postgresql'  
+  
+    testImplementation 'org.springframework.boot:spring-boot-starter-data-jpa-test'  
+    testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'  
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'  
+}  
+  
+  
+tasks.named('test') {  
+    useJUnitPlatform()  
+}
+```
+
+Ahora entrando en las entidades: 
+
+```java title=User.java
+@Entity  
+@Table(name = "users")  
+@Data  
+@EntityListeners(AuditingEntityListener.class)  
+public class User {  
+    @Id  
+    @GeneratedValue(strategy = GenerationType.IDENTITY)  
+    @Column(name = "id", nullable = false)  
+    private Long id;  
+  
+    @Column(name = "firstname", nullable = false, length = 45)  
+    private String firstname;  
+    @Column(name = "lastname", length = 45)  
+    private String lastname;  
+    @Column(name = "dob", nullable = false)  
+    private LocalDate dob;  
+    @Column(name = "address", nullable = true, length = 100)  
+    private String address;  
+    @Column(name = "email", nullable = false, unique = true)  
+    private String email;  
+    @CreatedDate  
+    @Column(name = "created_date")  
+    private LocalDateTime createdDate;  
+    @LastModifiedDate  
+    @Column(name = "last_modified_date")  
+    private LocalDateTime lastModifiedDate;  
+  
+    // todo, maybe pueda ir a un enum.  
+    private static final String USER_AGREGATE = "USER";  
+  
+    public User(String firstname, String lastname, LocalDate dob, String address, String email) {  
+        this.firstname = firstname;  
+        this.lastname = lastname;  
+        this.dob = dob;  
+        this.address = address;  
+        this.email = email;  
+    }  
+  
+    public User() {  
+  
+    }  
+}
+```
+
+**Outbox Entity**
+
+```java title=Outbox.java
+@Entity  
+@Data  
+@NoArgsConstructor  
+@EntityListeners(AuditingEntityListener.class)  
+public class Outbox {  
+    @Id  
+    @GeneratedValue(strategy = GenerationType.IDENTITY)  
+    @Column(name = "id", nullable = false)  
+    private Long id;  
+  
+    @Enumerated(EnumType.STRING)  
+    @Column(name = "aggregate")  
+    private Aggregate aggregate;  
+    @Column(name = "message", length = 500)  
+    private String message;  
+    @Column(name = "is_delivered", nullable = false)  
+    private Boolean isDelivered = false;  
+    @CreatedDate  
+    @Column(name = "created_date")  
+    private LocalDateTime createdDate;  
+    @LastModifiedDate  
+    @Column(name = "last_modified_date")  
+    private LocalDateTime lastModifiedDate;  
+  
+    public Outbox(Aggregate aggregate, String message, Boolean isDelivered) {  
+        this.aggregate = aggregate;  
+        this.message = message;  
+        this.isDelivered = isDelivered;  
+    }  
+  
+}
+```
+
+Los repositorios: 
+```java
+@Repository  
+public interface OutboxRepository extends JpaRepository<Outbox, Long> {  
+    // Este es para crear el trabajo  
+    List<Outbox> findTop10ByIsDelivered(boolean status);  
+}
+
+//
+
+@Repository  
+public interface UserRepository extends JpaRepository<User, Long> {  
+}
+```
+
+El servicio es la parte en donde SOLO ponemos el outbox, hagamos la comparación. La forma que NO se debería hacer:
+Esto es debido a que hacemos más de una operación que depende de que la primera se haga bien, y si en algún punto falla ... no se puede retroceder o, es complicado hacerlo.
+```java title=NoHacer
+@Transactional  
+    public User createUser(UserRequestDto userRequestDto) {  
+        User user = userRequestDtoMapper.mapToUserEntity(userRequestDto);  
+  
+        user = userRepository.save(user); // Write to the database  
+  
+        kafkaTemplate.send(topic, user); // Write to the message queue  
+  
+        return user;  
+    }
+```
+
+La mejor forma es solo usando el servicio que se quiere: 
+```java title=UserService.java
+@Service  
+public class UserService {  
+  
+    private final UserRepository userRepository;  
+    private final OutboxRepository outboxRepository;  
+    private final UserRequestDtoMapper userRequestDtoMapper;  
+    private final UserMapper userMapper;  
+  
+    public UserService(UserRepository userRepository, OutboxRepository outboxRepository,  
+                       UserRequestDtoMapper userRequestDtoMapper, UserMapper userMapper) {  
+        this.userRepository = userRepository;  
+        this.outboxRepository = outboxRepository;  
+        this.userRequestDtoMapper = userRequestDtoMapper;  
+        this.userMapper = userMapper;  
+    }  
+  
+    // aqui usamos el method que es con unchecked, por lo que  
+    // si falla automaticamente hace el rollback    @Transactional  
+    public User createUser(UserRequestDto userRequestDto) {  
+        User user = userRequestDtoMapper.mapToUserEntity(userRequestDto);  
+        user = userRepository.save(user);  
+        Outbox outbox = userMapper.mapToOutBoxEntity(user);  
+        outboxRepository.save(outbox);  
+  
+        return user;  
+  
+    }  
+  
+  
+}
+```
+
+En el código de arriba observamos que se hacen dos transacciones, pero ambas son de bases de datos que pueden tener `rollback`.
+
+El controlador para realizar el tema del evento: 
+```java title=UserController.java
+@RestController  
+@RequestMapping("api/v1/users")  
+public class UserController {  
+    private final UserService userService;  
+  
+  
+    public UserController(UserService userService) {  
+        this.userService = userService;  
+    }  
+  
+    @PostMapping  
+    public User createUser(@RequestBody @Valid UserRequestDto userRequestDto) {  
+        return userService.createUser(userRequestDto);  
+    }  
+}
+```
+
+Aqui claramente necesitamos mappers y necesitamos los dto: 
+```java
+@Data  
+@AllArgsConstructor  
+@NoArgsConstructor  
+public class UserRequestDto {  
+  
+    @NotNull  
+    private String firstName;  
+    private String lastName;  
+    private String address;  
+    @NotNull  
+    private LocalDate dob;  
+    @Email  
+    private String email;  
+  
+}
+
+//
+
+@Component  
+public class UserMapper {  
+  
+    private final ObjectMapper objectMapper;  
+  
+    public UserMapper(ObjectMapper objectMapper) {  
+        this.objectMapper = objectMapper;  
+    }  
+    // Este es un error unchecked  
+    public Outbox mapToOutBoxEntity(User user){  
+        if (user == null)  
+            throw new NoUserToMapOutbox("No se puede agregar el usuario");  
+        return new Outbox(  
+                Aggregate.USER,  
+                objectMapper.writeValueAsString(user),  
+                false  
+        );  
+    }  
+  
+}
+
+// 
+
+@Component  
+public class UserRequestDtoMapper {  
+  
+    public User mapToUserEntity(UserRequestDto userRequestDto) {  
+        return new User(  
+                userRequestDto.getFirstName(),  
+                userRequestDto.getLastName(),  
+                userRequestDto.getDob(),  
+                userRequestDto.getAddress(),  
+                userRequestDto.getEmail()  
+        );  
+    }  
+  
+}
+
+// El error: 
+
+public class NoUserToMapOutbox extends RuntimeException {  
+    public NoUserToMapOutbox(String message) {  
+        super(message);  
+    }  
+}
+```
+
+Y viene algo importante que es para generar los eventos: 
+```java title=OutboxProcessorTask.java
+@Slf4j  
+@Component  
+public class OutboxProcessorTask {  
+  
+    private final OutboxRepository outboxRepository;  
+    private final RabbitTemplate rabbitTemplate;  
+    private final DirectExchange directExchange;  
+  
+    public OutboxProcessorTask(OutboxRepository outboxRepository,  
+                               RabbitTemplate rabbitTemplate, DirectExchange directExchange,  
+                               ObjectMapper objectMapper) {  
+        this.outboxRepository = outboxRepository;  
+        this.rabbitTemplate = rabbitTemplate;  
+        this.directExchange = directExchange;  
+    }  
+  
+    @Scheduled(fixedRate = 5000)  
+    @Transactional  
+    public void process() {  
+        log.info("Task executed");  
+  
+        List<Outbox> outboxes = outboxRepository.findTop10ByIsDelivered(false);  
+        outboxes.forEach(  
+                outbox -> {  
+                    rabbitTemplate.convertAndSend(  
+                            directExchange.getName(),  
+                            "user.created",  
+                            outbox.getMessage()  
+                    );  
+                    outbox.setIsDelivered(true);  
+                }  
+        );  
+    }  
+}
+```
+
+Ahora vamos a ver el otro programa
+```java title=Cliente-Recibidor
+public class Main {  
+  
+    private static final String EXCHANGE = "outbox";  
+    private static final String ROUTING_KEY = "user.created";  
+  
+    public static void main(String[] args) throws Exception {  
+  
+        ConnectionFactory factory = new ConnectionFactory();  
+        factory.setHost("localhost");  
+  
+        Connection connection = factory.newConnection();  
+        Channel channel = connection.createChannel();  
+  
+        // IMPORTANTE: mismas propiedades que Spring  
+        channel.exchangeDeclare(EXCHANGE, BuiltinExchangeType.DIRECT, true);  
+  
+        // Queue temporal (ok para pruebas)  
+        String queueName = channel.queueDeclare().getQueue();  
+  
+        channel.queueBind(queueName, EXCHANGE, ROUTING_KEY);  
+  
+        System.out.println("[*] Esperando mensajes...");  
+  
+        DeliverCallback callback = (tag, delivery) -> {  
+            String message = new String(delivery.getBody(), StandardCharsets.UTF_8);  
+            System.out.println("[x] Recibido: " + message);  
+        };  
+  
+        channel.basicConsume(queueName, true, callback, tag -> {});  
+    }  
+}
+```
+
+Con ello ya estamos generando este lindo patrón de diseño en Spring Boot.
+Aunque hay algo que es muy importante y que el artículo nos da. Bueno, varias cosas en primera un dibujo del sistema :
+![[Pasted image 20251230203116.png]]
+Luego nos comenta sobre soluciones a implementar, nosotros implementamos un `Sheduled`.
+```java title=Scheduled
+   @Scheduled(fixedRate = 5000)  
+    @Transactional  
+    public void process() {  
+        log.info("Task executed");  
+  
+        List<Outbox> outboxes = outboxRepository.findTop10ByIsDelivered(false);  
+        outboxes.forEach(  
+                outbox -> {  
+                    rabbitTemplate.convertAndSend(  
+                            directExchange.getName(),  
+                            "user.created",  
+                            outbox.getMessage()  
+                    );  
+                    outbox.setIsDelivered(true);  
+                }  
+        );  
+    } 
+```
+Pero hay una solución más y tiene que ver con un tema llamado =={orange}**Message Relay Service (MRS)**== donde textualmente nos da dos soluciones: 
+- Create a job that will run periodically and poll the outbox table for undelivered messages and deliver them in batches.
+- Use CDC (change data capture) tools like [Debezium](https://debezium.io/) to automatically publish messages whenever data is inserted in the outbox table.
+Podemos ver algo de Debezium, aunque, será en otro curso.
+## Lazy Loading
+
+La carga diferida (Lazy Loading en inglés) es un patrón de diseño comúnmente usado para diferir la inicialización de un objeto hasta el punto en que se necesita. Puede contribuir a la eficiencia en la operación del programa si se usa de manera adecuada.
+### Aplicabilidad:
+Utilice el modelo de Carga Diferida cuando:
+
+- La carga anticipada es costosa o el objeto a cargar podría no ser necesario en absoluto
+### Estrucura:
+El diagrama de clases en java se puede observar de esta forma: 
+![[Pasted image 20260101082535.png]]
+Imagen dada por: https://java-design-patterns.com/es/patterns/lazy-loading/
+### Participantes:
+### Código: 
+#### Python: 
+Aquí vamos a tocar un tema un poco más complejo, la información dada aqui estará en un curso de Python, aunque puede saltarse al `código python` para solo observar el código.
+
+Para el código a continuación vamos a establercer tres concepts que suelen aparecer juntos: 
+- Generadores (`Generator`)
+	- No calculan todo de una vez, producen valores cuando se necesitan
+- Caché (`@cache`)
+	- Evita recalcular resultados ya calculados
+- Decoradores personalizados
+	- Permiten envolver funciones y modificar su comportamiento (por ejemplo, agregar caché con lógica propia).
+
+¿Qué son los Generadores?
+Un generador es una funci´´on que produce valores uno por uno, en lugar de devolverlos todos juntos, para ello usamos la palabra reservada `yield` el cual es una orden muy similar a `return`, con la gran diferencia de que `yield` pausará la ejecucuón de tu función y guardará el estado de la misma hasta que decidas usarla de nuevo, por ejemplo:
+```python
+# Queremos calcular los cuadrados de una lista de números que se pasan como parametro.
+# Una solución puede ser: 
+def squares(numbers):
+	return [number*number for number in numbers]
+
+squares([1,2,3,4,5])
+
+# El resultado será [1,4,9,16,25]
+```
+Aqui vemos que tenemos un pequeño problema y es que todos los resultados se generan de una vez. Si la lista `numbers` fuese muy grande, el tiempo de ejecucuón podría ser considerable. Para ello ahora hacemos: 
+```python
+import time  
+  
+def squares(numbers):  
+    for number in numbers:  
+        yield number * number  
+  
+def squaresSinGenerator(numbers):  
+    return [number * number for number in numbers]  
+  
+n = 100_000_000  
+  
+print("Obtener solo los primeros 2 elementos:\n")  
+  
+# Con generador - solo calcula los primeros que necesites  
+start = time.time()  
+resultado = []  
+for i, x in enumerate(squares(range(n))):  
+    resultado.append(x)  
+    if i >= 19:  # después del elemento 19 (índice 0-19 = 20 elementos)  
+        break  
+tiempo_yield = (time.time() - start) * 1000  
+print(f"Con yield: {tiempo_yield:.4f} ms")  
+print(f"Resultado: {resultado}\n")  
+  
+# Sin generador - calcula los 100 millones primero  
+start = time.time()  
+lista = squaresSinGenerator(range(n))  
+resultado = lista[:2]  
+print(f"Sin yield: {time.time() - start:.4f} seg")  
+print(f"Resultado: {resultado}")
+```
+Con esto que nos genera de resultado?:
+![[Pasted image 20260101122947.png]]
+
+Ahora vamos a ver lo que es `Generator`. El cual se puede ver como: 
+```python
+from typing import Generator  
+  
+  
+def contador() -> Generator[int, None, None]:  
+    yield 1
+```
+El significado es: `Generator[valor_yield,valor_send,valor_return]` y en la practica generalmente es `Generator[T, None, None]`.
+
+¿Qué es `Callable`?
+Esto describe funciones como objetos, por ejemplo:
+```python
+from typing import Callable  
+  
+def ejecutar(f:Callable[[int],int])->int:  
+    return f(10)
+```
+Esto significa: 
+- Recibe una función
+- Esa función recibe un `int`
+- Devuelve un `int`
+***
+Ahora hablemos del cache, lo básico:
+¿Qué hace `@cache`?
+```python
+from functools import cache  
+  
+  
+@cache  
+def fib(n):  
+    if n < 2:  
+        return n  
+    return fib(n - 1) + fib(n - 2)  
+  
+  
+print(fib(1000))
+```
+
+Esto internamente nos dice. 
+- Guarda un diccionario de tipo `{argumentos: resultado}`
+- Si llamas con los argumentos, no recalcula
+***
+¿Y a todas estas qué es un decorador?
+Un decorador es basicamente: 
+```python
+f = decorador(f)
+```
+que en terminos de decorador es: 
+```python
+@decorador
+def f():
+	pass
+```
+
+Para darle sentido una manera muy básica de crear un decorador es: 
+```python
+def miDecoradorImprimir(func):  
+    resultado= func()  
+    print(resultado)  
+  
+@miDecoradorImprimir  
+def saludar():  
+    return "hola"
+```
+Ahora que son los `*args` y los `*kwargs`
+Normalmente definimos funciones así:
+```python
+def suma(a,b):
+	return a+b
+```
+¿Pero que pasa si no sabes cuantos argumentos recibirá la función?, pues haces: 
+```python
+def f(*args): # aqui lo especial es *
+	print(args) 
+```
+Por lo general en decoradores no sabemos cuantos argumentos tiene la función decorada, entonces: 
+```python
+def decoradro(func):
+	def wrapper(*args):
+		return func(*args)
+	return wrapper
+```
+Ahora los `**kwargs` son argumentos con nombre variables. ¿Cómo así?
+imaginemos lo siguiente: 
+```python
+def decorador(func):  
+    def wrapper(*args, **kwargs):  
+        print(f"Ejecutando {func.__name__}")  
+        print("Argumento args: ",args, "\n Argumento kwargs: ",kwargs)  
+        print("resultado funcion: ",func(*args, **kwargs))  
+        return func(*args, **kwargs)  
+    return wrapper  
+  
+  
+@decorador  
+def suma(a, b):  
+    return a + b  
+  
+  
+@decorador  
+def sumaTriple(a, b, c) -> int:  
+    return a + b + c  
+  
+  
+suma(2, 3)           # kwargs vacío  
+suma(a=2, b=3)       # kwargs={'a': 2, 'b': 3}  
+sumaTriple(2, 3, c=4) # args=(2, 3), kwargs={'c': 4}
+```
+La salida de esto es: 
+![[Pasted image 20260101151249.png]]
+Así que `kwargs` es un diccionario `clave : valor`
+***
+¿Por qué estos son clave en los decoradores? Pues un decorador envuelve funciones arbitrarias, la unica forma general es: 
+```python
+def wrapper(*args, **kwargs):
+    return func(*args, **kwargs)
+```
+Junto a este, un tema importante es el uso de `@wraps(func)` porque uno copia los metadatos de la función para recrear la función, es decir, imaginemos el siguiente escenario: 
+```python
+def suma(a, b):  
+    """Suma dos numeros"""  
+    return a + b  
+  
+  
+print(suma.__name__)  
+print(suma.__doc__)
+```
+Aqui todo está bien, esto nos genera
+![[Pasted image 20260101151926.png]]
+Ahora, usamos el decorador sin `@wraps`.
+Entonces que sucede?: 
+```python
+from functools import wraps  
+  
+  
+def decorador(func):  
+    # @wraps(func)  
+    def wrapper(*args, **kwargs):  
+        print(f"Ejecutando {func.__name__}")  
+        print("Argumento args: ",args, "\n Argumento kwargs: ",kwargs)  
+        print("resultado funcion: ",func(*args, **kwargs))  
+        return func(*args, **kwargs)  
+    return wrapper  
+  
+  
+@decorador  
+def suma(a, b):  
+    """Suma dos numeros"""  
+    return a + b  
+  
+  
+print(suma.__name__)  
+print(suma.__doc__)
+```
+![[Pasted image 20260101152011.png]]
+Ese es el resultado, si agregamos `@wraps`: 
+![[Pasted image 20260101152033.png]]
+Volvemos a tener identidad y metadatos de la función, recordemos que el decorador lo que hace es para la función suma: `suma = decorador(suma)` como ven, vuelve a crear una función suma
+
+Con esta información vamos a el código:
+
+#### Código Python
+Aquí el caché es para **evitar llamadas repetidas** a algo lento (APIs, bases de datos, cálculos costosos).
+```python
+import csv  
+import time  
+from functools import wraps  
+from typing import Any, Callable, Generator  
+  
+  
+def ttl_cache(seconds: int) -> Callable[[Callable[..., Any]], Callable[..., Any]]:  
+    def decorator(func: Callable[..., Any]) -> Callable[..., Any]:  
+        cache_data = {}  
+        cache_time = {}  
+  
+        @wraps(func)  
+        def wrapper(*args: Any, **kwargs: Any):  
+            key = (args, tuple(kwargs.items()))  
+            now = time.time()  
+            if key in cache_data and (now - cache_time[key]) < seconds:  
+                return cache_data[key]  
+  
+            result = func(*args, **kwargs)  
+            cache_data[key] = result  
+            cache_time[key] = now  
+            return result  
+  
+        return wrapper  
+    return decorator  
+  
+  
+def load_sales(path: str) -> Generator[dict[str, str], None, None]:  
+    print("Loading CSV data ...")  
+    with open(path, 'r') as f:  
+        reader = csv.DictReader(f)  # ← DictReader en vez de reader  
+        for row in reader:  
+            yield row  
+  
+  
+@ttl_cache(seconds=60)  
+def get_conversion_rates() -> dict[str, float]:  
+    print("fetching conversion rate...")  
+    time.sleep(2)  
+    return {"USD": 1.0, "EUR": 1.1, "JPY": 150.0, "CHF": 0.9}  
+  
+  
+def count_sales(sales: Generator[dict[str, str], None, None]) -> int:  
+    return sum(1 for _ in sales)  # ← Cuenta elementos del generador  
+  
+  
+def analyze_sales(path: str, currency: str) -> float:  
+    total = 0.0  
+    for i, s in enumerate(load_sales(path), start=1):  
+        total += float(s["amount"])  
+        if i >= 10_000:  
+            break  
+  
+    rate = get_conversion_rates().get(currency, 1.0)  
+    return total * rate  
+  
+  
+def main() -> None:  
+    while True:  
+        print("\nElige una opción:")  
+        print("1. Analizar los datos")  
+        print("2. Contar el total de ventas")  
+        print("3. Salir")  
+  
+        choice = input("> ")  
+  
+        if choice == "1":  
+            currency = input("Ingresa una currency (USD/EUR/JPY/CHF): ").upper() or "USD"  
+            total = analyze_sales("sales.csv", currency)  
+            print(f"El total de ventas es: {total:.2f} {currency}")  
+        elif choice == "2":  
+            sales = load_sales("sales.csv")  
+            count = count_sales(sales)  
+            print(f"El total de ventas es: {count}")  
+        elif choice == "3":  
+            print("Adiós")  
+            break  # ← Este break sí sale del while  
+        else:  
+            print("Opción inválida")  
+  
+  
+if __name__ == "__main__":  
+    main()
+```
 
 
+#### Java
+```java
+// Aqui hay varias maneras de hacerlo pero la "pro" es la siguiente, vamos a pintar dos escenarios, el main: 
+public class Main {  
+    public static void main(String[] args) {  
+        //Config config = new Config();  
+        Config2 config = new Config2();  
+  
+        System.out.println("Inicializado");  
+  
+        // aqui lo necesitamos  
+        System.out.println("llamamos a lineas: ");  
+        var lineas = config.getLineas();  
+        System.out.println("Lineas: \n" + lineas);  
+        System.out.println("volvemos a llamar a lineas: ");  
+        var lineas2 = config.getLineas();  
+        System.out.println("Lineas: \n" + lineas2);  
+    }  
+  
+}
+
+// aqui vemos dos Config, Config es para normal, sin nada y el config2 es con lazyload+cache:
+public class Config {  
+  
+    private final List<String> lineas;  
+  
+    public Config() {  
+        List<String> lineas1;  
+        System.out.println("cargando archivo");  
+        try {  
+            lineas1 = cargarArchivo();  
+        } catch (InterruptedException e) {  
+            e.printStackTrace();  
+            lineas1 = new ArrayList<>();  
+        }  
+        this.lineas = lineas1;  
+    }  
+  
+    private List<String> cargarArchivo() throws InterruptedException {  
+        Thread.sleep(5000);  
+        return List.of("linera1|", "linea2", "linea3");  
+    }  
+  
+    public List<String> getLineas() {  
+        return this.lineas;  
+    }  
+  
+  
+}
+// Ahi vemos que es todo muy normal, el constructor es quein hace toda la inicialización y se demora un monton.
+public class Config2 {  
+  
+    private final Supplier<List<String>> lineas =  
+            new Supplier<>() {  
+                private List<String> cache;  
+  
+                @Override  
+                public List<String> get() {  
+                    if (cache == null) {  
+                        try {  
+                            cache = cargarArchivo();  
+                            return cache;  
+                        } catch (InterruptedException e) {  
+                            throw new RuntimeException(e);  
+                        }  
+                    }  
+                    return cache;  
+                }  
+            };  
+  
+    private List<String> cargarArchivo() throws InterruptedException {  
+        Thread.sleep(5000);  
+        return List.of("linera1|", "linea2", "linea3");  
+    }  
+  
+    public List<String> getLineas() {  
+        return this.lineas.get();  
+    }  
+}
+
+// De la segunda forma se usa un supplier para no cargar todo de golpe y usamos un cache jeje, y ya. Ahi termina
+```
+```java title=SpringBoot
+// En spring ha anotaciones para ello, está @Lazy  y @Cachable
+// En el siguiente bean se crea de forma Eager
+@Bean
+public RestTemplate restTemplate() {
+    return new RestTemplate();
+}
+
+// para cargar de forma Lazy usamos: 
+@Bean
+@Lazy
+public RestTemplate restTemplate() {
+    return new RestTemplate();
+}
+
+// Asi solo se usa cuando se vaya a utilizar
+// También se usa en dependencias
+
+@Service
+public class MiServicio {
+
+    private final RestTemplate restTemplate;
+
+    public MiServicio(@Lazy RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
+    }
+}
+// Aqui crea el servcio pero RestTemplate solo se inyecta un proxy
+// Y Cachable? : 
+@Cacheable("usuarios")
+public Usuario buscarUsuario(Long id) { ... }
+//- Eso ejecuta la primera vez y el resultado se guarda, las siguientes usan caché
+///// Otras formas de usar el lazy: 
+@Autowired
+ObjectProvider<RestTemplate> provider;
+
+public void usar() {
+    RestTemplate rt = provider.getObject(); // lazy
+}
+
+```
+## Specification
+### Aplicabilidad:
+### Estrucura:
+### Participantes:
+### Código: 
+
+## RPC
+### Aplicabilidad:
+### Estructura:
+### Participantes:
+### Código: 
+
+## State
+State es un patrón de diseño de comportamiento que permite a un objet alterar su comportamiento cuando su estado interno cambia. Parece como si el objeto cambiara su clase.
+### Aplicabilidad:
+La idea principal es que, en cualquier momento dado, un programa puede encontrarse en un número _finito_ de _estados_. Dentro de cada estado único, el programa se comporta de forma diferente y puede cambiar de un estado a otro instantáneamente. Sin embargo, dependiendo de un estado actual, el programa puede cambiar o no a otros estados. Estas normas de cambio llamadas _transiciones_ también son finitas y predeterminadas.
+
+También puedes aplicar esta solución a los objetos. Imagina que tienes una clase `Documento`. Un documento puede encontrarse en uno de estos tres estados: `Borrador`, `Moderación` y `Publicado`. El método `publicar` del documento funciona de forma ligeramente distinta en cada estado:
+
+- En `Borrador`, mueve el documento a moderación.
+- En `Moderación`, hace público el documento, pero sólo si el usuario actual es un administrador.
+- En `Publicado`, no hace nada en absoluto.
+![[Pasted image 20260117073422.png]]
+### Estructura:
+![[Pasted image 20260117073609.png]]
+### Participantes:
+En los participantes encontramos:
+
+1. Contexto: Almacena una referencia a uno de los objetos de estado concreto y le delega todo el trabajo especifico del estado. El contexto se comunica con el objeto de estado a tráves de la interfaz de etado
+2. Interfaz de estado: Declara los métodos específicos del estado. Estos métodos deben tener sentido para todos los estados concretos, porque no querrás que uno de tus estados tenga métodos inútiles que nunca serán invocados.
+3. Los estados concretos: Proporcionan implementaciones para los métodos específicos del estado. Evita duplicación de código y puede incluir clases abstractas intermedias que encapsulen algún comportamiento común.
+### Código: 
+#### Java:
+```java
+// primero hacemos el estado
+public abstract class State {
+	Player player;
+	
+	public abstract String onLock();
+    public abstract String onPlay();
+    public abstract String onNext();
+    public abstract String onPrevious();
+
+}
+
+// Ahora hacemos la implementación 
+public class LockedState extends State {
+
+    LockedState(Player player) {
+        super(player);
+        player.setPlaying(false);
+    }
+
+    @Override
+    public String onLock() {
+        if (player.isPlaying()) {
+            player.changeState(new ReadyState(player));
+            return "Stop playing";
+        } else {
+            return "Locked...";
+        }
+    }
+
+    @Override
+    public String onPlay() {
+        player.changeState(new ReadyState(player));
+        return "Ready";
+    }
+
+    @Override
+    public String onNext() {
+        return "Locked...";
+    }
+
+    @Override
+    public String onPrevious() {
+        return "Locked...";
+    }
+}
+
+// Otra implementación
+public class ReadyState extends State {
+
+    public ReadyState(Player player) {
+        super(player);
+    }
+
+    @Override
+    public String onLock() {
+        player.changeState(new LockedState(player));
+        return "Locked...";
+    }
+
+    @Override
+    public String onPlay() {
+        String action = player.startPlayback();
+        player.changeState(new PlayingState(player));
+        return action;
+    }
+
+    @Override
+    public String onNext() {
+        return "Locked...";
+    }
+
+    @Override
+    public String onPrevious() {
+        return "Locked...";
+    }
+}
+
+// ultima implementación: 
+
+public class PlayingState extends State {
+
+    PlayingState(Player player) {
+        super(player);
+    }
+
+    @Override
+    public String onLock() {
+        player.changeState(new LockedState(player));
+        player.setCurrentTrackAfterStop();
+        return "Stop playing";
+    }
+
+    @Override
+    public String onPlay() {
+        player.changeState(new ReadyState(player));
+        return "Paused...";
+    }
+
+    @Override
+    public String onNext() {
+        return player.nextTrack();
+    }
+
+    @Override
+    public String onPrevious() {
+        return player.previousTrack();
+    }
+}
+
+// Ahora nuestro "contexto"
+public class Player {
+    private State state;
+    private boolean playing = false;
+    private List<String> playlist = new ArrayList<>();
+    private int currentTrack = 0;
+
+    public Player() {
+        this.state = new ReadyState(this);
+        setPlaying(true);
+        for (int i = 1; i <= 12; i++) {
+            playlist.add("Track " + i);
+        }
+    }
+
+    public void changeState(State state) {
+        this.state = state;
+    }
+
+    public State getState() {
+        return state;
+    }
+
+    public void setPlaying(boolean playing) {
+        this.playing = playing;
+    }
+
+    public boolean isPlaying() {
+        return playing;
+    }
+
+    public String startPlayback() {
+        return "Playing " + playlist.get(currentTrack);
+    }
+
+    public String nextTrack() {
+        currentTrack++;
+        if (currentTrack > playlist.size() - 1) {
+            currentTrack = 0;
+        }
+        return "Playing " + playlist.get(currentTrack);
+    }
+
+    public String previousTrack() {
+        currentTrack--;
+        if (currentTrack < 0) {
+            currentTrack = playlist.size() - 1;
+        }
+        return "Playing " + playlist.get(currentTrack);
+    }
+
+    public void setCurrentTrackAfterStop() {
+        this.currentTrack = 0;
+    }
+}
+```
+#### typescript:
+```ts
+class Context {
+    /**
+     * @type {State} A reference to the current state of the Context.
+     */
+    private state: State;
+
+    constructor(state: State) {
+        this.transitionTo(state);
+    }
+
+    /**
+     * The Context allows changing the State object at runtime.
+     */
+    public transitionTo(state: State): void {
+        console.log(`Context: Transition to ${(<any>state).constructor.name}.`);
+        this.state = state;
+        this.state.setContext(this);
+    }
+
+    /**
+     * The Context delegates part of its behavior to the current State object.
+     */
+    public request1(): void {
+        this.state.handle1();
+    }
+
+    public request2(): void {
+        this.state.handle2();
+    }
+}
+
+/**
+ * The base State class declares methods that all Concrete State should
+ * implement and also provides a backreference to the Context object, associated
+ * with the State. This backreference can be used by States to transition the
+ * Context to another State.
+ */
+abstract class State {
+    protected context: Context;
+
+    public setContext(context: Context) {
+        this.context = context;
+    }
+
+    public abstract handle1(): void;
+
+    public abstract handle2(): void;
+}
+
+/**
+ * Concrete States implement various behaviors, associated with a state of the
+ * Context.
+ */
+class ConcreteStateA extends State {
+    public handle1(): void {
+        console.log('ConcreteStateA handles request1.');
+        console.log('ConcreteStateA wants to change the state of the context.');
+        this.context.transitionTo(new ConcreteStateB());
+    }
+
+    public handle2(): void {
+        console.log('ConcreteStateA handles request2.');
+    }
+}
+
+class ConcreteStateB extends State {
+    public handle1(): void {
+        console.log('ConcreteStateB handles request1.');
+    }
+
+    public handle2(): void {
+        console.log('ConcreteStateB handles request2.');
+        console.log('ConcreteStateB wants to change the state of the context.');
+        this.context.transitionTo(new ConcreteStateA());
+    }
+}
+
+/**
+ * The client code.
+ */
+const context = new Context(new ConcreteStateA());
+context.request1();
+context.request2();
+```
+
+## Interprete
+Este patrón de diseño es utilizado para evaluar un lenguaje definido como «expresiones», este patrón nos permite interpretar un lenguaje como Java,C#, SQL o incluso un lenguaje inventado por nosotros el cual tiene un significado; y darnos respuestas tras evaluar dicho lenguaje
+### Aplicabilidad:
+Se aplica a Lenguajes de dominio específico como expresiones matemáticas, fórmulas empresariales, etc. (Un sistema que evalúes expresiones como `"precio * impuesto + envío"`)
+También a procesamiento de comandos o scripts, análisis de expresiones regulares o lógicas o compiladores e intérpretes educativos.
+### Estructura:
+![[Pasted image 20260117074818.png]]
+### Participantes:
+- **Client**: Actor que dispara la ejecución del intérprete
+- **Context**: Objeto con información global que será utilizada por el intérprete para leer y almacenar información global entre todas las clases que conforman el patrón, este es enviado a interpeter el cual lo replica por toda la estructura.
+- **AbstractionExpression**: Interface que define la estructura mínima de una expresión.
+- **TerminalExpression**: Se refiere a expresiones que no tienen más continuidad y al ser evaluadas o interpretadas terminan la ejecución de esa rama. Estas expresiones marcan el final de la ejecucion de un sub-árbol de la expresión
+- **NonTerminalExpression**: Son expresiones compuestas y dentro de ellas existen más expresiones que deben ser evaluadas. Estas estructuras son interpretadas utilizada recursividad hasta llegar a una expresión Terminal. 
+
+
+### Código: 
 # Bibliografía:
 
 [Patrones de diseño bien - Erich Gamma.pdf](Patrones_de_diseo_bien_-_Erich_Gamma.pdf)
