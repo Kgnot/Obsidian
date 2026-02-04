@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Courses/React Native (Curso).md",
+                "file": "Courses/Java Avanzado (Curso).md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "React Native (Curso)"
+              "title": "Java Avanzado (Curso)"
             }
           }
         ]
@@ -53,7 +53,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "",
+                "query": "path:\"_Resourses/\" ",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -74,12 +74,12 @@
               "title": "Bookmarks"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "horizontal",
-    "width": 553.5,
-    "collapsed": true
+    "width": 553.5
   },
   "right": {
     "id": "ca31238cd924bf6a",
@@ -153,13 +153,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Courses/React Native (Curso).md",
+                "file": "Courses/Java Avanzado (Curso).md",
                 "followCursor": false,
                 "showSearch": true,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of React Native (Curso)"
+              "title": "Outline of Java Avanzado (Curso)"
             }
           },
           {
@@ -187,8 +187,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 526.5,
-    "collapsed": true
+    "width": 417.5
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -207,25 +206,33 @@
       "copilot:Open Copilot Chat": false
     }
   },
-  "active": "e7a7b303c61786dc",
+  "active": "1b92467000d0ab25",
   "lastOpenFiles": [
+    "Courses/images/Pasted image 20260204085822.png",
+    "Courses/Java SpringBoot (Curso).md",
+    "Courses/Java semi-avanzado (Curso).md",
+    "Courses/Java Avanzado (Curso).md",
     "_Resourses/Home/Home.md",
+    "Courses/images/Captura de pantalla 2026-01-30 103159.png",
+    "Courses/images/Captura de pantalla 2026-01-30 100155.png",
+    "Courses/images/Pasted image 20260130104152.png",
+    "Courses/images/Pasted image 20260130081250.png",
+    "Courses/images/Pasted image 20260130081127.png",
+    "_Resourses/Home/Programación Backend.md",
+    "_Resourses/Home/Internet de las cosas.md",
+    "Courses/React Native (Curso).md",
+    "Courses/React (Curso).md",
+    "Courses/images/Pasted image 20260127154815.png",
+    "Courses/images/Pasted image 20260127152923.png",
+    "copilot/copilot-conversations/mejora_este_texto_Esta_es_una_dependencia_que_tiene_expo@20260127_144915.md",
+    "Courses/images/Pasted image 20260127141704.png",
+    "Courses/images/Pasted image 20260127135810.png",
+    "Courses/images/Pasted image 20260127102919.png",
     "Courses/NestJS (Curso).md",
     "Concepto/Patrones de diseño (Concepto).md",
-    "Concepto/images/Pasted image 20260117074818.png",
-    "Concepto/images/Pasted image 20260117073609.png",
-    "Concepto/images/Pasted image 20260117073513.png",
-    "Concepto/images/Pasted image 20260117073422.png",
-    "Courses/images/Pasted image 20260116163438.png",
-    "Courses/images/Pasted image 20260116102828.png",
-    "Courses/images/Pasted image 20260116093447.png",
-    "Courses/images/Pasted image 20260114121707.png",
     "Courses/Mosquitto (Curso).md",
     "Courses/Nginx (Curso).md",
-    "Courses/images/Pasted image 20260113080557.png",
-    "Courses/images/Pasted image 20260113080357.png",
     "Courses/Typescript con React o Nextjs.md",
-    "Courses/React (Curso).md",
     "Courses/Angular Youtube(Curso).md",
     "Courses/Angular (Curso).md",
     "Courses/C++ y Sistemas embebidos (Curso).md",
@@ -237,13 +244,6 @@
     "Courses/Github Actions , Jenkins (CI CD) (Curso).md",
     "Excalidraw/Drawing 2026-01-08 10.52.06.excalidraw.md",
     "_Resourses/Home/Programacion Frontend.md",
-    "Courses/InfluxDB.md",
-    "Courses/Java SpringBoot (Curso).md",
-    "Courses/RabbitMQ (Curso).md",
-    "_Resourses/Home/Internet de las cosas.md",
-    "Courses/Frameworks para bases de datos java u ORM..md",
-    "_Resourses/Home/Programación Backend.md",
-    "copilot/copilot-conversations/Quisiera_que_completaras_esta_seccion_de_mosquitto,_el_#_MQTT@20251224_173426.md",
     "copilot/copilot-conversations",
     "copilot/copilot-custom-prompts",
     "copilot",

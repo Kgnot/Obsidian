@@ -217,6 +217,260 @@ Como resumen podemos decír:
 
 ## **JAX-RS y Jersey para REST**.
 
+## Programación de redes con I/O No bloqueante 
+### TCP
+Antes de entrar a todo el tema de lo que es la programación de redes con I/O no bloqueante, debemos entender que es TCP y por qué no, TCP/IP. 
+
+TCP es un protocolo de transporte que garantiza la entrega fiable y ordenada de paquetes de datos entre aplicaciones. Solo es el protocolo de transporte. En sus acciones está: 
+- Divide los datos en paquetes
+- numera los segmentos
+- gestiona el flujo de datos para evitar sobrecarga
+- retransmite paquetes perdidos
+Todo eso asegura que los datos lleguen completos y en orden
+
+TCP/IP es toda la "suit" que hace posible la comunicación en internet y redes locales. Lo que hace es usar TCP para fiabilidad e IP para direccion y enrutamiento de los paquetes a traves de la red. 
+![[Pasted image 20260204085822.png]]
+En la imagen se observa de forma intuitiva que un mensaje se desfragmente y se envía y se vuelve a construir en otro ordenador según la IP.
+### Sockets (bloqueantes vs no bloqueantes)
+
+En el ámbito de sockets: El sistema operativo incluye el recurso de comunicación entre procesos de Berkeley Software Distribution conocido como sockets.
+
+Los sockets son canales de comunicación que permiten que procesos no relacionados intercambien datos localmente y entre redes. Un único socket es un punto final de un canal de comunicación bidireccional. Para mayor información y detallada: https://www.ibm.com/docs/es/aix/7.2.0?topic=concepts-sockets
+
+Aquí entramos con los websockets, los websockets son un protocolo de comunicación bidireccional en tiempo real entre un cliente y un servidor a través de una única conexión de larga duración. A diferencia de las solicitudes HTTP tradicionales, que son unidireccionales, funcionan a través de un único socket TCP. Una vez se establece la conexión se pueden enviar y recibir datos en tiempo real entre cliente y servidor.
+
+
+Para crear sockets en Java debemos tener en cuenta varios conceptos: 
+
+- Puerto
+- Host
+- Socket del servidor
+- Socket del cliente
+- DataOutputStream
+- BufferReader
+- InputStreamReader
+
+Para ello lo más importante son los últimos 3, haciendo un breve repaso: 
+#### `InputStreamReader`
+
+> convierte bytes -> caracteres
+
+Java lee bytes, pero nosotros normalmente queremos texto.
+`InputStreamReader` es el puente entre un `InputStream` (bytes) y el mundo de los caracteres (`char`,`srting`
+por ejemplo, `System.in` son los bytes, por eso hacemos: 
+
+```java
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.IOException;
+
+public class ConsoleInputExample {
+    public static void main(String[] args) {
+        // Create an InputStreamReader wrapped in a BufferedReader
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+
+        System.out.println("Please enter your name:");
+
+        try {
+            // Read a line of text from the console
+            String name = reader.readLine();
+            System.out.println("Hello, " + name + "!");
+        } catch (IOException e) {
+            System.err.println("An I/O error occurred: " + e.getMessage());
+        } finally {
+            try {
+                // It is important to close the reader
+                if (reader != null) {
+                    reader.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+}
+```
+
+#### `BufferedReader`
+
+>Lee el texto de forma eficiente (lineas completas)
+
+Encima del `InputStreamReader` se pone un `BufferedReader` para: 
+- Mejor rendimiento
+- Poder usar `readLine()`
+
+Este `BufferedReader` solo lee texto.
+
+#### `DataOutputStream`
+> Escribe datos primitivos en binario
+
+Sirve para enviar datos primitivos de forma estructurada
+```java
+DataOutputStram dos = new DataOutputStream(System.out);
+dos.wirteUTF("ola xd");
+dos.flush();
+```
+
+Un ejemplo completo sobre un socket tanto cliente como servidor sería: 
+```java
+import java.io.*;  
+import java.net.ServerSocket;  
+import java.net.Socket;  
+import java.util.logging.Logger;  
+  
+public class SocketsMain {  
+  
+    private final int PUERTO = 1234;  
+    private final String HOST = "localhost";  
+    protected String mensajeServidor;  
+    protected ServerSocket ss; // socket del servidor  
+    protected Socket cs; // socket del cliente  
+    protected DataOutputStream salidaServidor, salidaCliente; // flujo de salida  
+  
+    public SocketsMain(String tipo) throws IOException {  
+        if (tipo.equals("servidor")) { // controlamos el servidor si es servidor  
+            ss = new ServerSocket(PUERTO);  
+            cs = new Socket();  
+        } else {  
+            cs = new Socket(HOST, PUERTO); // si no controlamos solo cliente  
+        }  
+    }  
+  
+//    public static void main(String[] args) throws IOException {  
+//        Servidor serv = new Servidor(); //Se crea el servidor  
+//  
+//        System.out.println("Iniciando servidor\n");  
+//        serv.startServer(); //Se inicia el servidor  
+//    }  
+  
+    public static void main(String[] args) throws IOException  
+    {  
+  
+        Cliente cli = new Cliente(); //Se crea el cliente  
+  
+        System.out.println("Iniciando cliente\n");  
+        cli.startClient(); //Se inicia el cliente  
+    }  
+  
+  
+    private static class Servidor extends SocketsMain {  
+  
+        private static Logger logger = Logger.getLogger(Servidor.class.getName());  
+  
+        public Servidor() throws IOException {  
+            super("servidor");  
+        }  
+  
+        public void startServer() {  
+            try {  
+                logger.info("Servidor esperando conexiones...");  
+                cs = ss.accept(); // aceptamos conexiones de los clientes | en espera  
+                logger.info("Cliente conectado: " + cs.getInetAddress().getHostAddress());  
+                // flujo de salida hacia el cliente  
+                salidaServidor = new DataOutputStream(cs.getOutputStream());  
+                mensajeServidor = "Hola desde el servidor!";  
+                // enviamos el mensaje al cliente  
+                salidaServidor.writeUTF(mensajeServidor);  
+                logger.info("Mensaje enviado al cliente: " + mensajeServidor);  
+  
+                //Se obtiene el flujo entrante desde el cliente  
+                BufferedReader entrada = new BufferedReader(new InputStreamReader(cs.getInputStream()));  
+  
+                while((mensajeServidor = entrada.readLine()) != null) //Mientras haya mensajes desde el cliente  
+                {  
+                    //Se muestra por pantalla el mensaje recibido  
+                    System.out.println(mensajeServidor);  
+                }  
+  
+                salidaServidor.close();  
+                cs.close();  
+                ss.close();  
+            } catch (IOException e) {  
+                e.printStackTrace();  
+            }  
+        }  
+    }  
+  
+  
+    private static class Cliente extends SocketsMain {  
+  
+        private static Logger logger = Logger.getLogger(Cliente.class.getName());  
+  
+        public Cliente() throws IOException {  
+            super("cliente");  
+        }  
+  
+        public void startClient() {  
+            try  {  
+                //Flujo de datos hacia el servidor  
+                salidaServidor = new DataOutputStream(cs.getOutputStream());  
+  
+                //Se enviarán dos mensajes  
+                for (int i = 0; i < 2; i++)  
+                {  
+                    //Se escribe en el servidor usando su flujo de datos  
+                    salidaServidor.writeUTF("Este es el mensaje número " + (i+1) + "\n");  
+                }  
+  
+                cs.close();//Fin de la conexión  
+  
+            } catch (IOException e) {  
+                e.printStackTrace();  
+            }  
+        }  
+    }  
+}
+```
+
+Pero entonces que es un socket I/O no bloqueante? 
+
+Cuando aqui en java nosotros hacemos : 
+```java
+public void startServer() {  
+            try {  
+                logger.info("Servidor esperando conexiones...");  
+                cs = ss.accept(); // aceptamos conexiones de los clientes | en espera  
+                logger.info("Cliente conectado: " + cs.getInetAddress().getHostAddress());
+                ...
+```
+
+Ese `accept()` es un "bloqueante" lo cual, puede manejar muchos clientes pero todos seran un hilo diferente y al final termina explotando, a diferencia de "no bloqueante" el cual no detiene o bloquea la ejecución, mas bien si no hay datos disponibles para leer la llamada regresa a esperar y corre a otro usuario.
+### Java NIO
+
+#### Selector
+#### Channel
+#### Buffer
+#### Event loop
+
+### Protocolo sobre TCP
+#### Framing
+#### Delimiatadores
+#### Problemas reales
+
+### HTTP desde cero (sobre NIO)
+
+#### Request
+#### Response
+#### Headers
+#### Content-lenght
+
+### Websocket
+#### Upgrade _HTTP_
+#### Frames
+#### Texto vs binario
+### HttpAsync
+#### Porque no usar threads
+### Reactor pattern
+### Netty / Webflux
+
+### Servers de alto rendimiento
+#### Nginx
+#### Netty
+#### Tomcat NIO
+
+### Arquitectura basada en NIO
+
+
 ---
 
 # Temas algorítmicos (si querés combinar con estructuras de datos)
@@ -229,19 +483,7 @@ Como resumen podemos decír:
 
 ---
 
-# Integración con tecnologías externas
-
-## **Conexión con bases de datos (JDBC, HikariCP)**.
-
-## **Mensajería (Kafka, RabbitMQ)**.
-
-## **Uso de Redis desde Java**.
-
-## **Integración con sistemas NoSQL (MongoDB, Cassandra)**.
-
----
-
-# Temas "Bonus" (si te animás a más)
+# Temas "Bonus"
 
 ## **Programación reactiva (Project Reactor o RxJava)**.
 

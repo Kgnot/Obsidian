@@ -1,8 +1,192 @@
 # LOGS: 
 Antes de entrar en el mundo de Springboot debemos entender sobre los logs ya que mas adelante nos será útil. (Aunque ese más adelante sera mucho mucho más adelante por lo que se puede omitir este apartado).
 
+La librería recomendada es: 
+```java
+import org.slf4j.Logger;  
+import org.slf4j.LoggerFactory;
+```
+Y su inicialización: 
 
-# Java SpringBoot
+```java
+public static final Logger logger = LoggerFactory.getLogger(InicialApplication.class);
+```
+
+La manera en que lo podmeos usar:
+```java
+@SpringBootApplication  
+public class InicialApplication {  
+  
+    public static final Logger logger = LoggerFactory.getLogger(InicialApplication.class);  
+  
+    public static void main(String[] args) {  
+        SpringApplication.run(InicialApplication.class, args);  
+  
+        logger.info("Aplicación iniciada correctamente");  
+  
+        new Thread(() -> {  
+            logger.info("Estoy en un hilo aparte");  
+        },"Estoy aqui ey").start();  
+  
+        Thread nuevoHilo = new Thread(() -> {  
+            logger.info("Otro hilo aparte");  
+        },"hilo-logger-2");  
+        nuevoHilo.start();  
+    }  
+}
+```
+Esto nos genera el siguiente resultado: 
+![[Pasted image 20260130081127.png]]
+Tal como observamos tenemos los logs de la información del hilo.
+
+Podemos modificar en `application.properties` o `application.yml` los logs de la siguiente forma: 
+```yml
+logging:
+  pattern:
+    console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+```
+![[Pasted image 20260130081250.png]]
+
+Queda más «rústico», por decirlo de alguna forma. 
+
+Una de las características es que en producción siempre toca loggear sin tanto detalle, es decir: 
+```yaml
+# dev
+logging.level.root=DEBUG
+
+# prod
+logging.level.root=INFO
+
+```
+
+Es bueno loggear el inicio y final en procesos largos.
+
+Si se quiere investigar más, el término MDC debe ser importante para su búsqueda.
+## Loki + Graphana
+
+Loki es un sistema de logs creado por Grafana Labs con una idea clave: 
+> Indexa etiquetas, no el contenido del log
+
+Entonces podemos tener una arquitectura como por ejemplo: 
+```plain text
+Spring Boot
+   ↓
+Promtail (agente)
+   ↓
+Loki (almacena logs)
+   ↓
+Grafana (consulta y visualiza)
+```
+
+la configuración minima para ello (en docker) es: 
+```yml title=docker-compose.yml
+version: "3.8"  
+  
+name: "Prueba logger Spring Boot con Loki y Grafana"  
+  
+services:  
+  app:  
+    image: eclipse-temurin:21-jre-alpine  
+    container_name: spring_app  
+    volumes:  
+      - ./build/libs/app.jar:/opt/app/app.jar  
+      - ./logs:/logs  
+    working_dir: /opt/app  
+    command: ["java", "-jar", "app.jar"]  
+    ports:  
+        - "8080:8080"  
+    depends_on:  
+      - loki  
+  loki:  
+    image: grafana/loki:2.8.2  
+    container_name: loki  
+    ports:  
+      - "3100:3100"  
+    command: -config.file=/etc/loki/local-config.yaml  
+  
+  promtail:  
+      image: grafana/promtail:2.9.0  
+      container_name: promtail  
+      volumes:  
+          - ./logs:/logs  
+          - ./promtail/config.yaml:/etc/promtail/config.yaml  
+      command: -config.file=/etc/promtail/config.yaml  
+      depends_on:  
+        - loki  
+  
+  grafana:  
+    image: grafana/grafana:10.2.0  
+    container_name: grafana  
+    ports:  
+      - "3000:3000"  
+    environment:  
+      - GF_SECURITY_ADMIN_USER=admin  
+      - GF_SECURITY_ADMIN_PASSWORD=admin  
+    depends_on:  
+      - loki
+```
+
+Necesitamos una configuración de promtail: 
+```yaml title=config.yaml
+server:  
+  http_listen_port: 9080  
+  grpc_listen_port: 0  
+  
+positions:  
+  filename: /tmp/positions.yaml  
+  
+clients:  
+  - url: http://loki:3100/loki/api/v1/push  
+  
+scrape_configs:  
+  - job_name: spring-app  
+    static_configs:  
+      - targets:  
+          - localhost  
+        labels:  
+          job: spring-app  
+          __path__: /logs/*.log
+```
+
+Aqui decimos que lee archivos, pone labels y los envía a loki.
+
+Ahora necesitamos que Spring Boot escriba logs a archivo, entonces: 
+
+```yml title=application.yml
+spring:  
+  application:  
+    name: inicial  
+  
+logging:  
+  pattern:  
+    console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"  
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"  
+  file:  
+    name: logs/spring-app.log  
+  level:  
+    root: INFO  
+    org.springframework: INFO
+
+```
+
+Y montamos ese folder en docker (no olvidemos también añadir el `jar`): 
+```yml title=docker-compose.yml
+volumes:
+  - ./logs:/logs
+  - ./build/libs/app.jar:opt/app/app.jar
+```
+***
+¡Dato importante no olvidar la estructura de carpetas de Linux: 
+![[Pasted image 20260130104152.png]]
+Por esa razón se coloca en `/opt`
+***
+Despues de realizar esas acciones, debemos ir a nuestro Grafana, agregar la conección: 
+![[Captura de pantalla 2026-01-30 100155.png]]
+Luego de eso debemos agregar un dashboard, preferiblemente, por temas prácticos, no ahondaremos en ello, pero es posible pedir un archivo `json` a la IA con el contexto de tu trabajo y que este te genere dicho `json` e importarlo, podría quedar de la siguiente forma: 
+
+![[Captura de pantalla 2026-01-30 103159.png]]
+
+# Java Spring Boot
 
 ## REST CRUD APIs:
 

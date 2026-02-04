@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  nginx:
+    image: nginx:alpine
+    container_name: nginx_proxy
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - obsidian-publish
+    restart: always
+
+  obsidian-publish:
+    image: obsidian/publish:latest
+    container_name: obsidian_publish
+    # Ports are not exposed to the host, only to the internal network (accessed via nginx)
+    volumes:
+      - ./obsidian_data:/data # Persist Obsidian Publish data locally
+      - ./obsidian_config:/config # Persist configuration files
+    environment:
+      - TZ=UTC # Adjust the timezone as needed
+      - AUTH_TOKEN=your_secure_auth_token # Set a secure authentication token
+    restart: unless-stopped
