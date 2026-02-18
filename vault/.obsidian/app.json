@@ -284,7 +284,8 @@
     "Sockets",
     "Websockets",
     "socket",
-    "socket"
+    "socket",
+    "logger"
   ],
   "newFileLocation": "root",
   "newFileFolderPath": "courses/src/images",

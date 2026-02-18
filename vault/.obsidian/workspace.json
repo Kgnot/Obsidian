@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Courses/Java Avanzado (Curso).md",
+                "file": "Concepto/Patrones de diseño (Concepto).md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Java Avanzado (Curso)"
+              "title": "Patrones de diseño (Concepto)"
             }
           }
         ]
@@ -53,7 +53,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "path:\"_Resourses/\" ",
+                "query": "",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -74,12 +74,11 @@
               "title": "Bookmarks"
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "horizontal",
-    "width": 553.5
+    "width": 430.5
   },
   "right": {
     "id": "ca31238cd924bf6a",
@@ -153,13 +152,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Courses/Java Avanzado (Curso).md",
+                "file": "Concepto/Patrones de diseño (Concepto).md",
                 "followCursor": false,
                 "showSearch": true,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of Java Avanzado (Curso)"
+              "title": "Outline of Patrones de diseño (Concepto)"
             }
           },
           {
@@ -206,13 +205,13 @@
       "copilot:Open Copilot Chat": false
     }
   },
-  "active": "1b92467000d0ab25",
+  "active": "e7a7b303c61786dc",
   "lastOpenFiles": [
-    "Courses/images/Pasted image 20260204085822.png",
-    "Courses/Java SpringBoot (Curso).md",
-    "Courses/Java semi-avanzado (Curso).md",
-    "Courses/Java Avanzado (Curso).md",
     "_Resourses/Home/Home.md",
+    "Courses/Java Avanzado (Curso).md",
+    "Courses/Java semi-avanzado (Curso).md",
+    "Courses/Java SpringBoot (Curso).md",
+    "Courses/images/Pasted image 20260204085822.png",
     "Courses/images/Captura de pantalla 2026-01-30 103159.png",
     "Courses/images/Captura de pantalla 2026-01-30 100155.png",
     "Courses/images/Pasted image 20260130104152.png",
@@ -227,7 +226,6 @@
     "copilot/copilot-conversations/mejora_este_texto_Esta_es_una_dependencia_que_tiene_expo@20260127_144915.md",
     "Courses/images/Pasted image 20260127141704.png",
     "Courses/images/Pasted image 20260127135810.png",
-    "Courses/images/Pasted image 20260127102919.png",
     "Courses/NestJS (Curso).md",
     "Concepto/Patrones de diseño (Concepto).md",
     "Courses/Mosquitto (Curso).md",

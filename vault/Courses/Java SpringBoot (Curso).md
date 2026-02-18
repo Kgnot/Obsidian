@@ -186,6 +186,45 @@ Luego de eso debemos agregar un dashboard, preferiblemente, por temas prácticos
 
 ![[Captura de pantalla 2026-01-30 103159.png]]
 
+## MDC: 
+
+MDC nos da contexto sobre un logger, este contiene pues, un mapa el cual podemos añadir, imaginemos que estamos en un proyecto de cero con gradle, debemos añadir las siguientes dependencias: 
+```gradle
+implementation 'org.slf4j:slf4j-api:2.0.17'  
+implementation 'ch.qos.logback:logback-classic:1.4.11'
+```
+Luego en una clase usamos el factory: 
+```java
+private static final Logger logger = LoggerFactory.getLogger(MainPrueba.class);
+```
+
+Y a la hora de usar hacemos por ejemplo:
+```java
+logger.info("Obtuvimos:{}", buffer.get());  
+MDC.put("transactionId", "12345");  
+buffer.put("H".getBytes());  
+buffer.put("o".getBytes());  
+logger.info("Obtuvimos:{}", buffer.get(1)); // Letra H en ascii  
+MDC.clear();
+```
+
+Como vemos esta puesto un `MDC` este nos ayuda para generar ese contexto, entonces, para verlo necesitamos un último archivo en resources: 
+```xml
+<configuration>  
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">  
+        <encoder>            <!-- Patron: Fecha (Hora) [Hilo] Nivel Logger - Mensaje -->  
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %X{transactionId} %highlight(%-5level) %cyan(%logger{36}) - %msg%n</pattern>  
+        </encoder>    </appender>  
+    <root level="INFO">  
+        <appender-ref ref="CONSOLE" />  
+    </root>
+</configuration>
+```
+
+Con esto podemos poner la "key" del mapa que construimos con MDC. Al final queda de la siguiente forma: 
+
+
+
 # Java Spring Boot
 
 ## REST CRUD APIs:

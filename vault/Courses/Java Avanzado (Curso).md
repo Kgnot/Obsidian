@@ -125,16 +125,6 @@ Como resumen podemos decír:
 
 ---
 
-# Arquitectura y organización
-
-## **Arquitectura Hexagonal**.
-
-## **Domain Driven Design (DDD)**.
-
-## **Microservicios con Spring Boot** (aunque es otro mundo, suma mucho).
-
----
-
 # Concurrencia avanzada
 
 ## **CompletableFuture y combinaciones (thenCombine, allOf, etc)**.
@@ -437,9 +427,358 @@ public void startServer() {
 Ese `accept()` es un "bloqueante" lo cual, puede manejar muchos clientes pero todos seran un hilo diferente y al final termina explotando, a diferencia de "no bloqueante" el cual no detiene o bloquea la ejecución, mas bien si no hay datos disponibles para leer la llamada regresa a esperar y corre a otro usuario.
 ### Java NIO
 
-#### Selector
-#### Channel
+Java NIO o (New I/O) es el modelo moderno de entrada/salida en Java, pensando para alto rendimiento, concurrencia eficiente y I/O no bloqueante. Es clave cuando se trabaja con servidores, sockets, streams de red o sistemas que manejen muchas conexiones a la vez. 
+
 #### Buffer
+En java NIO, un Buffer es una estructura de memoria controlada por la JVM que actúa como zona intermedia entre:
+- una fuente/destino de datos (archivo, socket, red, etc.)
+- y tu código Java
+Formalmente encontramos: 
+>Un `Buffer` es un contenedor tipado de datos, con estado interno, diseñado para operaciones I/O de alto rendimiento
+
+No solo es un array, es un objeto con estado.
+***
+##### Aqui nos preguntamos entonces para qué existen los buffers?
+**La problemática sin buffer:**
+El hardware **no trabaja al ritmo de tu código java**
+- El SO lee bloques grandes
+- La red entrega datos en paquetes
+- El CPU es mucho más rápido que el I/O
+Si intentaras leer byte por byte directamente:
+- Muchísimas llamadas al sistema
+- Context switching costoso (=={pink}proceso en el que la CPU de un ordenador detiene una tarea, guarda su estado ([registros, contador de programa](https://www.google.com/search?client=firefox-b-d&q=registros%2C+contador+de+programa&ved=2ahUKEwj1uZ_dl8GSAxVGQzABHaeMCSEQgK4QegQIARAD)) y carga el estado de una nueva tarea para permitir la [multitarea](https://www.google.com/search?client=firefox-b-d&q=multitarea&ved=2ahUKEwj1uZ_dl8GSAxVGQzABHaeMCSEQgK4QegQIARAE)==.)
+- Rendimiento pésimo
+
+La solución es usar una zona intermedia donde 
+- El sistema escribe grandes bloques
+- Tu aplicación procesa a su ritmo
+
+```text
+Vamos a tocar un tema y es ejemplificar mucho mejor lo que se hizo arriba
+Hagamos una analogía, imaginemos: 
+
+Hardware -> Camion cisterna que puede descargar 1000 litros de golpe
+Código java -> persona que necesita un vaso de agua a la vez
+
+Sin buffer:
+- Pides el camion: "Dame un vaso de agua"
+- El camionero se baja y nos llena el vaso
+- El minuto dices: "Necesito otro vaso de agua "
+- Vuelve el camion repleto y repite el proceso
+- !Esto es absudro y costoso, y lento!
+  
+Cuando usamos buffer:
+- El camion descarga los 1000 litros en un tanque (buffer)
+- Tu tomas vasos del tanque cuando necesites
+- Cuando el tanque se vacía, llamas al camión otra vez
+- Esto es más eficiente y rápido.
+  
+  
+En un mundo sin buffers: 
+
+Tu código:  "Dame el byte 1"
+Disco:      [Lee 4096 bytes, te da el 1]
+Tu código:  "Dame el byte 2"  
+Disco:      [Lee 4096 bytes OTRA VEZ, te da el 2]
+Tu código:  "Dame el byte 3"
+Disco:      [Lee 4096 bytes OTRA VEZ...]
+
+En uno con buffers: 
+
+Tu código:  "Dame 8192 bytes"
+Disco:      [Lee 2 bloques de 4096, llena el buffer]
+Tu código:  Procesa bytes 1..8192 de su memoria RAM
+            (500,000 veces más rápido)
+```
+
+##### **¿Qué tipos de buffers hay?:**
+
+`Buffer` es una clase abstracta, cuyas implementaciones concretas tenemos: 
+- `ByteBuffer`
+- `CharBuffer`
+- `IntBuffer`
+- `LongBuffer`
+- etc.
+En I/O red y archivos:
+
+>ByteBuffer el 99% de los casos
+
+##### Anatomía de un buffer: 
+
+1. Capacity
+	-  Tamaño total del buffer
+	- Fijo al crearlo
+```java
+public class MainPrueba {  
+  
+    private static final Logger logger = Logger.getLogger(MainPrueba.class.getName());  
+  
+    public static void main(String[] args) {  
+        ByteBuffer buffer = ByteBuffer.allocate(10);  
+//        buffer.capacity();  
+        logger.info("Capacidad del ByteBuffer: " + buffer.capacity());  
+    }  
+}
+```
+
+2. Position:
+	- Índice actual
+	- Indica dónde se va a leer o escribir
+		inicialmente empieza en 0 y se mueve automaticamente con cada `put()` o `get()` . Un programa que podemos probar es: 
+```java 
+public class MainPrueba {  
+    private static final Logger logger = LoggerFactory.getLogger(MainPrueba.class);  
+  
+    public static void main(String[] args) {  
+        ByteBuffer buffer = ByteBuffer.allocate(10);  
+//        buffer.capacity();  
+        logger.info("Capacidad del ByteBuffer: {}", buffer.capacity());  
+        logger.info("Obtuvimos:{}", buffer.get());  
+        MDC.put("transactionId", "12345");  
+        buffer.put("H".getBytes());  
+        buffer.put("o".getBytes());  
+        logger.info("Obtuvimos:{}", (char) buffer.get()); // Letra H en ascii  
+        MDC.clear();  
+  
+  
+        while(buffer.hasRemaining()) {  
+            logger.info("Posición actual: {}", buffer.position());  
+            logger.info("Límite actual: {}", buffer.limit());  
+            logger.info("Capacidad actual: {}", buffer.capacity());  
+            buffer.put((byte) 'A');  
+        }  
+    }  
+}
+```
+Con eso podemos observar que tanto `put` como `get` mandan el puntero a la derecha, podemos jugar con la línea 12, el `buffer.get()` si lo quitamos una casilla atrás y así
+3. Limit
+	En el código anterior observamos ese limite, nos marca:
+- El límite lógico
+- Hasta dónde se puede leer o escribir
+3. Mark (opcional)
+- Marca una posición para volver después
+- Poco usada, pero existe
+
+##### Estados del Buffer
+
+Un buffer no sabe solo si está leyendo o escribiendo, el estado lo definimos nosotros
+
+**Estado 1: Escritura:**
+Se usa cuando se recibe datos:
+```java
+buffer.put(byte);
+```
+**Estado 2: Lectura**
+Usado cuando se procesa datos desde el buffer: 
+```java
+buffer.flip() // Esto básicamente lo que hace es cuando terminas de escribir y ahora vas a leer, entonces reinicia todo
+
+//La lógica sería: 
+ByteBuffer buffer = ByteBuffer.allocate(1024);
+
+// 1. escribir datos en el buffer
+channel.read(buffer);
+
+// 2. cambiar a modo lectura
+buffer.flip();
+
+// 3. procesar datos
+while (buffer.hasRemaining()) {
+    byte b = buffer.get();
+}
+
+// 4. limpiar para reutilizar
+buffer.clear();
+
+```
+
+Hay Buffers directos y no directos
+##### Buffers directos vs Buffers no directos
+
+Heap buffer:
+```java
+ByteBuffer.allocate(1024);
+```
+- Vive en el heap
+- Más barato de crear
+- Copia extra ente JVM  SO
+
+Direct Buffer:
+```java
+ByteBuffer.allocateDirect(1024);
+```
+- Vive fuera del heap
+- Menos copias
+- Más rapido en I/O
+- Más caro de crear
+El uso típico de cada uno:
+- Heap: Lógica interna
+- Direct: Red, archivos grandes, servidores
+
+#### Selector
+Para selector vamos a enteder varios puntos iniciales.
+
+¿Qué problema resuelve selector?
+Imaginemos un servidor TCP clásico (java.io):
+- 1 conexion = 1 hilo
+- 1000 conexiones = 1000 hilos
+Esto tiene problemas como: 
+- Consumo brutal de memoria
+- Context switching constante
+- El 90% del tiempo los hilos estan esperando I/O
+
+Este modelo no escala.
+
+##### La idea fundamental e selector
+Un selector permite que un solo hilo supervise muchos canales y sea notificado solo cuando alguno puede: 
+- aceptar una conexión
+- leer datos
+- escribir datos
+Su definición formal:
+> Un `Selector` es un multiplexor de eventos de I/O que monitorea múltiples `SelectableChannel` y notifica cuando alguno está listo para una operación específica.
+
+Pero y ¿Qué no hace?
+- No lee datos
+- No escribe datos
+- No procesa lógica
+- No gestiona buffers
+El selector solo notifica.
+
+##### Requisitos para usar un selector
+No cualquier cosa se puede registrar
+
+Codiciones obligatorias: 
+
+1. El channel debe ser `SelectableChannel`
+2. El channel debe estar en **modo no bloqueante**
+3. Debe registrarse con un interés específico.
+Por ejemplo: 
+```java
+SocketChannel channel = socketChannel.open();
+channel.configureBlocking(false);
+```
+
+¿Cómo se registra?:
+```java
+Selector selector = Selector.open();
+channel.register(selector, SelectionKey.OP_READ);
+```
+
+Hasta aqui debemos preguntarnos ¿qué es el `SelectionKey`? Pues es un puente entre el evento que ocurre y el canal que lo maneja. Es como un contrato.
+
+Cada uno de los registros genera un `SelectionKey`
+
+La Key representa: 
+- El channel
+- El selector
+- Las operaciones de interes
+- el estado del canal
+Las operaciones posibles: 
+- OP_ACCEPT
+- OP_CONNECT
+- OP_READ
+- OP_WRITE
+
+Por ejemplo: 
+```java
+key.isReadable();
+key.isWritable();
+key.isAcceptable();
+key.isConnectable();
+```
+
+Y el ciclo central del selector, el corazón de NIO:
+```java
+while(true){
+	selector.select();
+	
+	Set<SelectionKey> keys = selector.selectedKeys();
+	Iterator<SelectionKey> it = keys.iterator();
+	
+	while(it.hasNext()){
+		SelectionKey key = it.next();
+		it.remove();
+		
+		if (key.isReadable()) {
+            // leer
+        }
+        if (key.isWritable()) {
+            // escribir
+        }
+	
+	}
+}
+```
+ Qué hace `select()`
+- Bloquea el hilo
+- Espera hasta que **al menos un canal esté listo**
+- Devuelve cuántos canales cambiaron de estado    
+
+No consume CPU mientras espera.
+> OP_WRITE: el más peligroso
+>Detalle importante:
+>- Un socket suele estar siempre listo para escribir
+>- Registrar OP_WRITE sin control causa loops infinitos
+>Patrón correcto:
+>- Registrar OP_WRITE solo cuando tienes datos pendientes
+>- Eliminarlo cuando terminas de escribir
+>`key.interestOps(SelectionKey.OP_READ);`
+
+Un solo hilo con Selector puede manejar:
+- miles de conexiones TCP
+- sin bloquear
+- con consumo estable
+
+Esto es la base de:
+- Netty
+- WebFlux
+- Undertow
+- Kafka
+- Redis (conceptualmente)
+#### Channel
+En el apartado anterior mencionamos a los `channel` pero no hemos definido que son, bueno. Hasta ahora tenemos
+- Buffer = memoria
+- Selector = notificación
+##### Definición formal
+Un `Channel` es una abstracción bidireccional de una fuente o destino de datos capaz de trasferir datos hacia o desde uno o más buffers
+
+Es decir: 
+- Representa una conexión con algo externo
+- Puede ser un archivo, socket, UDP, etc.
+- Siempre intercambia datos mediante buffers
+Un channel solo mueve los datos.
+¿Pero entonces qué diferencia un `Channel` de un `Stream`?
+
+Un Stream (Java.io)
+- Unidireccionales
+- Bloqueantes
+- Ocultan buffers
+- Orientado a flujos
+Un Channel (Java.nio):
+- Bidireccionales
+- Pueden ser no bloqueantes
+- Buffers explícitos
+- Orientado a bloques
+
+##### Tipos principales de channels: 
+
+**File I/O**
+- `FileChannel`
+**TCP**
+- `SocketChannel`
+- `ServerSocketChannel`
+**UDP**
+- `DatagramChannel`
+**Async (NIO.2)**
+- `AsyncrhonousSocketChannel`
+
+Para servidores: 
+> `ServerSocketChannel` + `SocketChannel` son el núcleo
+
+Vamos a colocar un ejemplo general de Java NIO: 
+```java
+
+```
 #### Event loop
 
 ### Protocolo sobre TCP
