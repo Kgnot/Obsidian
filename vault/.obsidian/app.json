@@ -285,7 +285,15 @@
     "Websockets",
     "socket",
     "socket",
-    "logger"
+    "logger",
+    "casteamos",
+    "padding",
+    "Padding",
+    "Structs",
+    "structs",
+    "Bitfields",
+    "struct",
+    "LIFO"
   ],
   "newFileLocation": "root",
   "newFileFolderPath": "courses/src/images",

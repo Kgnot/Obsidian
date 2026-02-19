@@ -9,6 +9,9 @@ Bienvenido a Obsidiana.
 - [[QT con C++ (Curso)]]
 - [[Git (Curso)]]
 - [[Docker (Curso)]]
+Sistemas embebidos
+- [[Sistemas Embebidos puro C (Curso)]]
+-  [[C (Curso)]]
 - [[ESP32 (intento de guía)]]
 Bases de datos: 
 - [[CDC - Bases de datos - Debezium - Eventos (Curso)]]
