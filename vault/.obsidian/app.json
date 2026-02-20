@@ -297,7 +297,10 @@
     "o",
     "ADC",
     "RC",
-    "shifting"
+    "shifting",
+    "ARM",
+    "cortex",
+    " linke"
   ],
   "newFileLocation": "root",
   "newFileFolderPath": "courses/src/images",

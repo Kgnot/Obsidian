@@ -312,7 +312,7 @@ typedef struct __attribute__((packed)) {
 // Array para buffer DMA
 LecturaSensor buffer[128];
 ```
-## Const y Volatile
+## Const, Volatile, Extern, Static
 
 Cuando estamos en C hay dos tipos de modificadores o palabras clave que necesitamos conocer: `const`,`volatile`.
 
@@ -396,6 +396,80 @@ volatile const int *registro_entrada = (volatile const int*)0xFFFF1000;
 // - const: porque yo no debo escribir en él
 // - puntero a int: porque es un registro de 32 bits
 ```
+
+### Extern
+
+Siendo breves extern indica que una variable o función está definida en otro archivo. Sirve para compartir símbolos entre múltiples `.c`.
+
+Un ejemplo de esto es:
+```C fold=main.c
+#include <stdio.h>
+#include <stdint.h>
+
+extern uint16_t system_clock; // aqui decimos que lo definimos en otro archivo
+
+
+int main(){
+	printf("Extern system_clock:  %u",system_clock);
+	
+	return 0;
+}
+
+```
+```c fold=config.c
+#include <stdint.h>  
+  
+uint16_t system_clock = 16000u;
+```
+
+Esto funciona perfectamente, ahora si agregamos otra clase con esa misma palabra, pues el linker falla: 
+```text
+/home/kgnot/.local/share/JetBrains/Toolbox/apps/clion/bin/cmake/linux/x64/bin/cmake --build /home/kgnot/CLionProjects/practica/cmake-build-debug --target practica -j 10
+[2/2] Linking C executable practica
+FAILED: practica 
+: && /usr/bin/cc -g -Wl,--dependency-file=CMakeFiles/practica.dir/link.d CMakeFiles/practica.dir/main.c.o CMakeFiles/practica.dir/config.c.o CMakeFiles/practica.dir/config2.c.o -o practica   && :
+/usr/bin/ld: CMakeFiles/practica.dir/config2.c.o:/home/kgnot/CLionProjects/practica/config2.c:3: definiciones múltiples de `system_clock'; CMakeFiles/practica.dir/config.c.o:/home/kgnot/CLionProjects/practica/config.c:3: primero se definió aquí
+collect2: error: ld returned 1 exit status
+```
+Cómo vemos, es definiciones múltiples, y nos dice donde se definió primero.
+
+
+### Static
+El estatic cambia lo que es el alcance (linkage).
+
+Tiene dos usos distintos:
+
+#### static en variables globales:
+```c
+static utin32_t contador;
+```
+Significa: 
+> Esta variable solo existe dentro de este archivo `.c`
+
+No se puede usar extern desde otro archivo.
+Se llama internal linkage, y esto es importante para encapsular módulos, evitar conflictos en nombres y reducir errores de linking. 
+
+#### static dentro de una función: 
+```C
+void funcion(void)
+{
+    static uint32_t contador = 0;
+    contador++;
+}
+```
+Aquí significa: 
+- La variable mantiene su valor entre llamadas
+- Solo es visible dentro de la función
+Es almacenamiento estático, no está en stack
+
+| Tipo                  | Vida              | Alcance        |
+| --------------------- | ----------------- | -------------- |
+| Variable local normal | stack             | solo función   |
+| `static` local        | toda la ejecución | solo función   |
+| global normal         | toda la ejecución | visible extern |
+| global `static`       | toda la ejecución | solo archivo   |
+
+
 ## Typedef: 
 
 Una declaración `typedef` es una declaración con `typedef` como clase de almacenamiento. El declarador se convierte en un nuevo tipo. Puede utilizar declaraciones `typedef` para construir nombres más cortos o más significativos para tipos ya definidos por C o para tipos que haya declarado. Los nombres de `typedef` permiten encapsular detalles de la implementación que pueden cambiar.
@@ -1011,6 +1085,48 @@ area = PI * r * r;           // → area = 3.14159 * r * r;
 dist = CUADRADO(5);          // → dist = ((5)*(5));
 ```
 
+En sistemas embebidos modernos, se prefiere:
+- `#define` → solo para macros reales
+- `const` → para constantes
+
+Y los `#define` globales son mejor colocarlos en un archivo `.h`.
+
+```c fold=config.h
+#ifndef CONFIG_H
+#define CONFIG_H
+
+#define TAM_VECTOR 30000U
+#define MAX_VALUE  7000U
+#define SYSTEM_CLOCK 16000000U
+
+#endif
+```
+
+Luego usamos solamente `#include "config.h"` en los archivos correspondientes. 
+
+*** 
+Cómo una aclaración importante es: 
+![[Pasted image 20260220082053.png]]
+
+Esto nos define a nosotros en algunos preprocesadores como MISRA-C que se usa en microcontroladores ARM (generalmente). Su uso es el siguiente: 
+
+```c
+typedef struct
+{
+  __I  uint32_t IDR;   // Input Data Register (solo lectura)
+  __O  uint32_t BSRR;  // Bit Set Reset Register (solo escritura)
+  __IO uint32_t ODR;   // Output Data Register (R/W)
+} GPIO_TypeDef;
+```
+Eso se transforma en:
+```c
+typedef struct
+{
+  volatile const uint32_t IDR;
+  volatile uint32_t BSRR;
+  volatile uint32_t ODR;
+} GPIO_TypeDef;
+```
 
 2. Condicionales
 Hay condicionales de compilación: 
@@ -1053,10 +1169,44 @@ typedef struct { int x; } Sensor;
 
 para más documentación:  https://www.ibm.com/docs/es/i/7.5.0?topic=reference-preprocessor-directives
 
+## Tablas look-up (LUT)
+
+Una **look-up table (LUT)** es una técnica donde reemplazas un cálculo por una **tabla precalculada en memoria**.
+
+En vez de calcular algo cada vez, haces:
+
+```C
+resultado = tabla[indice];
+```
+
+Supón que quieres `sin(x)` en un micro sin FPU.
+
+Calcular seno:
+- es costoso
+- usa `float`
+- aumenta tamaño de firmware
+Alternativa:
+```C
+static const uint16_t tabla_seno[360] = {
+    0, 114, 229, ...
+};
+```
+Luego 
+```c
+valor = tabla_seno[angulo];
+```
 ## Concurrencia
 
 -- Voy a terminar aquí por el tema de estudiar el Sistema embebido a totalidad. 
 
 ## Multi-file projects, makefiles, GCC
+
+## Linkers: 
+El **linker** (enlazador) es la herramienta que une todos los archivos compilados y genera el ejecutable final.
+
+En C el proceso ocurre en 3 etapas:
+1. **Preprocesador** → expande `#include`, `#define`
+2. **Compilador** → convierte cada `.c` en un `.o` (código objeto)
+3. **Linker** → une todos los `.o` y resuelve referencias externas
 # C para Embedded: Fundamentos Sólidos.
 

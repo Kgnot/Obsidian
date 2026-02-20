@@ -229,8 +229,23 @@ Eso no lo abstrae el microcontrolador automáticamente. Debemos de revisar
 Luiego revisaremos esot en código, por ahora mucho texto jaja
 # 2. Arquitectura ARM Cortex-M
 
+Para empezar, vamos a empezar con que es la arquitectura ARM, y esta es un diseño de procesadores basado en la filosofía RISC (REduced Instruction Set Computer). A diferencia de la arquitectura x86 que es común en PC's de intel y AMD, ARM se centra en la eficiencia energética y la simplicidad, lo que permite que dispositivos funcionen con menos calor y consuman menos batería. 
+- **Filosofía RISC:** Utiliza instrucciones simples que se ejecutan en pocos ciclos de reloj, lo que agiliza el procesamiento.
+- **Bajo consumo:** Es ideal para dispositivos móviles, ya que requiere poca energía y refrigeración en comparación con los diseños tradicionales.
+- **Modelo de licenciamiento:** La empresa [Arm Holdings](https://www.arm.com/architecture) no fabrica los chips físicos, sino que vende los "planos" (licencias) a empresas como **Apple, Qualcomm, Samsung y Huawei**, quienes personalizan el diseño para sus propios productos.
 
+| Característica    | ARM (RISC)                     | x86 (CISC)                             |
+| ----------------- | ------------------------------ | -------------------------------------- |
+| **Instrucciones** | Simples y de tamaño fijo       | Complejas y de tamaño variable         |
+| **Consumo**       | Muy bajo (ideal para baterías) | Elevado (requiere más refrigeración)   |
+| **Uso común**     | Móviles, IoT, Laptops modernas | PCs de escritorio, servidores potentes |
+Y ahora ¿qué es **cortex**? Esta es la marca bajo la cual la empresa ARM comercializa sus diseños de procesadores listos para ser usados, se divide en 4 familias: 
+- **Cortex-A (Application):** Máxima potencia para apps y sistemas operativos (celulares y laptops).
+- **Cortex-R (Real-time):** Respuesta instantánea y crítica (frenos de autos y módems).
+- **Cortex-M (Microcontroller):** Ultra bajo consumo para tareas simples (sensores y relojes).
+- **Cortex-X (eXtreme):** Máximo rendimiento puro, por encima de la serie A (gama alta premium).
 ## Arquitectura ARM Cortex-M
+ 
 
 ## Registros CPU (R0–R15)
 
@@ -534,6 +549,10 @@ https://www.youtube.com/watch?v=_oZTNCZbQ_M
 | APB2         | Bus de periféricos rápidos (ADC, Timers avanzados)                                                                                             |
 | APB1         | Bus periféricos lentos (I2C, UART, Timers básicos)                                                                                             |
 | UART         | Comunicación serial simple y asíncrono de solo dos cables (tx/rx) \| sin timers como I2C                                                       |
+| FPU          | Unidad de hardware para procesar números decimales velozmente                                                                                  |
+| HAL          | Libreria de alto nivel para programar periféricos                                                                                              |
+| CMSIS        | Estándar de bajo nivel para procesadores ARM.                                                                                                  |
+| firmware     | programa que se ejecuta directamente sobre el hardware de un dispositivo embebido. \| software de bajo nivel que controla el hardware.         |
 ***
 
 Detalles importantes
@@ -547,8 +566,8 @@ Primero hablemos de un proyecto generico, porque necesitamos entender cosas, pue
 Esto es una arquitectura con separación de seguridad que nosotros obtenemos al generar el código de la placa que deseamos (STM32N657X0HxQ).
 
 Primero: 
-# Partes de un proyecto:
-## .IOC
+## Partes de un proyecto:
+### .IOC
 Este es el archivo de confituración de STM32CubeIDE / CubeMX
 
 Ahi está: 
@@ -560,8 +579,8 @@ Ahi está:
 - Particionamiento Secure / NonSecure
 Regla: 
  NO EDITAR A MANO, EDITAR DESDE EL EDITOR GRAFICO
-### Que es TrustZone?
-Es una tecnologia de segurodad que divide el microcontrolador en dos mundos de ejecución aislados por hardware: 
+#### Que es TrustZone?
+Es una tecnologia de seguridad que divide el microcontrolador en dos mundos de ejecución aislados por hardware: 
 ```text
 Secure World
 Non-Secure world
@@ -569,12 +588,154 @@ Non-Secure world
 Esto no es software, esto es una separación implementada en arquitectura CPU (Cortex-M)
 Y según el datasheets: 
 ![[Pasted image 20260219215120.png]]
-## Drivers
+### Drivers
+Aquí vive:
+- HAL
+- CMSIS
+- Archivos del fabricante
 
+Aquí nada se toca ya que es código generado o del fabricante
+### FSBL
+Esto significa First Stage Boot Loader
+
+En STM32N6 con TrustZone: 
+```text
+ROM interna →  
+FSBL →  (main)
+Secure Application → (main)  
+NonSecure Application (main)
+```
+El FSBL:
+- Inicializa memoria
+- Configura seguridad
+- Define regiones Secure / NonSecure
+- Salta a la aplicación Secure
+
+Tampoco se debe tocar
+
+### AppliSecure
+
+Esta es la aplicación que corre en el mundo secure.
+
+Aquí vive: 
+- Código crítico
+- Claves
+- Configuración sensible
+- Control de acceso a periféricos protegidos
+Este código: 
+- Puede llamar a funcionas NonSecure
+- Decide qué expone.
+### AppliNonSecure
+
+Esta es la aplicación normal.
+Aqui vive: 
+- La lógica general
+- Comunicación
+- UI
+- Sensores comunes
+No puede acceder directamente a:
+- Recursos marcados como Secure
+- Memoria Secure
+Al intentar hacerlo genera `HardFault.`
+
+### Secure_nsclib:
+
+NSC = Non Secure Callable
+
+Es una libería puente.
+
+Sirve para: 
+
+Permitir que el mundo NonSecure llame funciones Secure.
+Por ejemplo: 
+Secure: 
+```c
+__attribute__((cmse_nonsecure_entry))
+void Secure_DoSomething(void)
+{
+   // código protegido
+}
+```
+Eso expone vía NSC. Sin esta liberaría no hay comunicación controlada entre mundos
+
+### Resumen en forma de tabla: 
+|Carpeta|Nivel de peligro|¿Tocar?|
+|---|---|---|
+|Drivers|Alto|No|
+|FSBL|Muy alto|No|
+|Secure_nsclib|Medio|Solo si sabes|
+|AppliSecure|Medio|Si usas TrustZone|
+|AppliNonSecure|Bajo|Sí|
+|.ioc|Seguro|Desde GUI|
+## Cómo corre El programa?
+
+Tal como vimos existe dos main:
+![[Pasted image 20260220100354.png]]
+
+El sistema siempre arranca en modo Secure. 
+Segun la documentación podemos decir: 
+El sistema arranca en el `main` de la aplicación segura, la cual prepara el entorno de seguridad y luego "lanza" la aplicación no segura, que comienza su propia ejecución desde su respectivo `main`
+
+La secuencia real es: 
+```text
+Reset →
+Vector table Secure →
+main() de AppliSecure →
+configuración →
+salto a NonSecure →
+main() de AppliNonSecure
+```
+Entonces:
+- El `main()` de **AppliSecure es el primero y obligatorio**.
+- El `main()` de **AppliNonSecure solo corre si el Secure lo permite**.
+No hay ambigüedad.
+
+Nosotros vemos en el código lo siguiente: 
+```c fold=main.h
+#include "secure_nsc.h" /* For export Non-secure callable APIs */
+```
+Luego vemos 
+```c fold=main.c
+static void NonSecure_Init(void)
+{
+  funcptr_NS NonSecure_ResetHandler;
+
+  SCB_NS->VTOR = VTOR_TABLE_NS_START_ADDR;
+
+  /* Set non-secure main stack (MSP_NS) */
+  __TZ_set_MSP_NS((*(uint32_t *)VTOR_TABLE_NS_START_ADDR));
+
+  /* Get non-secure reset handler */
+  NonSecure_ResetHandler = (funcptr_NS)(*((uint32_t *)((VTOR_TABLE_NS_START_ADDR) + 4U)));
+
+  /* Start non-secure state software application */
+  NonSecure_ResetHandler();
+}
+```
+Aqui observamos como se inicializa desde el Secure el NonSecure, y nuestro ayudante es el archivo en Secure_nsclib: 
+```c fold=secure_nsc.h
+#ifndef SECURE_NSC_H
+#define SECURE_NSC_H
+
+/* Includes ------------------------------------------------------------------*/
+#include <stdint.h>
+
+typedef enum
+{
+SECURE_FAULT_CB_ID     = 0x00U, /*!< System secure fault callback ID */
+  IAC_ERROR_CB_ID       = 0x01U  /*!< Illegal access secure error callback ID */
+} SECURE_CallbackIDTypeDef;
+/* Exported constants --------------------------------------------------------*/
+/* Exported macro ------------------------------------------------------------*/
+/* Exported functions ------------------------------------------------------- */
+void SECURE_RegisterCallback(SECURE_CallbackIDTypeDef CallbackId, void *func);
+
+```
 
 
 # Bibliografia de STM32N6...:
 
 - [Datasheet](https://www.st.com/resource/en/datasheet/stm32n657a0.pdf)
 - [Manual de programación](https://www.st.com/resource/en/programming_manual/pm0273-stm32-cortexm55-mcus-programming-manual-stmicroelectronics.pdf)
+- [ARM-Cortex-M (pg 109 -> )](https://www.disca.upv.es/aperles/arm_cortex_m3/llibre/libro-ARM-Cortex-M.pdf)
 - 
