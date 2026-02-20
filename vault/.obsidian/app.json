@@ -293,7 +293,11 @@
     "structs",
     "Bitfields",
     "struct",
-    "LIFO"
+    "LIFO",
+    "o",
+    "ADC",
+    "RC",
+    "shifting"
   ],
   "newFileLocation": "root",
   "newFileFolderPath": "courses/src/images",

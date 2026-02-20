@@ -788,7 +788,7 @@ void str_free(String *s) { free(s->data); s->data = NULL; }
 
 ### Bitwise - flags
 
-El bitwise es ...
+El bitwise es la forma en que hacemos operaciones a nivel de bits.
 Imaginemos que queremos representar esto: 
 ```C
 struct {
@@ -798,7 +798,7 @@ struct {
 } status;
 
 ```
-Pero ahora suando un entero normal y operaciones bitwise> 
+Pero ahora usando un entero normal y operaciones bitwise> 
 Primero debemos definir el registro
 ```C
 #inlcude <stdint.h>
@@ -945,8 +945,8 @@ SECTIONS {
 ```
 
 
-### Gestion de memoria en STM32: 
-Lo mejor que se puede hacer es evitar las variables dinamicas, evitar malloc/free. 
+### Gestión de memoria en STM32: 
+Lo mejor que se puede hacer es evitar las variables dinámicas, evitar malloc/free. 
 ```C
 // En bare metal, malloc usa el heap de newlib
 // Problemas: fragmentación, no determinista, puede fallar silenciosamente
@@ -997,7 +997,7 @@ El preprocesador es un programa que modifica tu código FUERA del lenguaje C ant
 #include <stdio.h> // el sistem busca en /usr/include
 #include "miarchivo.h" // busca en el directorio actual
 ```
-Esto copia y pega el archivo en tu codigo. 
+Esto copia y pega el archivo en tu código. 
 
 1. `#define`- Macros y constantes
 ```C 
