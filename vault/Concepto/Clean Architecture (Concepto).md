@@ -1,4 +1,4 @@
-![[1_gNMlCdPkghf_2F8v3MGtqA.png]]
+![1_gNMlCdPkghf_2F8v3MGtqA.png](images/1_gNMlCdPkghf_2F8v3MGtqA.png)
 
 ---
 A lo largo de este escrito voy a recopilar información de diferentes lados incluyendo del mismo libro del cual hace referencia
@@ -102,7 +102,7 @@ global.json
 Usa un ejemplo en C# que se ve en [GitHub](https://github.com/EceE91/CleanArchitecture)
 
 # Paginas web: 
-![[clean_architecture.png]]
+![clean_architecture.png](images/clean_architecture.png)
 [Web](https://www.milanjovanovic.tech/blog/clean-architecture-folder-structure)
 Aquí nos muestra otra forma en la que se ve la arquitectura limpia o Clean Architecture. Y este cuadra más con lo planteado en el apartado de Medium. Aquí nos comenta: 
 ## Capa de Dominio:

@@ -36,7 +36,7 @@ public class InicialApplication {
 }
 ```
 Esto nos genera el siguiente resultado: 
-![[Pasted image 20260130081127.png]]
+![Pasted image 20260130081127.png](images/Pasted%20image%2020260130081127.png)
 Tal como observamos tenemos los logs de la información del hilo.
 
 Podemos modificar en `application.properties` o `application.yml` los logs de la siguiente forma: 
@@ -45,7 +45,7 @@ logging:
   pattern:
     console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
 ```
-![[Pasted image 20260130081250.png]]
+![Pasted image 20260130081250.png](images/Pasted%20image%2020260130081250.png)
 
 Queda más «rústico», por decirlo de alguna forma. 
 
@@ -177,14 +177,14 @@ volumes:
 ```
 ***
 ¡Dato importante no olvidar la estructura de carpetas de Linux: 
-![[Pasted image 20260130104152.png]]
+![Pasted image 20260130104152.png](images/Pasted%20image%2020260130104152.png)
 Por esa razón se coloca en `/opt`
 ***
 Despues de realizar esas acciones, debemos ir a nuestro Grafana, agregar la conección: 
-![[Captura de pantalla 2026-01-30 100155.png]]
+![Captura de pantalla 2026-01-30 100155.png](images/Captura%20de%20pantalla%202026-01-30%20100155.png)
 Luego de eso debemos agregar un dashboard, preferiblemente, por temas prácticos, no ahondaremos en ello, pero es posible pedir un archivo `json` a la IA con el contexto de tu trabajo y que este te genere dicho `json` e importarlo, podría quedar de la siguiente forma: 
 
-![[Captura de pantalla 2026-01-30 103159.png]]
+![Captura de pantalla 2026-01-30 103159.png](images/Captura%20de%20pantalla%202026-01-30%20103159.png)
 
 ## MDC: 
 
@@ -3038,7 +3038,7 @@ Yo lo haré de la tercera forma en un ejercicio que estoy realizando :D. Asi que
 ## Manejo de ambientes y perfiles: 
 
 Una vez creado el proyecto la manera mas eficiente y sencilla para crear ambientes (Testing, produccion, dev, etc) es crear un `application.properties` o `application.yml` por cada uno de los ambientes.
-![[Pasted image 20251216144819.png]]
+![Pasted image 20251216144819.png](images/Pasted%20image%2020251216144819.png)
 En cada uno de estos archivos de propiedades se coloca todo lo relacionado a lo que nosotros deseemos de configurar. Una base de datos diferente, un puerto diferente, un nombre diferente, una tamaño de pool diferente. 
 Y en el `application.yml` vamos a colocar el perfil que deseamos:
 ```yaml
@@ -3117,7 +3117,7 @@ mvn clean install -Pdev
 mvn clean install -Pprod
 ```
 Por ejemplo, haciendo la primera nos genera los siguientes logs: 
-![[Pasted image 20251216173739.png]]
+![Pasted image 20251216173739.png](images/Pasted%20image%2020251216173739.png)
 Que como vemos toma la configuración de `stg`.
 
 ***
@@ -3177,7 +3177,7 @@ Es un proyecto que combinaremos con documentación y más:
 **Spring Cloud** es un conjunto de herramientas dentro del ecosistema Spring que te ayuda a construir **sistemas distribuidos y microservicios** de manera más sencilla, robusta y escalable.
 La arquitectura por la documentación: 
 
-![[Pasted image 20250513214651.png]]
+![Pasted image 20250513214651.png](src/Java%20SpringBoot/Pasted%20image%2020250513214651.png)
 
 Aqui encontramos como esta funcionando la arquitectura principal. Luego de enviar alguna peticion mediante un movil, un navegador o un IoT entrá a un 
 #### **ApiGetaway**:

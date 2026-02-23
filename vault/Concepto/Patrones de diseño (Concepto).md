@@ -2516,7 +2516,7 @@ Describe la salida de mensajes o eventos desde un componente hacia el exterior g
 ### Código: 
 #### Spring boot: 
 La estructura de carpetas que usaremos será la siguiente: 
-![[Pasted image 20251230150840.png]]
+![Pasted image 20251230150840.png](images/Pasted%20image%2020251230150840.png)
 Esta es algo simple y sencillo. Lo importante es las dos entidades que tenemos: Outbox y User.
 Cómo primeras configuraciones tendremos: 
 **application.yaml**
@@ -2946,7 +2946,7 @@ public class Main {
 
 Con ello ya estamos generando este lindo patrón de diseño en Spring Boot.
 Aunque hay algo que es muy importante y que el artículo nos da. Bueno, varias cosas en primera un dibujo del sistema :
-![[Pasted image 20251230203116.png]]
+![Pasted image 20251230203116.png](images/Pasted%20image%2020251230203116.png)
 Luego nos comenta sobre soluciones a implementar, nosotros implementamos un `Sheduled`.
 ```java title=Scheduled
    @Scheduled(fixedRate = 5000)  
@@ -2980,7 +2980,7 @@ Utilice el modelo de Carga Diferida cuando:
 - La carga anticipada es costosa o el objeto a cargar podría no ser necesario en absoluto
 ### Estrucura:
 El diagrama de clases en java se puede observar de esta forma: 
-![[Pasted image 20260101082535.png]]
+![Pasted image 20260101082535.png](images/Pasted%20image%2020260101082535.png)
 Imagen dada por: https://java-design-patterns.com/es/patterns/lazy-loading/
 ### Participantes:
 ### Código: 
@@ -3041,7 +3041,7 @@ print(f"Sin yield: {time.time() - start:.4f} seg")
 print(f"Resultado: {resultado}")
 ```
 Con esto que nos genera de resultado?:
-![[Pasted image 20260101122947.png]]
+![Pasted image 20260101122947.png](images/Pasted%20image%2020260101122947.png)
 
 Ahora vamos a ver lo que es `Generator`. El cual se puede ver como: 
 ```python
@@ -3153,7 +3153,7 @@ suma(a=2, b=3)       # kwargs={'a': 2, 'b': 3}
 sumaTriple(2, 3, c=4) # args=(2, 3), kwargs={'c': 4}
 ```
 La salida de esto es: 
-![[Pasted image 20260101151249.png]]
+![Pasted image 20260101151249.png](images/Pasted%20image%2020260101151249.png)
 Así que `kwargs` es un diccionario `clave : valor`
 ***
 ¿Por qué estos son clave en los decoradores? Pues un decorador envuelve funciones arbitrarias, la unica forma general es: 
@@ -3172,7 +3172,7 @@ print(suma.__name__)
 print(suma.__doc__)
 ```
 Aqui todo está bien, esto nos genera
-![[Pasted image 20260101151926.png]]
+![Pasted image 20260101151926.png](images/Pasted%20image%2020260101151926.png)
 Ahora, usamos el decorador sin `@wraps`.
 Entonces que sucede?: 
 ```python
@@ -3198,9 +3198,9 @@ def suma(a, b):
 print(suma.__name__)  
 print(suma.__doc__)
 ```
-![[Pasted image 20260101152011.png]]
+![Pasted image 20260101152011.png](images/Pasted%20image%2020260101152011.png)
 Ese es el resultado, si agregamos `@wraps`: 
-![[Pasted image 20260101152033.png]]
+![Pasted image 20260101152033.png](images/Pasted%20image%2020260101152033.png)
 Volvemos a tener identidad y metadatos de la función, recordemos que el decorador lo que hace es para la función suma: `suma = decorador(suma)` como ven, vuelve a crear una función suma
 
 Con esta información vamos a el código:
@@ -3439,9 +3439,9 @@ También puedes aplicar esta solución a los objetos. Imagina que tienes una cla
 - En `Borrador`, mueve el documento a moderación.
 - En `Moderación`, hace público el documento, pero sólo si el usuario actual es un administrador.
 - En `Publicado`, no hace nada en absoluto.
-![[Pasted image 20260117073422.png]]
+![Pasted image 20260117073422.png](images/Pasted%20image%2020260117073422.png)
 ### Estructura:
-![[Pasted image 20260117073609.png]]
+![Pasted image 20260117073609.png](images/Pasted%20image%2020260117073609.png)
 ### Participantes:
 En los participantes encontramos:
 
@@ -3709,7 +3709,7 @@ Este patrón de diseño es utilizado para evaluar un lenguaje definido como «ex
 Se aplica a Lenguajes de dominio específico como expresiones matemáticas, fórmulas empresariales, etc. (Un sistema que evalúes expresiones como `"precio * impuesto + envío"`)
 También a procesamiento de comandos o scripts, análisis de expresiones regulares o lógicas o compiladores e intérpretes educativos.
 ### Estructura:
-![[Pasted image 20260117074818.png]]
+![Pasted image 20260117074818.png](images/Pasted%20image%2020260117074818.png)
 ### Participantes:
 - **Client**: Actor que dispara la ejecución del intérprete
 - **Context**: Objeto con información global que será utilizada por el intérprete para leer y almacenar información global entre todas las clases que conforman el patrón, este es enviado a interpeter el cual lo replica por toda la estructura.

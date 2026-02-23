@@ -71,7 +71,7 @@ int main(void) {
 Aqui especificamos una variable a que se guarda en algún lugar de nuestra memoria RAM. Y luego especificamos una variable puntero del mismo tipo del que es a donde guardamos la referencia a esa variable. 
 
 Luego al imprimirlas, generamos el valor, como vemos para imprimir el valor imprimimos el puntero como tal porque este apunta a lo que está adentro de esa dirección. : 
-![[Pasted image 20260217225706.png]]
+![Pasted image 20260217225706.png](images/Pasted%20image%2020260217225706.png)
 
 Nosotros casteamos por comodidad, ya que el especificador: `%p` espera un argumento de tipo `void *`
 
@@ -976,7 +976,7 @@ Esto se llama memoria unificada o arquitectura Von Neumann | Harvard modificada.
 
 Vamos a usar un ejemplo de STM32F4 que es más sencillo que STM32N6...
 Cómo ejemplo tenemos lo siguiente: 
-![[Pasted image 20260219104221.png]]
+![Pasted image 20260219104221.png](images/Pasted%20image%2020260219104221.png)
 
 ### Linker script -> El corazón de todo
 El linker script (`.ld`) define cómo se mapea la memoria. Aquí podemos observar uno funcional: 
@@ -1063,7 +1063,7 @@ void pool_release(UartBuffer *buf) {
 }
 ```
 Y para terminar, tenemos: 
-![[Pasted image 20260219131617.png]]
+![Pasted image 20260219131617.png](images/Pasted%20image%2020260219131617.png)
 ## Preprocesadores
 El preprocesador es un programa que modifica tu código FUERA del lenguaje C antes de que el compilador lo vea. Reconoce por líneas que empiezan con `#`.
 ### Las directivas principales: 
@@ -1107,7 +1107,7 @@ Luego usamos solamente `#include "config.h"` en los archivos correspondientes.
 
 *** 
 Cómo una aclaración importante es: 
-![[Pasted image 20260220082053.png]]
+![Pasted image 20260220082053.png](images/Pasted%20image%2020260220082053.png)
 
 Esto nos define a nosotros en algunos preprocesadores como MISRA-C que se usa en microcontroladores ARM (generalmente). Su uso es el siguiente: 
 

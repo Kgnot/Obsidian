@@ -78,7 +78,7 @@ Typescript es una herramienta que en sí necesita de un `tsconfig.json` el cual 
 # Bases de Typescript
 
 Typescript es JavaScript con sintaxis para tipos.
-![[Pasted image 20260108105351.png]]
+![Pasted image 20260108105351.png](images/Pasted%20image%2020260108105351.png)
 
 Se escribe de forma similar con la diferencia de que uno tiene un tipado fuerte y el otro un tipado débil y dinámico, esto quiere decir: 
 ```javascript
@@ -288,7 +288,7 @@ const tex = devolverPrimero(["a", "b"]); // tex es inferido como string
 
 ### Patrón adaptador: 
 Es muy útil en la vida real cuando tienes una clase que hace lo que necesitas, pero no tiene una interfaz que tu sistema espera. 
-![[Pasted image 20260108145949.png]]
+![Pasted image 20260108145949.png](images/Pasted%20image%2020260108145949.png)
 
 Entonces tenemos: 
 ```typescript
@@ -498,7 +498,7 @@ The components defined in special files are rendered in a specific hierarchy:
 - `not-found.js` (React error boundary for "not found" UI)
 - `page.js` or nested `layout.js`
 
-![[Pasted image 20260108161549.png]]
+![Pasted image 20260108161549.png](images/Pasted%20image%2020260108161549.png)
 
 ### Private folders
 
@@ -506,13 +506,13 @@ Private folders can be created by prefixing a folder with an underscore: `_folde
 
 This indicates the folder is a private implementation detail and should not be considered by the routing system, thereby **opting the folder and all its subfolders** out of routing.
 
-![[Pasted image 20260108161642.png]]
+![Pasted image 20260108161642.png](images/Pasted%20image%2020260108161642.png)
 ### Route groups
 Route groups can be created by wrapping a folder in parenthesis: `(folderName)`
 
 This indicates the folder is for organizational purposes and should **not be included** in the route's URL path.
 
-![[Pasted image 20260108161715.png]]
+![Pasted image 20260108161715.png](images/Pasted%20image%2020260108161715.png)
 
 Para mayo información: https://nextjs.org/docs/app/getting-started/project-structure
 
@@ -523,7 +523,7 @@ NextJS usa un sistema de routing basado en archivos, esto significa que puedes u
 ### Creando una página: 
 
 Una página es UI que es renderizada en una ruta específica. Para crear una página, añadimos un archivo`page`dentro del directorio de  `app`y un `default export`. Por ejemplo, para crear la página index (`/`).
-![[Pasted image 20260108170427.png]]
+![Pasted image 20260108170427.png](images/Pasted%20image%2020260108170427.png)
 ```typescript
 export default function Page(){
 	return <h1> Hello Next.js! <h/1>
@@ -537,7 +537,7 @@ Un layout es una UI que es compartida entre diferentes páginas. En la navegaci�
 Podemos definir un layout exportando por defecto un componente React de un archivo `layout`. El componente debe aceptar un `children` como parámetro el cual puede ser una página u otro layout.
 
 Por ejemplo, para crear un layout que acepte a tu index como una página hija, añadimos al archivo `layout` dentro del directorio de `app`.
-![[Pasted image 20260108174159.png]]
+![Pasted image 20260108174159.png](images/Pasted%20image%2020260108174159.png)
 
 ```tsx
 export default function DashboardLayout({
@@ -566,7 +566,7 @@ En Next.JS:
 - Las **carpetas** son usadas para definir los segmentos de la ruta
 - Los **archivos** (como `page` y `layout`) son usados para crear UI que se muestra en el segmento.
 Para crear rutas anidad podemos crear carpetas dentro de otras. Por ejemplo: 
-![[Pasted image 20260109093230.png]]
+![Pasted image 20260109093230.png](images/Pasted%20image%2020260109093230.png)
 
 ```typescript title=app/blog/page.tsx
 
@@ -588,7 +588,7 @@ export default async function Page() {
 
 ```
 
-Podemos seguir haciendo anidaciones. ![[Pasted image 20260109093400.png]]
+Podemos seguir haciendo anidaciones. ![Pasted image 20260109093400.png](images/Pasted%20image%2020260109093400.png)
 Y en el código: 
 ```typescript title=app/blog/[slug]/page.tsx
 interface Props {
@@ -621,7 +621,7 @@ y ambas son válidas y dirán:
 Por defecto, los layouts en un sistema de carpetas ya son anidados, el cual significa que estos encierran un layout hijo mediante la propiedad `children`. Tú puedes crear layouts anidados añadiendo `layout` dentro de un segmento de ruta específica (carpeta)
 
 Por ejemplo: 
-![[Pasted image 20260109114302.png]]
+![Pasted image 20260109114302.png](images/Pasted%20image%2020260109114302.png)
 
 Ahí añadimos un layout a la carpeta `blog`, usando: 
 ```typescript title=app/blog/layout.tsx icon=typescript

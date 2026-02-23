@@ -7,7 +7,7 @@ La ESP32 es un sistema con un chip integrado que contiene las siguientes caracte
 Antes que nada debemos aclarar que una salida analógica se refiere a continuo y digital a discreto.
 
 ---
-Para empezar conociendo a la ESP32 necesitamos saber que son los pines y que es pinout, un pin es un contacto eléctrico o terminal en un circuito integrado, o dispositivo electrónico. Por su parte pinout es una representación o diagrama que muestra la disposición y función de cada uno de estos pines. El pinout de la ESP32 es:![[doc-esp32-pinout-reference-wroom-devkit.webp]]
+Para empezar conociendo a la ESP32 necesitamos saber que son los pines y que es pinout, un pin es un contacto eléctrico o terminal en un circuito integrado, o dispositivo electrónico. Por su parte pinout es una representación o diagrama que muestra la disposición y función de cada uno de estos pines. El pinout de la ESP32 es:![doc-esp32-pinout-reference-wroom-devkit.webp](images/doc-esp32-pinout-reference-wroom-devkit.webp)
 Aquí hay muchos conceptos, entonces vamos a desglosar uno por uno.
 ### GPIO (General Purpose Input/Output)
 Significa que este pin puede ser usado como entrada o salida digital, solo puede tener dos estados (ON / OF), (1/0), (High/Low)-> (3.3v/0v). 

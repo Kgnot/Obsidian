@@ -11,16 +11,16 @@ nest new project-name
 ```
 
 Al usar el comando `nest` podemos observar una tabla: 
-![[Pasted image 20260111185222.png]]
+![Pasted image 20260111185222.png](images/Pasted%20image%2020260111185222.png)
 Que son una forma en la que podemos crear o generar código fácilmente.
 
 # Estructura del proyecto
 
 La estructura del proyecto es la siguiente: 
-![[Pasted image 20260111191708.png]]
+![Pasted image 20260111191708.png](images/Pasted%20image%2020260111191708.png)
 
 En NESTJS nosotros encontramos: 
-![[Pasted image 20260113074114.png]]
+![Pasted image 20260113074114.png](images/Pasted%20image%2020260113074114.png)
 Lo importante es el apartado del módulo, ¿qué es un módulo?: 
 # Modulo
 
@@ -50,7 +50,7 @@ Toda aplicación NestJS tiene al menos un módulo, llamado módulo raíz. Este e
 - Global Módulos (Módulos Globales): Si declara un módulo como global (`@global`), no necesitas importarlo en otros módulos; sus `providers` estarán disponibles en todas aprtes automáticamente. Se debe usar con cautela.
 
 ## Gráfico de ejemplo
-![[Pasted image 20260113075256.png]]
+![Pasted image 20260113075256.png](images/Pasted%20image%2020260113075256.png)
 
 Los módulos tienen el siguiente aspecto
 ```ts
@@ -423,7 +423,7 @@ Sus caracteristicas claves son:
 3. Trabaja con observables RxJS
 4. Se ejecuta en orden especifico en el ciclo de vida
 
-![[Pasted image 20260116093447.png]]
+![Pasted image 20260116093447.png](images/Pasted%20image%2020260116093447.png)
 Cuales son sus usos comunes?: 
 1. Transformar respuestas (formato estandar)
 2. Logging/auditoria (registrar todo)
@@ -769,7 +769,7 @@ Un guard es un **vigilante/guardián** que decide SI UNA PETICIÓN PUEDE PASAR O
 Básicamente, responde a la pregunta: `¿Puedo entrar aqui? Es una desición binaria`.
 
 Un flujo de datos es: 
-![[Pasted image 20260116102828.png]]
+![Pasted image 20260116102828.png](images/Pasted%20image%2020260116102828.png)
 
 Los guards por defecto tienen esta forma: 
 ```ts
@@ -951,7 +951,7 @@ export class ProfileController {
 
 Sigamos recordando esta imagen: 
 
-![[Pasted image 20260116163438.png]]
+![Pasted image 20260116163438.png](images/Pasted%20image%2020260116163438.png)
 
 
 `
@@ -993,7 +993,7 @@ export class LoggerMiddleware implements NestMiddleware {
 }
 ```
 Eso, al ir a la URL, nos aparece: 
-![[Pasted image 20260114121707.png]]
+![Pasted image 20260114121707.png](images/Pasted%20image%2020260114121707.png)
 # Class-validator
 
 Este es una librería poderosa para typescript y JavaScript que nos ayuda a usar decoradores y no decoradores basados en la validación. Un ejemplo rápido de cómo funciona es: 
@@ -1078,10 +1078,10 @@ Para mayor información la encontramos en: https://class-validator.sonicar.tech/
 # Comandos
 
 Cuando nosotros necesitamos "generar" ciertas cosas predeterminadas podemos hacerlo mediante comandos, para saber que podemos generar usamos `nest generate --help`. Y esto nos da el siguiente resultado: 
-![[Pasted image 20260113080357.png]]
+![Pasted image 20260113080357.png](images/Pasted%20image%2020260113080357.png)
 
 Por ejemplo, podemos usar:
-![[Pasted image 20260113080557.png]]
+![Pasted image 20260113080557.png](images/Pasted%20image%2020260113080557.png)
 (`nest g mo <nombre_modulo>`)
 (`nest g co <nombre_controlador>`) | (`nest g co <nombre_de_la_carpeta`) | (`nest g co <nombre> --no-espec`)
 (``)

@@ -5,7 +5,7 @@ Este será un curso dedicado a `c+ +`, no será dedicado desde el inicio, tal co
 En la primera fase y curso vamos a hablar un poco de lo que es C++ junto con el libro [A Tour of C++](https://elhacker.info/manuales/Lenguajes%20de%20Programacion/C++/A%20Tour%20of%20C++%20-%20Bjarne%20Stroustrup%20(Addison-Wesley,%202014)(193p).pdf).
 
 C++ es un lenguaje compilado, eso significa que cada archivo fuente pasa por un compilador que lo convierte a archivos objeto que luego se junta y se crea un archivo ejecutable: 
-![[Pasted image 20251225113821.png]]
+![Pasted image 20251225113821.png](images/Pasted%20image%2020251225113821.png)
 Ya sabemos cosas básicas del programa más común de todos: 
 ```c++
 #include <iostream>  
@@ -41,7 +41,7 @@ int main() {
 }
 ```
 Esto nos genera el siguiente resultado: 
-![[Pasted image 20251225122006.png]]
+![Pasted image 20251225122006.png](images/Pasted%20image%2020251225122006.png)
 Aquí observamos las 3 diferentes, e incluso hay más, formas de usar el operador `::` y el operador `<<` es un corrimiento de bits. es decir: 
 ```c++
 int main() {  
@@ -51,7 +51,7 @@ int main() {
 }
 ```
 Aqui hacemos un corrimiento de bits como 3 es `11` en binario, y corremos 3, entonces: `11000` y eso da 24. Cómo vemos:
-![[Pasted image 20251225122305.png]]
+![Pasted image 20251225122305.png](images/Pasted%20image%2020251225122305.png)
 ## Funciones: 
 Las funciones en c++ tienen la estructura genérica de muchos tipos de funciones en otros lenguajes como Java.
 ```cpp
@@ -220,7 +220,7 @@ int* const q;   // el puntero es const
 
 ```
 Tenemos :
-![[Pasted image 20251225182242.png]]
+![Pasted image 20251225182242.png](images/Pasted%20image%2020251225182242.png)
 ### Regla práctica moderna
 
 - Usa **`constexpr`** cuando el valor **debe ser constante en compile time**
@@ -279,7 +279,7 @@ char x = *p; // *p es el objeto que p apunta a
 ```
 
 En la expresión, el prefijo unario `*` significa"contenido de" y el prefijo unario `&` significa"dirección de". Nosotros podemos representar el resultado graficamente cómo: 
-![[Pasted image 20251225185706.png]]
+![Pasted image 20251225185706.png](images/Pasted%20image%2020251225185706.png)
 
 Otra manera en el que podemos usar `&` es tambien para llamar por referencia y no por copia, es decir, en el siguiente ejemplo creamos una copia: 
 ```c++
@@ -484,7 +484,7 @@ int main() {
 }
 ```
 Este nos genera el siguiente resultado: 
-![[Pasted image 20251226110603.png]]
+![Pasted image 20251226110603.png](images/Pasted%20image%2020251226110603.png)
 
 Vamos a ver u uso útil en los enums, el primer caso es para mejorar el rendimiento, declaramos que la forma de su enumeración sera en enteros sin signo hasta 255. De esta forma: 
 ```cpp
@@ -754,7 +754,7 @@ double sqrt_sum(Vector& v) {
 Aqui este archivo no tiene ni dea de como vector guarda los datos, pero solo sabe que los guarda
 
 Un gráfico interesante puede ser: 
-![[Pasted image 20251228091048.png]]
+![Pasted image 20251228091048.png](images/Pasted%20image%2020251228091048.png)
 
 ## Namespaces:
 
@@ -1264,7 +1264,7 @@ Aqui tendremos ayuda de diferentes paginas y articulos
 La arquitectura en capas o «_layered architecture_» es la arquitectura de software más extendida y tradicional. Sigue la estructura organizativa y comunicativa tradicional de las empresas IT y es la más empleada en el software embebido.
 
 Consiste en capas independientes que se comunican entre sí mediante interfaces concretas. Si las interfaces están bien diseñadas y se mantienen, las capas pueden ser intercambiables. Por ejemplo, una aplicación de un ARM Cortex-M0 podría ser usada por un microcontrolador AVR
-![[Pasted image 20251228160141.png]]
+![Pasted image 20251228160141.png](images/Pasted%20image%2020251228160141.png)
 Generalmente esta arquitectura consta de 4 capas: 
 - drivers
 - capa de abstracción del hardware
@@ -1784,7 +1784,7 @@ int main() {
 ```
 
 Su uso es:
-![[Pasted image 20251228221832.png]]
+![Pasted image 20251228221832.png](images/Pasted%20image%2020251228221832.png)
 
 
 ### Strategy
@@ -2497,7 +2497,7 @@ int main() {
 }
 ```
 Y visualmente: 
-![[Pasted image 20251229121043.png]]
+![Pasted image 20251229121043.png](images/Pasted%20image%2020251229121043.png)
 
 
 ***

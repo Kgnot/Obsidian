@@ -1,7 +1,7 @@
-![[img_6212df40ef951.png]]
+![img_6212df40ef951.png](images/img_6212df40ef951.png)
 
 Este es un dibujo de como se comporta el MVC, aunque se visualiza mejor en UML: 
-![[mvc-sequence-diagram-example-2.png]]
+![mvc-sequence-diagram-example-2.png](images/mvc-sequence-diagram-example-2.png)
 Es de las arquitecturas de presentación más conocidas y fáciles de entender.
 
 **Los objetos de la entidad**(Modelo) no son más que la información o los datos que buscan sus objetos de contorno. Estos pueden ser: tablas de bases de datos, archivos de Excel, sesiones o datos guardados en caché o algo por el estilo
@@ -30,6 +30,6 @@ Aquí están las cuatro reglas básicas de conexión.
 - Los objetos de entidad solo pueden interactuar con los controladores.
 - Los controladores pueden comunicarse con objetos de contorno y objetos de entidad, así como con otros controladores, pero no con actores.
 
-![[mvc-sequence-diagram-example-1.png]]
+![mvc-sequence-diagram-example-1.png](images/mvc-sequence-diagram-example-1.png)
 
 El código es algo que haremos en un apartado de prueba donde uso Thymeleaf, Jetty y una base de datos. 

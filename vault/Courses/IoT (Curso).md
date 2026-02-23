@@ -7,7 +7,7 @@ El IoT como lo dice el nombre es el internet de las cosas, es la interconexión 
 ### Arquitectura:
 La arquitectura que se toma para un sistema IoT se divide en cuatro o cinco capas:
 
-![[kskkwto3gkhej4ghw-layers-of-iot-architecture.avif]]
+![kskkwto3gkhej4ghw-layers-of-iot-architecture.avif](images/kskkwto3gkhej4ghw-layers-of-iot-architecture.avif)
 #### Capa de percepción:
 
 La capa de percepción interactúa con el terreno físico para recopilar datos sin procesar. Dispositivos conectados al IoT, como sensores y cámaras, recopilan pasivamente información e imágenes que se comunicarán a través de la capa de transporte (por ejemplo la capa de red) mientras que los actuadores instruyen a los dispositivos para que realicen tareas basándose en datos de sensores o comandos adicionales dentro de los sistemas IoT. (Los actuadores son dispositivos de hardware que convierten la energía en movimiento).
@@ -40,7 +40,7 @@ En esta arquitectura la manera en que todas se combinan está descrita de la sig
 - **Capa de aplicación:** la nube genera informes y análisis para los usuarios finales de las aplicaciones y el mantenimiento de registros, a través de interfaces web y entrega por correo electrónico.
 
 Y par aún sistema de 4 capas puede ser visto de esta forma: 
-![[kskkvyrt1mnkzgasi-stages-iot-architecture.png.avif]]
+![kskkvyrt1mnkzgasi-stages-iot-architecture.png.avif](images/kskkvyrt1mnkzgasi-stages-iot-architecture.png.avif)
 
 
 

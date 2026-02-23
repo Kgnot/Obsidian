@@ -2,7 +2,7 @@ Para entender lo que son los servidores web debemos entrar en el apartado de la 
 
 
 # Modelo OSI:
-![[Capas-modelo-OSI.png]]
+![Capas-modelo-OSI.png](images/Capas-modelo-OSI.png)
 Aqui vemos el modelo OSI explicado por cada capa.
 ## Capa 1 - Fisica | Electrónica Analógica
 La capa física no existen protocolos de software, solo existen lo que son las señales:

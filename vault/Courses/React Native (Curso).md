@@ -27,9 +27,9 @@ npx create-expo-app@ latest curso-react-native --template blank
 Esto genera una carpeta mucho más limpia.
 
 Sin `--template blank`: 
-![[Pasted image 20260127102819.png]]
+![Pasted image 20260127102819.png](images/Pasted%20image%2020260127102819.png)
 Con `--template blank`:
-![[Pasted image 20260127102919.png]]
+![Pasted image 20260127102919.png](images/Pasted%20image%2020260127102919.png)
 ***
 Como observamos es un lugar mucho más limpio para diseñar directamente. (Aunque tiene JS). 
 
@@ -136,7 +136,7 @@ npx expo install -- --save-dev prettier eslint-config-prettier eslint-plugin-pre
 ## Scrolling
 
 En estas primeras utilidades hablamos sobre el problema del `view`  y el `scroll` que no se puede realizar de forma inmediata, es decir: 
-![[Pasted image 20260127135810.png]]
+![Pasted image 20260127135810.png](images/Pasted%20image%2020260127135810.png)
 Aqui observamos que el «Título» aparece en toda la zona superior y no hay scroll. 
 Para el apartado del scroll tenemos el componente
 
@@ -171,7 +171,7 @@ npx expo install expo-constants
 ```
 
 Expo Constants es una dependencia que proporciona acceso a información clave de la aplicación, como la versión y los detalles del dispositivo. Esto es fundamental porque incluye constantes específicas que nos permiten obtener los datos necesarios que se muestran a continuación:
-![[Pasted image 20260127141704.png]]
+![Pasted image 20260127141704.png](images/Pasted%20image%2020260127141704.png)
 
 Y lo que debemos hacer en código: 
 ```tsx
@@ -266,13 +266,13 @@ export function Main() {
 }
 ```
 Y nuestro aplicativo termina viendose: 
-![[Pasted image 20260127152923.png]]
+![Pasted image 20260127152923.png](images/Pasted%20image%2020260127152923.png)
 
 ## Usar SVG: 
 
 Primero que nada vamos a usar la siguiente página: https://react-svgr.com/playground/?native=true
 Esto nos ayuda a pasar de SVG normal a componente de React Native : 
-![[Pasted image 20260127154815.png]]
+![Pasted image 20260127154815.png](images/Pasted%20image%2020260127154815.png)
 Con esto ya entonces creamos el componente.
 
 > Nota:

@@ -1,8 +1,8 @@
 # Inicio
 Primero veremos lo que es Codacy que según yo es el más fácil de usar y de aplicar. Primero vamos a la página: 
-![[Pasted image 20250425183750.png]]
+![Pasted image 20250425183750.png](src/Calidad%20de%20C%C3%B3digo%20%28SonarQube%20y%20Codacy/Pasted%20image%2020250425183750.png)
 Primero miremos algo de los precios que siempre es importante entender que es lo que , si pagamos, obtenemos: 
-![[Pasted image 20250425184308.png]]
+![Pasted image 20250425184308.png](src/Calidad%20de%20C%C3%B3digo%20%28SonarQube%20y%20Codacy/Pasted%20image%2020250425184308.png)
 Nosotros claramente usaremos el "Developer", aqui veremos una tabla que nos puede ayudar a indentificar: 
 
 | Plan           | ¿Qué hace?                                                                                                                                                                                            | Diferencias clave                                                                                                                                                                                                          | ¿Cuándo usarlo?                                                                                                                                                               |
@@ -17,27 +17,27 @@ En la tabla observamos las principales diferencias.
 Dentro de la documentación nos dan una serie de pasos a seguir para poder iniciar, entonces tendremos que hacer: 
 1. Iniciar sesión o registrarse
 2. Escoger una organización
-	-  ![[Pasted image 20250425193046.png]]
+	-  ![Pasted image 20250425193046.png](src/Calidad%20de%20C%C3%B3digo%20%28SonarQube%20y%20Codacy/Pasted%20image%2020250425193046.png)
 3. Añadir los repositorios
-	- ![[repositories-add.png]]
+	- ![repositories-add.png](src/Calidad%20de%20C%C3%B3digo%20%28SonarQube%20y%20Codacy/repositories-add.png)
 
 Una vez hecho esto nos encontramos en la pagina principal, usaré mi Codacy para seguir explicando. 
 
-![[Pasted image 20250425185714.png]]
+![Pasted image 20250425185714.png](src/Calidad%20de%20C%C3%B3digo%20%28SonarQube%20y%20Codacy/Pasted%20image%2020250425185714.png)
 
-![[Pasted image 20250425191958.png]]
+![Pasted image 20250425191958.png](src/Calidad%20de%20C%C3%B3digo%20%28SonarQube%20y%20Codacy/Pasted%20image%2020250425191958.png)
 Aqui nosotros tenemos la pagina principal que veremos
-![[Pasted image 20250425192021.png]]
+![Pasted image 20250425192021.png](src/Calidad%20de%20C%C3%B3digo%20%28SonarQube%20y%20Codacy/Pasted%20image%2020250425192021.png)
 Y en repositorio vemos que repositorios hemos elegido: 
-![[Pasted image 20250425192053.png]]
+![Pasted image 20250425192053.png](src/Calidad%20de%20C%C3%B3digo%20%28SonarQube%20y%20Codacy/Pasted%20image%2020250425192053.png)
 Podemos crear integraciones a diferente lado
-![[Pasted image 20250425192139.png]]
-Al meternos dentro de cada uno de los repositorios tenemos una vista diferente. ![[Pasted image 20250425192249.png]]
+![Pasted image 20250425192139.png](src/Calidad%20de%20C%C3%B3digo%20%28SonarQube%20y%20Codacy/Pasted%20image%2020250425192139.png)
+Al meternos dentro de cada uno de los repositorios tenemos una vista diferente. ![Pasted image 20250425192249.png](src/Calidad%20de%20C%C3%B3digo%20%28SonarQube%20y%20Codacy/Pasted%20image%2020250425192249.png)
 Aqui vemos un apartado de home que es un Dashboard de básicamente lo necesario que nos dan. 
 La documentación nos recomienda una sección en la que configuremos nuestro repositorios: 
 ## Configurar repositorios
 En muchas situaciones, tu quisieras ignorar o excluir archivos del analisis de Codecy. Para excluirlos vamos a las opciones de nuestro repositorio: 
-![[Pasted image 20250425200532.png]]
+![Pasted image 20250425200532.png](src/Calidad%20de%20C%C3%B3digo%20%28SonarQube%20y%20Codacy/Pasted%20image%2020250425200532.png)
 Este es un repositorio en el cual podemos ignorar muchas cosas, lo recomendable, siento yo, es posible ignorar `resources` o `test` dependiendo de como se comporte el sistema después de eso.
 Nos recomienda usar un archivo de configuración para definir una lista personalizada de exclusión de direcciones. 
 ### Crear una lista personalizada de exlcusión
@@ -113,7 +113,7 @@ Aquí entendemos un poco más ahora bien definiremos cada uno haciendo una tabla
 | `languages`                         | Aquí declaro que lenguaje uso y que extensiones voy o quiero analizar.                                      |
 | `exclude_path` global               | Son los archivos o directorios que ningún motor debe tocar                                                  |
 | `include_path`                      | Rutas que si deberían analizarse , asi estén dentro de las exclusiones.                                     |
-Por defecto ya se nos viene ignorado unos archivos, como podemos observar: ![[Pasted image 20250425204028.png]]
+Por defecto ya se nos viene ignorado unos archivos, como podemos observar: ![Pasted image 20250425204028.png](src/Calidad%20de%20C%C3%B3digo%20%28SonarQube%20y%20Codacy/Pasted%20image%2020250425204028.png)
 
 
 

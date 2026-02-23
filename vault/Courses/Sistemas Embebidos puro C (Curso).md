@@ -5,7 +5,7 @@ La tensión o voltaje es la magnitud física que cuantifica la diferencia de pot
 La corriente o intensidad eléctrica es la cantidad de carga eléctrica que pasa por un conductor por unidad de tiempo y se mide en amperios (A).
 
 Las señales pueden ser analógicas o digitales.
-![[Pasted image 20260219143421.png]]
+![Pasted image 20260219143421.png](images/Pasted%20image%2020260219143421.png)
 Mientras la primera existe un valor infito  de valores en el tiempo (entre -1 y 1) la segunda esta restringida a solo 2 valores {1,-1}.
 ## Señal digital (push-pull, open-drain)
 Las señales digitales push-pull y open drain son configuraciones comunes de los pines GPIO de microcontroladores para manjear salidas lógicas (alto/bajo). Push-pull usa dos transistores activos para "empujar" y "tirar" activamente la señal, mientras que open drain solo "tira" hacie tierra y necesita ayuda externa para el nivel alto.
@@ -561,7 +561,7 @@ Detalles importantes
 Vamos a hablar de esto. 
 
 Primero hablemos de un proyecto generico, porque necesitamos entender cosas, puede esto ir por partes. 
-![[Pasted image 20260219214622.png]]
+![Pasted image 20260219214622.png](images/Pasted%20image%2020260219214622.png)
 
 Esto es una arquitectura con separación de seguridad que nosotros obtenemos al generar el código de la placa que deseamos (STM32N657X0HxQ).
 
@@ -587,7 +587,7 @@ Non-Secure world
 ```
 Esto no es software, esto es una separación implementada en arquitectura CPU (Cortex-M)
 Y según el datasheets: 
-![[Core_crotex.png]]
+![Core_crotex.png](images/Core_crotex.png)
 ### Drivers
 Aquí vive:
 - HAL
@@ -670,7 +670,7 @@ Eso expone vía NSC. Sin esta liberaría no hay comunicación controlada entre m
 ## Cómo corre El programa?
 
 Tal como vimos existe dos main:
-![[Pasted image 20260220100354.png]]
+![Pasted image 20260220100354.png](images/Pasted%20image%2020260220100354.png)
 
 El sistema siempre arranca en modo Secure. 
 Segun la documentación podemos decir: 
@@ -733,7 +733,7 @@ void SECURE_RegisterCallback(SECURE_CallbackIDTypeDef CallbackId, void *func);
 ```
 ## PINES: 
 Ya hablando más a detalle y según la documentación debemos mirar los pines, nosotros contamos con una distribución: VFBGA264 ballout, que es básicamente:
-![[Pasted image 20260220192024.png]]
+![Pasted image 20260220192024.png](images/Pasted%20image%2020260220192024.png)
 
 De aqui tenemos una tabla que nos dice la descripción de los pines (ahora hablaremos de nombres): 
 

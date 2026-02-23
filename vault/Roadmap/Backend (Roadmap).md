@@ -301,7 +301,7 @@ En HTTP, [Idempotencia](http://tools.ietf.org/html/rfc2616#section-9.1.2) signif
 	1. POST
 	2. PATCH
 
-![[Pasted image 20250519155822.png]]
+![Pasted image 20250519155822.png](src/Backend%20RoadMap/Pasted%20image%2020250519155822.png)
 # Controlador de Versionado de Sistemas
 
 Git es un sistema de control de versiones distribuido diseñado para manejar proyectos de cualquier tamaño con velocidad y eficiencia.

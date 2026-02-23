@@ -146,11 +146,11 @@ Esto le dice que volúmenes estamos montando, el nombre del contenedor y que cor
 Ahora ya con esto, vamos a instalar un programa llamado `MQTT Explorer`. [Click para descargar](https://mqtt-explorer.com/).
 
 Ahora tenemos lo que es Mosquitto corriendo y veremos algo así: 
-![[Pasted image 20251224183854.png]]
+![Pasted image 20251224183854.png](images/Pasted%20image%2020251224183854.png)
 
 Podemos ahora simular IoT, ya sea en Python, o si tenemos una ESP32 también. 
 Por ejemplo, si conecto mi ESP32 con un código que ya voy a poner, pasa lo siguiente:
-![[Pasted image 20251224183953.png]]
+![Pasted image 20251224183953.png](images/Pasted%20image%2020251224183953.png)
 
 Cómo vemos se creó un topic: `esp32/test`. Y se publicó: "hola desde ESP32". Ya vamos a ir con ese código. 
  (Antes de aqui voy a pasarme unas semanas aprendiendo c++ de mejro forma)

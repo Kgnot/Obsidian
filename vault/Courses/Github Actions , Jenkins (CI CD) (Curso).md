@@ -1245,7 +1245,7 @@ pipeline {
 ```
 Con este apartado de código recrea todo lo que anteriormente se hacía, todo en un mismo bloque. 
 Luego nos habla de, entonces que diferencias hay? Nos comenta que una de las mayores diferencias es la durabilidad, esto se refiere a esa durabilidad de cuando se reinicia el controlador de Jenkins. Todos los trabajos de Jenkins esta corriendo, una vez el controlador se apaga, automáticamente se reinicia y empieza a correr desde donde lo dejaron. Por otro lado, los "Freestyle Jobs" no hace eso. Este lo demuestra matando a mitad de un "run" el servidor. Al volverlo a levantar, los "Freestyle" se quedan sin seguir nada mientras que el Pipeline muestra los siguientes logs: 
-![[Pasted image 20250423221140.png]]
+![Pasted image 20250423221140.png](src/Github%20Actions%20%2C%20Jenkins%20%28CI%20CD%29/Pasted%20image%2020250423221140.png)
 Aqui observamos que en un apartad de `Resuming build at Tue Feb 01 ...` es decir que vuelve a seguir ejecutando desde donde se dejo sin importar si se cierra el servidor.
 Además de esto hay varios videos donde sigue explicando los conceptos en los que se diferencian, aunque básicamente:
 > - **Durabilidad**: Pipelines sobreviven al apagado del servidor
@@ -1267,11 +1267,11 @@ Recordemos que hay dos maneras de crear un Pipeline, tanto de manera declarativa
 - A través del clásico UI
 - En un SCM -> donde podemos escribir un `Jenkinsfile` manualmente que puede asegurar en tu repositorio.
 ### Empecemos con un Script: 
-![[Pasted image 20250424143638.png]]
+![Pasted image 20250424143638.png](src/Github%20Actions%20%2C%20Jenkins%20%28CI%20CD%29/Pasted%20image%2020250424143638.png)
 Aquí vamos a Pipeline. 
-![[Pasted image 20250424152509.png]]
+![Pasted image 20250424152509.png](src/Github%20Actions%20%2C%20Jenkins%20%28CI%20CD%29/Pasted%20image%2020250424152509.png)
 Vamos a ver algo similar a esto. Aqui podemos encontrar una descripción, aunque la parte más importante la encontramos como: 
-![[Pasted image 20250424152940.png]]
+![Pasted image 20250424152940.png](src/Github%20Actions%20%2C%20Jenkins%20%28CI%20CD%29/Pasted%20image%2020250424152940.png)
 Aqui vemos un script que podemos modificar, entonces para crear un Pipeline de formato script podemos colocar: 
 ``` Groovy
 node {
@@ -1283,7 +1283,7 @@ node {
 
 ```
 Esto nos da a nosotros lo que ya hemos visto antes, un mensaje de "Hello world" en la consola. El output es el siguiente: 
-![[Pasted image 20250424153409.png]]
+![Pasted image 20250424153409.png](src/Github%20Actions%20%2C%20Jenkins%20%28CI%20CD%29/Pasted%20image%2020250424153409.png)
 Como observamos tenemos quien empezó el Pipeline, El stage que corre, etc. Está toda la información ahi. 
 Entonces ¿Cómo es la forma declarativa? es muy similar y ahora veremos que diferencias tienen: 
 ```Groovy
@@ -1304,11 +1304,11 @@ Como vemos, son muy similares pero tenemos una diferencia y es que en la forma d
 En la documentación hay mucha información sobre esto. 
 ### Y el JenkinsFile?
 Para esto vamos a realizar los siguientes pasos, entrando en nuestro github y luego a opciones , vamos a `Developer settings` : 
-![[Pasted image 20250424155633.png]]
+![Pasted image 20250424155633.png](src/Github%20Actions%20%2C%20Jenkins%20%28CI%20CD%29/Pasted%20image%2020250424155633.png)
 Y vamos al apartado de Personal Access Token en la cual creamos un Token (classic). 
-![[Pasted image 20250424155745.png]]
+![Pasted image 20250424155745.png](src/Github%20Actions%20%2C%20Jenkins%20%28CI%20CD%29/Pasted%20image%2020250424155745.png)
 Le colocamos un nombre, como por ejemplo "Ajedrez Repository - Jenkins" , a continuación le brindamos todos los que necesitamos, en nuestro caso: 
-![[Pasted image 20250424160152.png]]
+![Pasted image 20250424160152.png](src/Github%20Actions%20%2C%20Jenkins%20%28CI%20CD%29/Pasted%20image%2020250424160152.png)
 Nos da un token, en este caso es un token semanal y toca guardarla porque solo se muestra una sola vez. 
 ahora vamos al repositorio y vamos al apartado de Webhooks que hemos ya visto y enlazamos al servidor de Jenkins. 
 Ahora en nuestra carpeta de archivos vamos a crear el archivo Jenkins:
@@ -1350,24 +1350,24 @@ pipeline {
     }
 }
 ```
-Después de esto ya podemos subirlo a nuestro repositorio: ![[Pasted image 20250424164302.png]]
-Ahora entramos en nuestro Servidor de Jenkins y que me cree una tarea. Esta tarea va a ser la siguiente, creamos una nueva Pipeline y le configuramos lo siguiente: ![[Pasted image 20250424165005.png]]
+Después de esto ya podemos subirlo a nuestro repositorio: ![Pasted image 20250424164302.png](src/Github%20Actions%20%2C%20Jenkins%20%28CI%20CD%29/Pasted%20image%2020250424164302.png)
+Ahora entramos en nuestro Servidor de Jenkins y que me cree una tarea. Esta tarea va a ser la siguiente, creamos una nueva Pipeline y le configuramos lo siguiente: ![Pasted image 20250424165005.png](src/Github%20Actions%20%2C%20Jenkins%20%28CI%20CD%29/Pasted%20image%2020250424165005.png)
 Como nuestro Jenkins esta enlazado con nuestro github entonces no nos genera error y no es necesario el token de acceso, de lo contrario o normalmente se coloca el token de acceso en el repositorio de esa forma, es decir -> `https://<token>@github.com/Kgnot/Ajedrez#` 
 
 > ==Como anotación importante, el archivo se llama "JenkinsFile" no "JenkinsFile" , error mío.==
 
 Ahora, después de hacer todo eso, solo debemos correr el Pipeline que inmediatamente aparecerá:
-![[Pasted image 20250424170255.png]]
+![Pasted image 20250424170255.png](src/Github%20Actions%20%2C%20Jenkins%20%28CI%20CD%29/Pasted%20image%2020250424170255.png)
 Esto significa que pudo identificar el archivo ==Jenkinsfile== y podemos ver al final: 
-![[Pasted image 20250424170406.png]]![[Pasted image 20250424170424.png]]![[Pasted image 20250424170430.png]]
+![Pasted image 20250424170406.png](src/Github%20Actions%20%2C%20Jenkins%20%28CI%20CD%29/Pasted%20image%2020250424170406.png)![Pasted image 20250424170424.png](src/Github%20Actions%20%2C%20Jenkins%20%28CI%20CD%29/Pasted%20image%2020250424170424.png)![Pasted image 20250424170430.png](src/Github%20Actions%20%2C%20Jenkins%20%28CI%20CD%29/Pasted%20image%2020250424170430.png)
 
 Cada una de los pasos que realizo y como todo quedó bien. Podemos tambien entrar a cada uno de los nodos y revisar como lo hizo, etc. 
 
 Recordemos que nosotros activamos lo que era que escuchara los trigers de github, entonces, si hacemos un push por ejemplo: 
-![[Pasted image 20250424171726.png]]
-![[Pasted image 20250424172539.png]]
+![Pasted image 20250424171726.png](src/Github%20Actions%20%2C%20Jenkins%20%28CI%20CD%29/Pasted%20image%2020250424171726.png)
+![Pasted image 20250424172539.png](src/Github%20Actions%20%2C%20Jenkins%20%28CI%20CD%29/Pasted%20image%2020250424172539.png)
 Aqui vemos que la corre y si vamos al github: 
-![[Pasted image 20250424172604.png]]
+![Pasted image 20250424172604.png](src/Github%20Actions%20%2C%20Jenkins%20%28CI%20CD%29/Pasted%20image%2020250424172604.png)
 Entonces entendemos como es el flujo de todo esto.
 > Como una nota adicional, tenemos que tener en cuenta que si hacemos Ngrok de forma local o un formato local, siempre hay que estar actualizando el webhook ya que este no siempre es el mismo al desplegarse 
 

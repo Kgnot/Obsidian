@@ -126,13 +126,13 @@ docker run -d \
   serve --node-id node1
 ```
 En la documentación nos comenta que podemos hacer lo siguiente: 
-![[Pasted image 20260103110452.png]]
+![Pasted image 20260103110452.png](images/Pasted%20image%2020260103110452.png)
 Después de eso nos dice que realizamos el siguiente comando: 
 ```bash
 export INFLUXDB3_AUTH_TOKEN=YOUR_AUTH_TOKEN
 ```
 y en `YOUR_AUTH_TOKEN` poner el que obtuvimos en el paso anterior, es decir: 
-![[Pasted image 20260103111555.png]]
+![Pasted image 20260103111555.png](images/Pasted%20image%2020260103111555.png)
 Luego algo que debemos de tomar en cuenta es que ahora, para cada petición que se realice debe ser de la siguiente forma: 
 ```bash
 curl "http://localhost:8181/api/v3/configure/database" \
@@ -157,7 +157,7 @@ InfluxDB 3 Core usa line protocol para escribir puntos de datos. Este es un text
 myTable,tag1=value1,tag2=value2 fieldKey="fieldValue" 1556813561098000000
 ```
 Líneas separadas por un carácter de nueva línea `\n` representa un simple punto en InfluxDB. Line protocol es sensible a espacio de línea.
-![[Pasted image 20260103112504.png]]
+![Pasted image 20260103112504.png](images/Pasted%20image%2020260103112504.png)
 ### Table: 
 
 (=={red}Requerido==)El nombre de la tabla. InfluxDB acepta una tabla por punto.
@@ -281,7 +281,7 @@ Para inspeccionar lo que hemos hecho:
 influxdb3 show databases --token apiv3_Y18r_5lhrwjF6gl6o8gQ9WC0hEnCRrxvd4l6qKnWGE0KVuylG4Qlv5SAleurJ2yQp8xAEHcVxTfqURshK5gdBw
 ```
 Eso nos muestra: 
-![[Pasted image 20260103124456.png]]
+![Pasted image 20260103124456.png](images/Pasted%20image%2020260103124456.png)
 Ahora entramos a `DATABASE_NAME` porque sin culpa así lo llamamos jeje. 
 Ejecutamos: 
 ```bash
@@ -291,7 +291,7 @@ influxdb3 query \
 "SHOW TABLES"
 ```
 Eso nos genera:
-![[Pasted image 20260103124750.png]]
+![Pasted image 20260103124750.png](images/Pasted%20image%2020260103124750.png)
 Con ello miramos y tenemos la `table_schema` con el nombre de `home` que era el que se creo, como bien recordamos:
 ```bash
 home,room=Kitchen temp=21.0,hum=35.9,co=0i 1641024000
@@ -304,7 +304,7 @@ influxdb3 query \
 "SELECT * FROM home ORDER BY time"
 ```
 Eso nos genera: 
-![[Pasted image 20260103124950.png]]
+![Pasted image 20260103124950.png](images/Pasted%20image%2020260103124950.png)
 Entonces, podemos observar por orden de tiempo una serie de datos temporal.
 ***
 Todo esto ha sido realizado desde el CLI, pero hay otras maneras de escribir datos, en la documentacións nos menciona 3 formas diferentes: 
@@ -341,7 +341,7 @@ curl -G "http://localhost:8181/api/v3/query_sql" \
 ```
 
 A lo que yo lo hice con Insomnia para probarlo y hacerlo más visual que un bash, por lo que queda:
-![[Pasted image 20260103130440.png]]
+![Pasted image 20260103130440.png](images/Pasted%20image%2020260103130440.png)
 
 ## SQL vs InfluxQL
 

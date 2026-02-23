@@ -219,7 +219,7 @@ TCP es un protocolo de transporte que garantiza la entrega fiable y ordenada de 
 Todo eso asegura que los datos lleguen completos y en orden
 
 TCP/IP es toda la "suit" que hace posible la comunicación en internet y redes locales. Lo que hace es usar TCP para fiabilidad e IP para direccion y enrutamiento de los paquetes a traves de la red. 
-![[Pasted image 20260204085822.png]]
+![Pasted image 20260204085822.png](images/Pasted%20image%2020260204085822.png)
 En la imagen se observa de forma intuitiva que un mensaje se desfragmente y se envía y se vuelve a construir en otro ordenador según la IP.
 ### Sockets (bloqueantes vs no bloqueantes)
 

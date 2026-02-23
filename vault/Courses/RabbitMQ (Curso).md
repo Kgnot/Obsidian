@@ -10,7 +10,7 @@ docker run -it --rm --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:4-manag
 ```
 
 si es en windows recomendamos tener esto activo :
-![[Pasted image 20251204180323.png]]
+![Pasted image 20251204180323.png](../images/Pasted%20image%2020251204180323.png)
 Luego de eso si aplicamos el comando de docker.
 Ahora explicamos que hace el comando:
 
@@ -25,12 +25,12 @@ Ahora explicamos que hace el comando:
 | `rabbitmq:4-management` | Imagen de rabbitMQ con interfaz web |
 ***
 Una vez descargado tenemos lo que es la interfaz interactiva: 
-![[Pasted image 20251204181120.png]]
-![[Pasted image 20251204182305.png]]
+![Pasted image 20251204181120.png](images/Pasted%20image%2020251204181120.png)
+![Pasted image 20251204182305.png](images/Pasted%20image%2020251204182305.png)
 Dentro de la documentación también nos comenta como instalarlo en diferentes entornos, no solo docker. 
 ***
 Para poder observar de forma visual el RabbitMQ, podemos ir al `localhost:15672` este nos dirige al apartado visual donde el usuario y contraseña son `guest`.
-![[Pasted image 20251204204423.png]]
+![Pasted image 20251204204423.png](images/Pasted%20image%2020251204204423.png)
 
 # RabbitMQ Tutorial principiante :
 Link: https://www.rabbitmq.com/tutorials
@@ -45,7 +45,7 @@ Muchos productores pueden enviar mensajes que van a una cola, y muchos consumido
 
 Luego tenemos lo que son los consumidores y es muy similar a lo que significa ser un recibidor, un consumidor es un programa que generalmente espera recibir mensajes.
 
-![[Pasted image 20251204200956.png]]
+![Pasted image 20251204200956.png](images/Pasted%20image%2020251204200956.png)
 Debemos notar que ninguno de los 3, ni el consumidor, productor ni la cola, residen en el mismo host, y de hecho por lo general nunca se hace..
 
 ### Creando nuestro primer HOLA MUNDO
@@ -143,16 +143,16 @@ public class Main {
 ```
 ***
 Al correrlos obtenemos esto: 
-![[Pasted image 20251204205258.png]]
+![Pasted image 20251204205258.png](images/Pasted%20image%2020251204205258.png)
 
 La primera imagen es antes y la segunda es despues, la imagen de ambos corriendo fue la siguiente: 
-![[Pasted image 20251204205327.png]]
+![Pasted image 20251204205327.png](images/Pasted%20image%2020251204205327.png)
 Algo que es necesario es descargar el `slf4j` o agregarlo en el maven.
 Lo más importante es que la cola se cargó con el nombre que se le había colocado (==hello==): 
-![[Pasted image 20251204205447.png]]
+![Pasted image 20251204205447.png](images/Pasted%20image%2020251204205447.png)
 
 Y en el docker desktop se puede observar: 
-![[Pasted image 20251204205717.png]]
+![Pasted image 20251204205717.png](images/Pasted%20image%2020251204205717.png)
 Que en efecto se envia , se abre y se cierra una conexion mientras una permanece abierta.
 ### Work Queues
 (Usando java client)
@@ -194,12 +194,12 @@ DeliverCallback deliverCallback = (consumerTag, delivery) -> {
 };
 ```
 El `doWork` es quien nos dice que una tarea dura más o menos, y en el apartado que envia solo debemos ponerle '.' a los mensajes para que sea una tarea pesada o menos pesada. Generando lo siguiente: 
-![[Pasted image 20251205113309.png]]
+![Pasted image 20251205113309.png](images/Pasted%20image%2020251205113309.png)
 Con eso vemos que sin importar cuanto dure una tarea siempre queda en la cola, y se realiza poco a poco. 
 
 #### Round Robin Dispatching:
 Una de las ventajas que nosotros tenemos es que "reparte" las cargas de los mensajes a todos los trabajadores, imaginemos lo siguiente, una serie de tareas no dependientes que se necestian realizar y le pasamos una serie de trabajadores que van a realizarla, cada trabajador obtiene una tarea y la realiza, esto mismo hace RabbitMQ, por ejemplo tengamos lo siguiente, tres trabajadores : 
-![[Pasted image 20251205131445.png]]
+![Pasted image 20251205131445.png](images/Pasted%20image%2020251205131445.png)
 Y en el código de quien envía la petición: 
 ```java
 List<String> lista = List.of(  
@@ -215,9 +215,9 @@ for(var msg : lista){
 ```
 Con esto publicamos varios al tiempo, ahora bien, a la hora de publicarlos: 
 1. vemos que se envía correctamente: 
-	![[Pasted image 20251205131604.png]]
+	![Pasted image 20251205131604.png](images/Pasted%20image%2020251205131604.png)
 2. Observamos que cambio tuvieron los trabajadores:  
-	![[Pasted image 20251205131640.png]]
+	![Pasted image 20251205131640.png](images/Pasted%20image%2020251205131640.png)
 Ahora imaginemos 100 tareas mandandose en paralelo: 
 ```java
 List<String> lista = generadorTareas(); //genera 100 tareas 
@@ -231,7 +231,7 @@ lista.stream().parallel().forEach(msg -> {
 });
 ```
 Obtenemos esto: 
-![[Pasted image 20251205132253.png]]
+![Pasted image 20251205132253.png](images/Pasted%20image%2020251205132253.png)
 Por lo que podemos ver que se les envía toda la cola, y se divide entre los diferentes trabajadores o workers. Que pueden ser instancias de lo que sea. 
 #### Reconocimiento de Mensajes (Message acknowledgment):
 
@@ -241,7 +241,7 @@ Imaginemos que tenemos un sistema de mensajería donde:
 3. Un consumidor los recibe y procesa
 Nos hacemos la pregunta de: ¿Qué pasaría si el consumidor muere durante el procesamiento? 
 Imaginemos el siguiente pipeline: 
-![[Pasted image 20251205160220.png]]
+![Pasted image 20251205160220.png](images/Pasted%20image%2020251205160220.png)
 Claramente no nos favorece que suceda, para que no pase RabbitMQ nos brinda "Reconocimiento de Mensajes" (ack). Un reconocimiento es algo que se le envía a RabbitMQ diciéndose que el mensaje ya fue recibido, procesado y que RabbitMQ es libre de liberarlo.
 Si un consumidor muere sin enviar el reconocimiento o "ack", entonces se entenderá como que el mensaje no fue procesado completamente y lo volverá a encolar.
 Los reconocimientos de los mensajes están activados de forma predeterminada. En ejemplos anteriores los desactivamos explícitamente a través de la bandera `autoAck=true`. Es hora de poner esta bandera en falso y enviar un reconocimiento adecuado del trabajador, una vez que hayamos terminado con una tarea.
@@ -282,7 +282,7 @@ void basicAck(long deliveryTag, boolean multiple) throws IOException;
 // 2. multiple: si confirma múltiples mensajes
 ```
 Y nosotros le estamos pasando el `delivery.getEnvelope().getDeliveryTag()` esto es un número secuencial que RabbitMQ asigna a cada mensaje entregado. Un flujo de como se podria esperar comportar este proceso es el siguiente: 
-![[Pasted image 20251205181316.png]]
+![Pasted image 20251205181316.png](images/Pasted%20image%2020251205181316.png)
 En código se vería algo de esta forma: 
 ```java 
 DeliverCallback deliverCallback = (consumerTag, delivery) -> {  
@@ -309,7 +309,7 @@ channel.basicConsume(QUEUE_NAME, autoAck, deliverCallback, consumerTag -> {});
 }  
 ```
 Y como respuestas tenemos lo siguiente: 
-![[Pasted image 20251205183417.png]]
+![Pasted image 20251205183417.png](images/Pasted%20image%2020251205183417.png)
 ##### Forgotten Acknowledgment - Explicación
 Un "Forgotten Acknowledgment" ocurre cuando configuras `autoAck = false` (para control manual) pero olvidas llamar a `basicAck()` después de procesar un mensaje. RabbitMQ entrega el mensaje, pero nunca recibe confirmación de que fue procesado, por lo que el mensaje queda en estado "unacknowledged" (no confirmado).
 
@@ -365,7 +365,7 @@ Es posible que haya notado que el envío todavía no funciona exactamente como q
 Por ejemplo, en una situación con dos trabajadores, cuando todos los mensajes extraños son pesados e incluso los mensajes son ligeros, un trabajador estará constantemente ocupado y el otro apenas hará ningún trabajo. Bueno, RabbitMQ no sabe nada de eso y seguirá enviando mensajes de manera uniforme.
 
 Esto sucede porque RabbitMQ solo envía un mensaje cuando el mensaje entra en la cola. No se fija en la cantidad de mensajes no reconocidos para un consumidor. Simplemente envía ciegamente cada n-ésimo mensaje al n-ésimo consumidor.
-![[Pasted image 20251205203353.png]]
+![Pasted image 20251205203353.png](images/Pasted%20image%2020251205203353.png)
 Para quitar este problema nosotros podemos usar el método`basicQos` con la configuración `prefetchCount` = `1`. Esto le dice a RabbitMQ que no le dé más de un mensaje a un worker al mismo tiempo, por decirlo así, no entregue más mensajes a un trabajador (Worker) a menos que este haya terminado y reconocido previamente, en cambio, le mandara mensajes a quien no esté ocupado. Entonces: 
 ```java
 int preferchCount = 1;
@@ -494,7 +494,7 @@ En la parte anterior del tutorial enviamos y recibimos mensajes de una cola. Aho
 La idea central en el modelo de mensajería en RabbitMQ es que el productor nunca envía ningún mensaje directamente a una cola. En realidad, muy a menudo el productor ni siquiera sabe si un mensaje será entregado a alguna cola.
 
 En cambio, el productor solo puede enviar mensajes a un intercambio. Un intercambio es algo muy simple. Por un lado recibe mensajes de los productores y el otro lado los empuja a hacer colas. El intercambio debe saber exactamente qué hacer con un mensaje que recibe. ¿Debería adjuntarse a una cola en particular? ¿Debería adjuntarse a muchas colas? O debería descartarse. Las reglas para eso se definen por el tipo de intercambio.
-![[Pasted image 20251206114028.png]]
+![Pasted image 20251206114028.png](images/Pasted%20image%2020251206114028.png)
 Hay varios tipos de intercambios disponibles: `direct`, `topic`, `headers` y `fanout`.
 Vamos a hacer énfasis en el último, en `fanout`. Vamos a crear un intercambio de este tipo y llamarlo `logs`.
 Aquí una tabla sobre la lista de intercambios
@@ -502,7 +502,7 @@ Aquí una tabla sobre la lista de intercambios
 sudo rabbitmqctl list_exchanges
 ```
 o dentro del contendor podemos hacer: 
-![[Pasted image 20251206114526.png]]
+![Pasted image 20251206114526.png](images/Pasted%20image%2020251206114526.png)
 
 | Nombre               | Tipo    | Descripción                                                                                                                |
 | -------------------- | ------- | -------------------------------------------------------------------------------------------------------------------------- |
@@ -523,7 +523,7 @@ El intercambio de fanout es bastante simple. Como puedes observar por el nombre 
 
 En la parte anterior pudimos enviar mensajes a todas las colas porque el exchange por defecto es `""`.
 Si recordamos nosotros enviábamos de la siguiente forma: 
-![[Pasted image 20251211101654.png]]
+![Pasted image 20251211101654.png](images/Pasted%20image%2020251211101654.png)
 Por lo que en `channel.basicPublish("",...)` poníamos el literal por defecto. Ahora podemos colocar nuestro exchange.
 ```java
 channel.basicPublish( "logs", "", null, message.getBytes());
@@ -540,7 +540,7 @@ String queueName = channel.queueDeclare().getQueue();
 Después ahondaremos más en todo el apartado de colas y cada término específicamente, para colas tenemos https://www.rabbitmq.com/docs/queues .
 Por el momento `queueName` contiene un nombre de cola cualquiera. (Este puede ser algo cómo `amq.gen-JzTY20BRgKO-HjmUJj0wLg`)
 #### Bindings
-![[Pasted image 20251212082135.png]]
+![Pasted image 20251212082135.png](images/Pasted%20image%2020251212082135.png)
 Ya hemos creado un exchange de tipo fanout y una cola `queue`. Ahora necesitamos llamar a ese exchange para enviar mensajes a nuestras colas, esa relación entre el exchange y las colas se llama `binding`.
 ```java
 channel.queueBinding(queueName,"logs","");
@@ -554,7 +554,7 @@ Listing bindings for vhost /... #Esta es la respuesta
 
 #### Poniendolo todo junto
 Ahora toca poner cada una de estas cosas juntas, lo cual generaría un diagrama:
-![[Pasted image 20251212083648.png]]
+![Pasted image 20251212083648.png](images/Pasted%20image%2020251212083648.png)
 El programa del productor debe lucir algo como lo siguiente: 
 ```java
 public class EmitLog {
@@ -609,9 +609,9 @@ public class ReceiveLogs {
 ```
 ***
 En nuestro ejemplo añadimos esta lógica y obtenemos los siguientes resultados. Enviamos: 
-![[Pasted image 20251212091600.png]]
+![Pasted image 20251212091600.png](images/Pasted%20image%2020251212091600.png)
 y lo que recibimos de cuatro (4) consumidores diferentes: 
-![[Pasted image 20251212091625.png]]
+![Pasted image 20251212091625.png](images/Pasted%20image%2020251212091625.png)
 Aqui observamos como cada uno procesa exactamente lo mismo
 
 ### Routing
@@ -633,13 +633,13 @@ El significado de esta llave depende del exchange que nosotros hayamos colocado,
 Siguiendo un ejemplo de un sistema de logging que tocamos en los tutoriales anteriores, manda todos los mensajes a todos los consumidores. Nosotros necesitamos filtrar los mensajes de logging dependiendo de su gravedad, por ejemplo , necesitamos escribir en el disco todos los problemas de logging críticos, pero no necesitamos ni los de alerta ni los informativos. Nosotros usamos `fanout` que a final de cuentas no nos brinda tanta flexibilidad, solo manda los mensajes a todos y ya.
 
 En cambio, vamos a usar el exchange `direct`, el algoritmo de ruteo detrás de `direct` es simple - un mensaje va a la cola cuyo `binding key` coincide exactamente con la `routing key`. La ilustración siguiente mejora la explicación.
-![[Pasted image 20251212114731.png]]
+![Pasted image 20251212114731.png](images/Pasted%20image%2020251212114731.png)
 Aqui podemos ver el exchange de tipo `direct` que tiene dos colas atada a esta. La primera cola tiene la llave `orange` y la segunda tiene dos llaves, `black` y `green`.
 
 En tal configuración, un mensaje publicado en el intercambio con una clave de enrutamiento naranja se enrutará a la cola `amq.x`. Los mensajes con una clave de enrutamiento de negro o verde irán a la `amq.x2`. Todos los demás mensajes serán descartados.
 #### Múltiples bindings:
 Es completamente válido crear múltiples colas con el mismo `binding Key`. En el siguiente ejemplo nuestro exchange `direct` va a actuar como un `fanout` aunque sea de tip`direct` esto debido a que se manda a todas las colas.
-![[Pasted image 20251213085919.png]]
+![Pasted image 20251213085919.png](images/Pasted%20image%2020251213085919.png)
 #### Emitir los logs:
 Para conseguir lo que deseamos que es mandar y recibir un tipo de log, primero vamos a cambiar de `fanout` a `direct`. Entonces: 
 ```java
@@ -741,7 +741,7 @@ public class Main {
 }
 ```
 Y nuestro resultado es el siguiente: 
-![[Pasted image 20251213110206.png]]
+![Pasted image 20251213110206.png](images/Pasted%20image%2020251213110206.png)
 Aquí observamos tanto la inicialización como los `logs` que nosotros enviamos
 
 ### Topicos:
@@ -763,7 +763,7 @@ Existe una regla importante: ese nombre del tema no puede ocupar más de **255 b
 - * (estrella) puede sustituir exactamente una palabra.
 - `#` (hash) puede sustituir a cero o más palabras.
 
-![[Pasted image 20251213122415.png]]
+![Pasted image 20251213122415.png](images/Pasted%20image%2020251213122415.png)
 En este ejemplo nosotros estamos enviando mensajes que describen animales. El mensaje sera enviado con una `routing key` que consiste en 3 palabras (dos puntos). La primera palabra describe la velocidad, la segunda palabra un color y la tercera la especie, generando un formato: `<velocidad>.<color>.<especie>`.
 
 Nosotros creamos tres `bindings`: Para Q1 está unida con él `binding key` `*.orange.*` y la Q2 con `*.*.rabbit` y `lazy.#`.
@@ -786,7 +786,7 @@ Lo único que se cambia en el código es:
 channel.exchangeDeclare(EXCHANGE_NAME, "topic");
 ```
 En resto queda exactamente igual. Un ejemplo demostrativo: 
-![[Pasted image 20251213190224.png]]
+![Pasted image 20251213190224.png](images/Pasted%20image%2020251213190224.png)
 Aqui vemos diferentes tipos de mensajes que son redirigidos dependiendo de lo que decidimos que escuchara, como se puede observar se coloca al inicio del la inicializacion del `jar` por `cmd`.
 
 ### RPC (Remote Procedurel Call)
@@ -852,7 +852,7 @@ Eso plantea un nuevo problema, después de haber recibido una respuesta en esa c
 Puede preguntar, ¿por qué deberíamos ignorar los mensajes desconocidos en la cola callback, en lugar de fallar con un error? Se debe a la posibilidad de una condición de carrera en el lado del servidor. Aunque es poco probable, es posible que el servidor RPC muera justo después de enviarnos la respuesta, pero antes de enviar un mensaje de acuse de recibo para la solicitud. Si eso sucede, el servidor RPC reiniciado procesará la solicitud de nuevo. Es por eso que en el cliente debemos manejar las respuestas duplicadas con gracia, y el RPC debería ser ideal.
 
 #### Summary (resumen)
-Nuestro RCP va a trabajar de la siguiente forma:![[Pasted image 20251214121556.png]]
+Nuestro RCP va a trabajar de la siguiente forma:![Pasted image 20251214121556.png](images/Pasted%20image%2020251214121556.png)
 
 - Cuando el cliente inicia, este crea una exclusiva callback queue.
 - Para una solicitud RPC, el cliente envía un mensaje con dos propiedades `reply_to` que nos dice a la cola a la que va dirigida y `correlation_id` que es quien da un unico valor a una petición
@@ -1186,9 +1186,9 @@ Usa una cola intermedia (`ConcurrentLinkedQueue`) y un hilo publicador
 ```
 
 Según la IA se puede decir: 
-![[Pasted image 20251215085123.png]]
+![Pasted image 20251215085123.png](images/Pasted%20image%2020251215085123.png)
 Y para un mejor entendimiento: 
-![[Pasted image 20251215090402.png]]
+![Pasted image 20251215090402.png](images/Pasted%20image%2020251215090402.png)
 #### Poniéndolo todo junto: 
 Vamos por dos partes, la del consumidor: 
 ##### Consumidor:
@@ -1492,17 +1492,17 @@ docker exec rabbitmq rabbitmq-plugins enable \
   rabbitmq_stream_management
 ```
 Eso sería todo, y en el cmd/bash veriamos: 
-![[Pasted image 20251216102550.png]]
+![Pasted image 20251216102550.png](images/Pasted%20image%2020251216102550.png)
 y en la UI: 
-![[Pasted image 20251216102624.png]]
+![Pasted image 20251216102624.png](images/Pasted%20image%2020251216102624.png)
 ***
 Ahora poniendo todo junto podemos ver el cómo funciona: 
 
-![[Pasted image 20251216103229.png]]
+![Pasted image 20251216103229.png](images/Pasted%20image%2020251216103229.png)
 Y del lado del productor: 
-![[Pasted image 20251216103245.png]]
+![Pasted image 20251216103245.png](images/Pasted%20image%2020251216103245.png)
 Si se vuelve a correr el consumidor: 
-![[Pasted image 20251216103304.png]]
+![Pasted image 20251216103304.png](images/Pasted%20image%2020251216103304.png)
 Vemos que ahora ya solo va al marker, porque ya consumio lo anterior :D . El código completo: 
 **Recibidor**
 ```java title=ReceivingApp.java
@@ -1951,7 +1951,7 @@ spring:
 	  username: guest  
 	  password: guest
 ```
-En este archivo de configuración tambien podemos denominar nuestra cola, puede ser algo como![[Pasted image 20251216202147.png]].
+En este archivo de configuración tambien podemos denominar nuestra cola, puede ser algo como![Pasted image 20251216202147.png](images/Pasted%20image%2020251216202147.png).
 
 Como se usa, el uso es sencillo. Vamos a seguir el tutorial de RabbitMQ para este caso, vamos a crearlo de la siguiente forma:
 ```java title=Receiver.java
@@ -1993,7 +1993,7 @@ public class Sender {
 
 Y vamos a hacer la prueba corriendo dos veces el `jar` pero con diferente perfil:
 
-![[Pasted image 20251218150336.png]]
+![Pasted image 20251218150336.png](images/Pasted%20image%2020251218150336.png)
 Aqui en el apartado de `sender` coloqué un controlador sencillo: 
 ```java title=ControllerDummy.java
   
@@ -2018,11 +2018,11 @@ public class ControllerDummy {
 }
 ```
 Si ingresamos a ese `endpoint` tenemos: 
-![[Pasted image 20251218150348.png]] y ![[Pasted image 20251218150402.png]]
+![Pasted image 20251218150348.png](images/Pasted%20image%2020251218150348.png) y ![Pasted image 20251218150402.png](images/Pasted%20image%2020251218150402.png)
 Aquí observamos que envia y recibe en dos diferentes que tiene perfiles diferentes para simular dos aplicaciones diferentes.
 ## Work Queues:
 Vamos a hablar sobre las work queues en Spring Boot. Tenemos la siguiente imagen que nos representa lo que deseamos: 
-![[Pasted image 20251219092430.png]]
+![Pasted image 20251219092430.png](images/Pasted%20image%2020251219092430.png)
 
 Para empezar vamos a crear el programa mediante los perfiles: 
 ```java title=configTutorial.java
@@ -2130,7 +2130,7 @@ public class SpringEnvironmentsApplication {
 ***
 Aqui nosotros vemos las tres clases, y el uso de los perfiles para ahora iniciar mediante maven cada perfil. Cómo tenemos el `@Shedule` apenas inicie va a empezar a enviar mensajes tipo: `Hello`.
 
-![[Pasted image 20251219101155.png]]
+![Pasted image 20251219101155.png](images/Pasted%20image%2020251219101155.png)
 Aqui observamos ambos apartados junto con sus perfiles. 
 ***
 En la documentación nos menciona cosas importantes, como por ejemplo el reconocimiento de menajes o el `Message acknowledge` el cual por defecto re encola si llega a haber algún tipo de problema con el procesamiento de mensajes, en el protocolo AMQP es: 
@@ -2153,7 +2153,7 @@ Hay dos formas de mandar lo que son este apartado de las colas de trabajo, digam
 
 Spring tiene por defecto `Fair dispatch` usando Spring AMQP. Este lo usa con `prefetchCount = 250` es decir: “No le des más de 250 mensajes sin ACK a un consumer”.
 Según la IA: 
-![[Pasted image 20251219124031.png]]
+![Pasted image 20251219124031.png](images/Pasted%20image%2020251219124031.png)
 
 ## Publish/Subscribe:
 Aquí volvemos a ver lo que son los exchanges, esta vez vamos directamente con el código, tenemos una clase de configuración de la siguiente forma: 
@@ -2283,9 +2283,9 @@ public Binding binding1a(DirectExchange direct,
 }
 ```
 Para eso recordemos el estilo en que se trasmiten los mensajes en los exchanges de tipo `direct`: 
-![[Pasted image 20251220155524.png]]
+![Pasted image 20251220155524.png](images/Pasted%20image%2020251220155524.png)
 También debemos de saber que es completamente legal crear múltiples bindings con el mismo binding key:
-![[Pasted image 20251220155646.png]]
+![Pasted image 20251220155646.png](images/Pasted%20image%2020251220155646.png)
 ### Publicando mensajes: 
 
 Para este apartado de publicación de mensajes ya no necesitamos usar la configuración de `fanout`, necesitamos la configuración de `direct`.
@@ -2423,7 +2423,7 @@ public class Sender {
 ```
 Entonces cada segundo cambiamos de binding.
 A la hora de reproducirlos vemos lo siguiente: 
-![[Pasted image 20251220170042.png]]
+![Pasted image 20251220170042.png](images/Pasted%20image%2020251220170042.png)
 También se agregó un programa con otro binding, el programa: 
 ```java title=OtroPrograma
 public class Main {  
@@ -2474,7 +2474,7 @@ public class Main {
 ```
 
 Y los resultados: 
-![[Pasted image 20251220170157.png]]
+![Pasted image 20251220170157.png](images/Pasted%20image%2020251220170157.png)
 ***
 Como conclusión, ya tenemos el cómo replicarlo en Spring Boot.
 ## Topics: 
@@ -2483,13 +2483,13 @@ Recordemos lo que son los topics, los topics son una forma de subdividir temas e
 - `#` (hash) puede sustituir cero o muchas palabras.
 
 El ejemplo que dimos en tutoriales anteriores es el mismo usado aqui:
-![[Pasted image 20251220192009.png]]
+![Pasted image 20251220192009.png](images/Pasted%20image%2020251220192009.png)
 En este caso, al igual que en el tutorial de los inicios, se divide en 3 topicos: 
 `<velocidad>.<color>.<especie>`
 Un ejemplo rápido generado por la IA frente a esto de los asteriscos y hash, es por ejemplo:
-![[Pasted image 20251221152809.png]]
+![Pasted image 20251221152809.png](images/Pasted%20image%2020251221152809.png)
 Y en el apartado de hash: 
-![[Pasted image 20251221152821.png]]
+![Pasted image 20251221152821.png](images/Pasted%20image%2020251221152821.png)
 ***
 ¿Cómo quedaría con el código?: 
 El código queda muy, muy similar, lo único que cambia es la configuración así: 
@@ -2560,7 +2560,7 @@ public class Sender {
 }
 ```
 Ahora, creamos los programas y como vemos lo que enviamos, esto es lo que recibimos: 
-![[Pasted image 20251221172951.png]]![[Pasted image 20251221173009.png]]
+![Pasted image 20251221172951.png](images/Pasted%20image%2020251221172951.png)![Pasted image 20251221173009.png](images/Pasted%20image%2020251221173009.png)
 
 Ahí vemos cuál es la que envía, cuáles reciben.
 
@@ -2639,5 +2639,5 @@ public class Receiver {
 ```
 
 Con esto ya tenemos el siguiente resultado: 
-![[Pasted image 20251221211934.png]]
+![Pasted image 20251221211934.png](images/Pasted%20image%2020251221211934.png)
 Cómo se observa hay un apartado que envia y uno que recibe. Y ... ya.

@@ -1,7 +1,7 @@
 # Un Análisis Detallado de Arquitecturas de Aplicaciones Web: Del Modelo Clásico a la Single-Page Application (SPA)
 
 
-![[ajax.png]]
+![ajax.png](images/ajax.png)
 ## 1. Nomenclatura y Semántica de los Diagramas de Arquitectura Web
 
 ### Introducción al Concepto de Diagramas de Arquitectura
@@ -107,6 +107,6 @@ La elección de la arquitectura adecuada es una decisión estratégica que debe 
 La tensión entre el renderizado inicial y el rendimiento posterior ha llevado a la evolución de arquitecturas híbridas. Las soluciones modernas buscan combinar lo mejor de ambos mundos: el rápido tiempo de carga y el SEO amigable del renderizado en el servidor, con la experiencia de usuario fluida y la interactividad de las aplicaciones de una sola página.
 
 # Apartado de diagramas de diferentes situaciones. 
-![[jsf-generando-html.png]]
+![jsf-generando-html.png](images/jsf-generando-html.png)
 Aqui encontramos lo que es el funcionamiento de JSF. 
 
