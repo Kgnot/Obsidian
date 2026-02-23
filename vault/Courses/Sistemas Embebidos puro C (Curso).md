@@ -587,7 +587,7 @@ Non-Secure world
 ```
 Esto no es software, esto es una separación implementada en arquitectura CPU (Cortex-M)
 Y según el datasheets: 
-![[Pasted image 20260219215120.png]]
+![[Core_crotex.png]]
 ### Drivers
 Aquí vive:
 - HAL
@@ -731,7 +731,608 @@ SECURE_FAULT_CB_ID     = 0x00U, /*!< System secure fault callback ID */
 void SECURE_RegisterCallback(SECURE_CallbackIDTypeDef CallbackId, void *func);
 
 ```
+## PINES: 
+Ya hablando más a detalle y según la documentación debemos mirar los pines, nosotros contamos con una distribución: VFBGA264 ballout, que es básicamente:
+![[Pasted image 20260220192024.png]]
 
+De aqui tenemos una tabla que nos dice la descripción de los pines (ahora hablaremos de nombres): 
+
+Entonces temos diferentes tipos de pines: 
+
+|Abreviación|Significa|En palabras simples|
+|---|---|---|
+|S|Supply pin|Pin de alimentación (VDD, VSS). No programable.|
+|I|Input only|Solo entrada. No puede sacar señal.|
+|O|Output only|Solo salida.|
+|I/O|Input/Output|Puede leer o escribir.|
+|A|Analog|Conectado a ADC/DAC o función analógica.|
+|TT|3.3V tolerant|Soporta 3.3V aunque el núcleo trabaje a menos.|
+|RST|Reset|Pin de reinicio del chip.|
+
+Estas abreviaciones  ...
+
+Luego tenemos la estructura eléctrica del pin, una I/O structure:
+
+|Sufijo|Qué significa|
+|---|---|
+|_a|Tiene switch analógico interno (conectado a VDDA)|
+|_c|Puede manejar USB Type-C power delivery|
+|_f|Soporta I2C Fast Mode+|
+|_t|Función tamper activa en modo batería|
+**Nota importante**
+
+> “All I/Os are set as analog inputs during and after reset”
+
+Esto es clave.
+Cuando el micro arranca:
+Todos los pines están en modo analógico.
+
+¿Por qué?
+
+- Menor consumo
+- Evita corrientes indeseadas
+- Evita conflicto eléctrico
+
+Luego tú los configuras como:
+
+- GPIO
+- I2C
+- SPI
+- UART
+- ADC
+***
+***
+## Funciones del pin 
+
+Ahora vamos a ver las funciones de pin: 
+
+¿Qué significa?, por ejemplo, un pin físico PH8 no está conectado a una sola consta internamente. Tiene un multiplexor interno, esto significa: 
+> El pin puede conectarse a distintos bloques del microcontrolador.
+> Tú eliges cuál usar.
+
+Qué tipos de funciones puede tener un pin?, hay 3 categorías reales a nivel práctico
+
+### Funciones básicas
+Estas son las que no conectan el pin a un periférico especial, es decir, todas las de GPIO: 
+- **GPIO Input**
+- **GPIO Output**
+- **GPIO Analog**
+- **GPIO Interrupt (EXTI)**
+
+### Funciones alternativas
+
+Luego tenemos las funciones Alternativas que se dividen en 16, F0 - F15. 
+Estas funciones alternativas es un sistema cuyo mecanismo permite que un solo pin físico del microcontrolador STM32N6 se conecte internamente a diferentes módulos o bloques periféricos. Hay 16 posibles selecciones
+
+Nos preguntamos: ¿Cómo funcionan las funciones alternativas?
+Cada pin de entrada/salida (GPIO) tiene un multiplexor interno. Mediante la programación, puedes "enrutar" la señal del pin hacia un bloque específico (como un temporizador, una interfaz de comunicación o el sistema de depuración)
+
+**Selección por hardware:** Para cada pin, se eligen 4 bits en los registros de configuración para decidir cuál de las 16 funciones estará activa.
+**Independencia:** Si un pin no se usa para una función alterna, puede usarse como un GPIO estándar (entrada o salida digital)
+
+#### Conexión por bloques (AF0 - AF15)
+
+La documentación organiza las funciones según el bloque o periférico al que se conectan. Aquí podemos observar un pequeño resumen según la documentación: 
+- **AFO - Sistema y control:** Se usa principalmente para funciones del sistema (SYS), señales de depuración (JTAG,SWD) y temporizadores básicos como el TIM1,TIM2,TIM16 y TIM17.
+- **AF1 al AF3 - Temporizadores y Low Power:** Conectan con una amplia gama de temporizadores (TIM3,TIM4,TIM5,TIM8,TIM12,TIM15) y periféricos de bajo consumo como LPTIM1/2/3
+- **AF4 al AF6 - Interfaces seriales (I2C/SPI/USART):** Estos bloques están dedicados a la comunicación. Permiten conecta los pines a módulos SPI (1 al 6), interfaces de audio I2S, y puertos USART/UART
+- **AF7 al AF8 - Comunicación Avanzada y Audio:** Aquí se encuentran puertos USART adicionales (1,2,3,6,10), interfaces de audio serie (SAI2), y receptores de audio digital (SPDIFRX)
+- **AF9 al AF12 - Almacenamiento, Gráficos y Memoria:** Estos se conectan a bloques de alto rendimiento como: 
+	    ◦ **FDCAN1/2/3** (Redes industriales).
+	    ◦ **SDMMC1/2** (Tarjetas SD/eMMC).
+	    ◦ **FMC** (Controlador de memoria flexible para RAM/Flash externa).
+	    ◦ **LCD-TFT** (Controlador de pantalla).
+- **AF13 al AF14 - Multimedia:** Reservado para la interfaz de cámara digital (DCMI/PSSI) y señales adicionales del controlador de pantalla (LCD).
+- **AF15 - Eventos del Sistema:** Generalmente se asocia con señales de salida de eventos (**EVENTOUT**) y funciones de monitoreo del sistema.
+
+#### ¿Cómo se programa a nivel de registros?
+
+Para configurar estas funciones en el código, se utilizan dos registros específicos por cada puerto de GPIO (puerto A, B, C, etc.):
+1. **GPIOx_AFRL** **(Alternate Function Register Low):** Controla la selección de los pines **0 al 7** del puerto.
+2. **GPIOx_AFRH** **(Alternate Function Register High):** Controla la selección de los pines **8 al 15** del puerto.
+
+Cada pin tiene asignados **4 bits** en estos registros. Por ejemplo, si quieres que el pin PA0 funcione como la señal del temporizador TIM2_CH1, debes escribir el valor binario correspondiente a la **AF1** en los primeros 4 bits del registro `GPIOA_AFRL`.
+
+#### Consideración de Seguridad
+
+Dado que este microcontrolador soporta **TrustZone**, la configuración de estas funciones alternas puede restringirse. Es decir, puedes programar el sistema para que solo la aplicación segura (**AppliSecure**) tenga permiso para cambiar la función de ciertos pines críticos, protegiendo así el hardware contra modificaciones no autorizadas por parte del software no seguro
+
+## Tipos de configuraciones de los PIN: 
+
+### Multimedia y Pantalla (LTDC / DSI / DCMI / VENC / JPEG)
+
+#### Controlador de Pantalla LTDC (LCD-TFT Display Controller)
+
+|Señal|Función|Descripción Detallada|
+|---|---|---|
+|**LCD_CLK**|Reloj de píxel|Genera el reloj para sincronizar la transferencia de píxeles. Típicamente entre 5-33 MHz según resolución.|
+|**LCD_HSYNC**|Sincronización horizontal|Indica el inicio de una nueva línea de píxeles. Permite resetear el contador horizontal del panel.|
+|**LCD_VSYNC**|Sincronización vertical|Indica el inicio de un nuevo cuadro/fotograma. Resetea el contador vertical para comenzar una nueva imagen.|
+|**LCD_DE**|Habilitación de datos|Activo durante la transmisión válida de píxeles. Distingue entre el área visible y los periodos de blanking.|
+|**LCD_R[7:0]**|Canal Rojo|Hasta 8 bits por color (24 bits total) para paneles RGB888. Compatible con paneles RGB565 y RGB666.|
+|**LCD_G[7:0]**|Canal Verde|El ojo humano es más sensible al verde, por eso suele tener más resolución en algunos formatos.|
+|**LCD_B[7:0]**|Canal Azul|Completa la gama de colores de 16.7 millones de colores en modo 24 bits.|
+**Características adicionales del LTDC:**
+
+- Soporta múltiples capas (Layer 1 y Layer 2) con mezcla alpha blending por hardware
+- Formatos de píxel: ARGB8888, RGB888, RGB565, ARGB1555, ARGB4444
+- Look-Up Tables (LUTs) para paletas de color
+- Interrupción por sincronización vertical (Vsync) para actualización sin tearing
+
+
+#### Interfaz de Cámara DCMI / DCMIPP (Digital Camera Interface)
+|Señal|Función|Detalles Técnicos|
+|---|---|---|
+|**DCMIPP_PIXCLK**|Reloj de píxel|Generado por el sensor de cámara. Captura datos en cada flanco (programable por flanco ascendente/descendente).|
+|**DCMIPP_HSYNC**|Sincronización horizontal|Indica el inicio/fin de una línea de la imagen. Activo bajo o alto configurable.|
+|**DCMIPP_VSYNC**|Sincronización vertical|Indica el inicio/fin de un cuadro completo. Fundamental para reconstruir la imagen.|
+|**DCMI_D[13:0] / DCMIPP_D[13:0]**|Bus de datos|Modos de 8, 10, 12 o 14 bits. Soporta formatos YCbCr, RGB, RAW Bayer.|
+**Novedades de DCMIPP (Pixel Pipeline):**
+
+- Procesamiento en tiempo real: recorte, escalado, conversión de formato
+- Estadísticas automáticas de imagen (histograma, balance de blancos)
+- Detección de movimiento por hardware
+
+#### Interfaz Paralela Sincrónica PSSI
+| Señal            | Función               | Aplicación                                                                         |
+| ---------------- | --------------------- | ---------------------------------------------------------------------------------- |
+| **PSSI_PDCK**    | Reloj de datos        | Reloj para sincronizar la transferencia de datos paralelos. Hasta 50 MHz.          |
+| **PSSI_DE**      | Habilitación de datos | Señal de control para indicar datos válidos en el bus.                             |
+| **PSSI_RDY**     | Listo                 | Handshake para control de flujo. Indica que el receptor está listo para más datos. |
+| **PSSI_D[15:0]** | Datos paralelos       | Bus de 8 o 16 bits para comunicación rápida con FPGAs, ADCs paralelos, o sensores. |
+
+### Audio Digital (I2S / SAI / SPDIF / ADF / DFSDM)
+#### Interfaz I2S (Inter-IC Sound)
+
+|Señal|Función|Detalles|
+|---|---|---|
+|**I2Sx_CK**|Reloj serie (SCK)|Reloj continuo que sincroniza los bits. Frecuencia = frecuencia de muestreo × bits por canal × 2.|
+|**I2Sx_WS**|Selección de palabra|Identifica el canal (izquierdo = 0, derecho = 1). Conmutación a la frecuencia de muestreo.|
+|**I2Sx_SDI**|Entrada de datos serie|Recibe audio desde códecs, micrófonos digitales o DSPs.|
+|**I2Sx_SDO**|Salida de datos serie|Transmite audio a amplificadores, DACs o auriculares.|
+|**I2Sx_MCK**|Reloj maestro|Reloj de alta precisión (256× o 384× frecuencia de muestreo) para códecs que lo requieren.|
+**Formatos I2S soportados:**
+
+- Estándar I2S Philips (MSB justificado con desplazamiento de 1 bit)
+- MSB Justificado (dato alineado con WS)
+- LSB Justificado (alineación al final)
+- PCM (sin WS, solo reloj y datos)
+
+#### Interfaz SAI (Serial Audio Interface) - La más avanzada
+|Señal|Función|Características|
+|---|---|---|
+|**SAIx_SCK_y**|Reloj serie|Reloj independiente para cada bloque A o B. Hasta 12.288 MHz.|
+|**SAIx_FS_y**|Frame Sync|Sincronización de cuadro. Puede ser onda cuadrada o pulso.|
+|**SAIx_SD_y**|Datos serie|Línea de datos para audio. Hasta 16 canales por bloque.|
+|**SAIx_MCLK_y**|Reloj maestro|Salida de reloj para códecs externos. Múltiplo de la frecuencia de muestreo.|
+
+**Flexibilidad del SAI:**
+
+- Dos bloques independientes (A y B) que pueden trabajar en modo maestro/esclavo
+- Soporta TDM (Time Division Multiplexing) hasta 16 canales
+- Interfaces con I2S, AC'97, SPDIF, PCM
+- Compatibilidad con DSP y procesamiento en coma flotante
+#### Receptor SPDIF (Sony/Philips Digital Interface)
+
+|Señal|Función|Descripción|
+|---|---|---|
+|**SPDIFRX1_INy**|Entrada SPDIF|Recibe audio digital óptico (TOSLINK) o coaxial. Soporta hasta 192 kHz/24 bits.|
+|**SPDIFRX1_INVALID**|Invalid Frame|Indica errores en la trama recibida (opcional según implementación).|
+**Datos transmitidos por SPDIF:**
+
+- Audio digital codificado en biphase-mark (BMC)
+- Información de canal (derechos de copia, énfasis, frecuencia de muestreo)
+- Soporte para audio comprimido (Dolby Digital, DTS)
+
+#### Filtro Digital de Audio ADF / MDF / DFSDM
+
+| Señal                     | Función          | Aplicación                                                            |
+| ------------------------- | ---------------- | --------------------------------------------------------------------- |
+| **ADF1_SDIy / MDF1_SDIy** | Entrada de datos | Para micrófonos PDM (Pulse Density Modulation) de móviles y MEMS.     |
+| **ADF1_CCKx**             | Reloj de salida  | Reloj configurable para micrófonos digitales (típicamente 1-3.2 MHz). |
+| **DFSDM_CKOUT**           | Reloj maestro    | Control de múltiples micrófonos digitales.                            |
+| **DFSDM_DATINy**          | Datos PDM        | Entrada de moduladores sigma-delta externos.                          |
+**Procesamiento en DFSDM:**
+
+- Filtros Sinc (CIC) configurables
+- Decimación programable (de 16 a 128)
+- Salida PCM de 16/24 bits
+- Soporte para hasta 8 canales simultáneos
+
+### Conectividad y Redes (Ethernet / USB / CAN / FDCAN)
+#### Controlador Ethernet (MAC)
+
+| Señal         | Función          | Detalles                                                                |
+| ------------- | ---------------- | ----------------------------------------------------------------------- |
+| **ETH1_MDC**  | Management Clock | Reloj para la interfaz de gestión MDIO. Máximo 2.5 MHz.                 |
+| **ETH1_MDIO** | Management Data  | Línea de datos bidireccional para configurar el PHY. Pull-up requerido. |
+**Modos MII (Media Independent Interface):**
+
+|Señal MII|Función|
+|---|---|
+|**ETH1_MII_TX_CLK**|Reloj de transmisión (25 MHz para 100 Mbps, 2.5 MHz para 10 Mbps)|
+|**ETH1_MII_TX_EN**|Habilitación de transmisión|
+|**ETH1_MII_TXD[3:0]**|Datos de transmisión (nibble)|
+|**ETH1_MII_RX_CLK**|Reloj de recepción|
+|**ETH1_MII_RX_DV**|Datos válidos en recepción|
+|**ETH1_MII_RXD[3:0]**|Datos de recepción|
+|**ETH1_MII_CRS**|Carrier Sense - Detección de portadora|
+|**ETH1_MII_COL**|Collision Detect - Detección de colisión|
+
+**Modo RMII (Reduced MII) - El más usado:**
+
+|Señal RMII|Función|
+|---|---|
+|**ETH1_RMII_REF_CLK**|Reloj de referencia de 50 MHz único|
+|**ETH1_RMII_CRS_DV**|Carrier Sense + Data Valid combinados|
+|**ETH1_RMII_TXD[1:0]**|Datos de transmisión (2 bits)|
+|**ETH1_RMII_RXD[1:0]**|Datos de recepción (2 bits)|
+|**ETH1_RMII_TX_EN**|Habilitación de transmisión|
+|**ETH1_RMII_RX_ER**|Error de recepción|
+
+**Modo RGMII (Reduced Gigabit MII) - Alta velocidad:**
+
+|Señal RGMII|Función|
+|---|---|
+|**ETH1_RGMII_TX_CTL**|Control de transmisión (TX_EN + TX_ER combinados)|
+|**ETH1_RGMII_RX_CTL**|Control de recepción (RX_DV + RX_ER combinados)|
+|**ETH1_RGMII_TXD[3:0]**|Datos de transmisión (doble tasa de datos: rising/falling edge)|
+|**ETH1_RGMII_RXD[3:0]**|Datos de recepción (doble tasa de datos)|
+|**ETH1_RGMII_CLK**|Reloj de 125 MHz (para Gigabit)|
+
+#### USB 2.0 High Speed / OTG
+
+|Señal|Función|Características|
+|---|---|---|
+|**USB_OTGx_HS_DP**|D+ positivo|Línea diferencial positiva. Pull-up interno para identificar velocidad.|
+|**USB_OTGx_HS_DM**|D- negativo|Línea diferencial negativa.|
+|**USB_OTGx_ID**|Identification|Para modo OTG: corto a GND = Host, flotante = Device.|
+|**USB_OTGx_VBUS**|Voltaje bus|Detección de 5V en el bus USB. Protección contra sobrevoltaje.|
+|**USB_OTGx_SOF**|Start of Frame|Pulso de sincronización de 1 kHz para isócrono.|
+**Modos USB soportados:**
+
+- Full Speed (12 Mbps)
+- High Speed (480 Mbps) - requiere PHY externo
+- OTG (On-The-Go): puede actuar como Host o Device
+- Soporte para 8 endpoints bidireccionales
+
+#### USB Type-C Power Delivery (UCPD)
+| Señal           | Función                 | Protocolo                                                            |
+| --------------- | ----------------------- | -------------------------------------------------------------------- |
+| **UCPD1_CC1**   | Configuration Channel 1 | Detecta orientación del cable y negocia voltajes (5V, 9V, 15V, 20V). |
+| **UCPD1_CC2**   | Configuration Channel 2 | Igual que CC1 para el otro lado del conector.                        |
+| **UCPD1_VCONN** | Voltaje para cable      | Alimenta chips en cables electrónicos (hasta 1W).                    |
+**Capacidades PD:**
+
+- Negociación bidireccional de potencia (Source/Sink)
+- Mensajes estructurados por BMC (Biphase Mark Coding)
+- Roles intercambiables dinámicamente (DRP - Dual Role Power)
+
+#### CAN FD (Controller Area Network Flexible Data-Rate)
+
+|Señal|Función|Diferencias con CAN clásico|
+|---|---|---|
+|**FDCANx_TX**|Transmisión|Salida al transceptor CAN (como PCA82C251, TJA1040).|
+|**FDCANx_RX**|Recepción|Entrada desde el transceptor. Diferencial en el bus.|
+
+**Mejoras de CAN FD:**
+
+- **Datos más rápidos:** Hasta 8 Mbps en fase de datos (vs 1 Mbps clásico)
+- **Payload mayor:** Hasta 64 bytes por trama (vs 8 bytes clásico)
+- **Mejor integridad:** CRC más robusto
+- Retrocompatible con CAN 2.0 (puede coexistir en la misma red)
+
+### Memorias y Almacenamiento (FMC / XSPI / SDMMC / OSPI)
+#### FMC (Flexible Memory Controller) - El más versátil
+
+|Señal|Función|Dispositivos Soportados|
+|---|---|---|
+|**FMC_A[25:0]**|Bus de direcciones|Hasta 64MB por banco de memoria.|
+|**FMC_D[31:0]**|Bus de datos|8, 16 o 32 bits según dispositivo.|
+|**FMC_AD[15:0]**|Address/Data mux|Dirección y datos multiplexados para ahorrar pines.|
+|**FMC_NE[4:1]**|Chip Select|Hasta 4 bancos independientes.|
+|**FMC_NWE**|Write Enable|Estrobos de escritura (activo bajo).|
+|**FMC_NOE**|Output Enable|Estrobos de lectura (activo bajo).|
+|**FMC_NBL[3:0]**|Byte Enable|Habilita bytes específicos en bus de 32 bits.|
+
+**Señales específicas para NOR/PSRAM:**
+
+|Señal|Función|
+|---|---|
+|**FMC_NL (NADV)**|Address Latch - Dirección válida en bus mux|
+|**FMC_NWAIT**|Wait - Extiende ciclos de acceso|
+
+**Señales específicas para NAND:**
+
+|Señal|Función|
+|---|---|
+|**FMC_NCE**|Chip Enable para NAND|
+|**FMC_NWP**|Write Protect - Protección contra escritura|
+|**FMC_INT**|Ready/Busy - Estado del dispositivo|
+
+**Señales específicas para SDRAM:**
+
+|Señal|Función|Timing Típico|
+|---|---|---|
+|**FMC_SDCLK**|Reloj SDRAM|Hasta 100-133 MHz|
+|**FMC_SDNWE**|Write Enable para SDRAM|DQM (Data Mask)|
+|**FMC_SDCKE[1:0]**|Clock Enable|Activa/desactiva reloj para ahorro energía|
+|**FMC_NRAS**|Row Address Strobe|Activa dirección de fila|
+|**FMC_NCAS**|Column Address Strobe|Activa dirección de columna|
+|**FMC_BA[1:0]**|Bank Address|Selecciona banco interno (4 bancos típicos)|
+#### Interfaz XSPI / Octo-SPI (eXpanded SPI)
+
+| Señal                | Función               | Velocidad                                           |
+| -------------------- | --------------------- | --------------------------------------------------- |
+| **XSPIM_Px_CLK**     | Reloj serie           | Hasta 200 MHz (DDR - Double Data Rate)              |
+| **XSPIM_Px_NCLK**    | Reloj inverso         | Para señales diferenciales en alta velocidad        |
+| **XSPIM_Px_IO[7:0]** | Datos bidireccionales | 8 líneas de datos (de ahí "Octo" SPI)               |
+| **XSPIM_Px_DQS**     | Data Strobe           | Señal de sincronización para DDR (como en HyperBus) |
+| **XSPIM_Px_NCS**     | Chip Select           | Selección de dispositivo                            |
+
+**Rendimiento XSPI:**
+
+- Modo SDR (Single Data Rate): 1 bit/cycle × 8 líneas × 200 MHz = **200 MB/s**
+- Modo DDR (Double Data Rate): 2 bits/cycle × 8 líneas × 200 MHz = **400 MB/s**
+- Soporta memoria Flash, PSRAM, HyperRAM, MRAM
+
+#### SDMMC (SD/MMC Card Interface)
+| Señal             | Función       | Modo 1-bit           | Modo 4-bit    | eMMC              |
+| ----------------- | ------------- | -------------------- | ------------- | ----------------- |
+| **SDMMCx_CK**     | Reloj         | 0-50 MHz             | 0-50 MHz      | 0-200 MHz (HS200) |
+| **SDMMCx_CMD**    | Comandos      | Bidireccional        | Bidireccional | Bidireccional     |
+| **SDMMCx_D[7:0]** | Datos         | D0 solo              | D0-D3         | D0-D7             |
+| **SDMMCx_CD**     | Card Detect   | Detección mecánica   | -             | -                 |
+| **SDMMCx_WP**     | Write Protect | Protección escritura | -             | -                 |
+**ipos soportados:**
+
+- SDSC (hasta 2GB)
+- SDHC (hasta 32GB)
+- SDXC (hasta 2TB)
+- eMMC 4.5/5.0/5.1
+- MMCplus
+
+### Temporizadores y PWM (TIM / LPTIM / HRTIM)
+
+#### Temporizadores Avanzados (TIM1, TIM8, TIM20)
+
+|Señal|Función|Capacidades|
+|---|---|---|
+|**TIMx_CH[1:4]**|Capture/Compare|PWM, medición de frecuencia, generación de ondas. Resolución de 16 bits.|
+|**TIMx_CH[1:4]N**|Salidas complementarias|Para drivers de MOSFET/IGBT con dead-time programable.|
+|**TIMx_BKIN**|Break Input|Entrada de fallo. Desactiva salidas en <100 ns.|
+|**TIMx_BKIN2**|Segundo Break|Doble seguridad para aplicaciones críticas.|
+|**TIMx_ETR**|External Trigger|Clock externo o reset por hardware.|
+|**TIMx_COMB**|Combinación de canales|Para PWM trifásico o múltiples fases.|
+#### Temporizadores de Bajo Consumo (LPTIM)
+
+| Señal              | Función         | Consumo Típico                  |
+| ------------------ | --------------- | ------------------------------- |
+| **LPTIMx_IN[1:2]** | Entradas        | Pueden funcionar en STOP mode   |
+| **LPTIMx_OUT**     | Salida PWM      | Mantiene señal en bajo consumo  |
+| **LPTIMx_ETR**     | Trigger externo | Despierta el sistema desde STOP |
+#### Temporizadores de Alta Resolución (HRTIM)
+- **Resolución:** 217 ps (picosegundos)
+- **Canales:** Hasta 6 canales con 10 salidas
+- **Aplicaciones:** Fuentes conmutadas (SMPS), inversores solares, control motor avanzado
+
+
+### Conversores Analógico-Digital (ADC / DAC / COMP / OPAMP)
+
+#### ADC de 12/16 bits
+| Señal                     | Función                | Características                                     |
+| ------------------------- | ---------------------- | --------------------------------------------------- |
+| **ADCx_IN[0:19]**         | Entradas analógicas    | Hasta 20 canales externos                           |
+| **ADCx_INPy / ADCx_INNy** | Entradas diferenciales | Para mediciones de alta precisión                   |
+| **VREF+ / VREF-**         | Referencia de voltaje  | Precisión determinada por estabilidad de referencia |
+| **ADCx_EXT**              | Trigger externo        | Inicia conversión por hardware                      |
+**Características ADC:**
+
+- Resolución configurable: 6, 8, 10, 12, 14, 16 bits
+- Modo scan: múltiples canales automáticos
+- Inyectado: canales prioritarios
+- DMA: transferencia automática a memoria
+- Sobremuestreo: mejora SNR hasta 16 bits
+
+#### DAC de 12 bits
+
+| Señal             | Función            |                                   |
+| ----------------- | ------------------ | --------------------------------- |
+| **DACx_OUT[1:2]** | Salidas analógicas | Generación de formas de onda      |
+| **DACx_TRIG**     | Trigger            | Sincronización con temporizadores |
+
+#### Comparadores (COMP)
+| Señal         | Función          |                                |
+| ------------- | ---------------- | ------------------------------ |
+| **COMPx_INP** | Entrada positiva | Voltaje a comparar             |
+| **COMPx_INN** | Entrada negativa | Voltaje de referencia          |
+| **COMPx_OUT** | Salida digital   | 0 si INP < INN, 1 si INP > INN |
+
+#### Amplificadores Operacionales (OPAMP)
+
+| Señal           | Función              | Modos                          |
+| --------------- | -------------------- | ------------------------------ |
+| **OPAMPx_VINP** | Entrada no inversora | PGA (amplificador programable) |
+| **OPAMPx_VINM** | Entrada inversora    | Follower (seguidor)            |
+| **OPAMPx_VOUT** | Salida               | Filtro activo                  |
+### Interfaces de Comunicación Serial (I2C / SPI / USART / I3C)
+#### I2C / I3C (Inter-Integrated Circuit)
+
+| Señal            | I2C Estándar          | I3C (Mejorado)                   |
+| ---------------- | --------------------- | -------------------------------- |
+| **SCL**          | Reloj hasta 1 MHz     | Reloj hasta 12.5 MHz             |
+| **SDA**          | Datos bidireccionales | Datos bidireccionales HDR        |
+| **SMBA**         | SMBus Alert           | -                                |
+| **SCL**, **SDA** | Pull-up requerido     | Push-pull en modo alta velocidad |
+**Ventajas I3C:**
+
+- Compatible con dispositivos I2C legacy
+- In-band interrupts (sin línea extra)
+- Hot-join: dispositivos pueden unirse dinámicamente
+- Menor consumo (1.8V compatible)
+
+#### SPI (Serial Peripheral Interface)
+|Señal|Función|Modo Dúplex|
+|---|---|---|
+|**SPIx_SCK**|Reloj serie|Hasta 50 MHz (SDR) o 100 MHz (DDR)|
+|**SPIx_MISO**|Master In Slave Out|Datos desde periférico|
+|**SPIx_MOSI**|Master Out Slave In|Datos hacia periférico|
+|**SPIx_NSS**|Chip Select|Selección de dispositivo|
+#### USART / UART / LPUART
+|Señal|USART|UART|LPUART|
+|---|---|---|---|
+|**TX**|Transmisión|Transmisión|Transmisión|
+|**RX**|Recepción|Recepción|Recepción|
+|**CK**|Reloj síncrono|-|-|
+|**CTS**|Clear to Send|-|-|
+|**RTS**|Request to Send|-|-|
+|**SW**|SmartCard|-|-|
+### Sistema y Depuración (SYS / DBG / RCC / PWR)
+#### Depuración JTAG / SWD
+| Señal          | JTAG             | SWD (Serial Wire)           |
+| -------------- | ---------------- | --------------------------- |
+| **JTMS/SWDIO** | JTAG Mode Select | Datos serie bidireccionales |
+| **JTCK/SWCLK** | JTAG Clock       | Reloj serie                 |
+| **JTDI**       | Datos entrada    | -                           |
+| **JTDO**       | Datos salida     | -                           |
+| **NJTRST**     | Reset TAP        | -                           |
+#### Traza ETM (Embedded Trace Macrocell)
+|eñal|Función|Ancho de banda|
+|---|---|---|
+|**TRACECLK**|Reloj de traza|Hasta 200 MHz|
+|**TRACED[3:0]**|Datos de traza|Hasta 4 bits|
+#### Relojes del Sistema
+| Señal            | Función         | Frecuencia                 |
+| ---------------- | --------------- | -------------------------- |
+| **OSC_IN/OUT**   | Cristal HSE     | 4-26 MHz                   |
+| **OSC32_IN/OUT** | Cristal LSE     | 32.768 kHz                 |
+| **MCO1**         | Salida de reloj | HSI, HSE, LSI, LSE, SYSCLK |
+| **MCO2**         | Salida de reloj | PLL, HSE, SYSCLK, PLLI2S   |
+#### Control de Potencia y Seguridad
+
+|Señal|Función|Uso|
+|---|---|---|
+|**WKUP[1:5]**|Wake-up|Despiertan desde STOP/STANDBY|
+|**TAMP_IN**|Tamper input|Detecta manipulaciones físicas|
+|**TAMP_OUT**|Tamper output|Borra RTC backup registers|
+|**PVD_IN**|Power Voltage Detect|Monitor de voltaje|
+#### Puertos de Depuración Avanzada
+| Señal        | Función               |                                          |
+| ------------ | --------------------- | ---------------------------------------- |
+| **HDP[0:7]** | High-speed Debug Port | Observa señales internas en tiempo real  |
+| **EVENTOUT** | Salida de eventos     | Sincronización entre cores o periféricos |
+
+### RESUMEN GENERAL: 
+
+1. Multimedia y Pantalla (LTDC / PSSI / DCMI / VENC)
+
+Estas señales gestionan la salida de gráficos y la entrada de video:
+
+• **LCD_CLK, LCD_HSYNC, LCD_VSYNC, LCD_DE**: Señales de reloj, sincronización y habilitación de datos para el controlador de pantalla LTDC.
+
+• **LCD_Ry, LCD_Gy, LCD_By**: Canales de color (Rojo, Verde, Azul) para paneles de hasta 24 bits.
+
+• **PSSI_PDCK, PSSI_DE, PSSI_RDY**: Reloj, habilitación de datos y señal de listo para la interfaz paralela sincrónica PSSI.
+
+• **DCMIPP_PIXCLK, DCMIPP_HSYNC, DCMIPP_VSYNC**: Señales de la tubería de píxeles de la cámara digital para sincronización de imagen.
+
+• **DCMI_Dx / DCMIPP_Dx**: Bus de datos de la interfaz de cámara (de 8 a 16 bits).
+
+2. Audio Digital (I2S / SAI / SPDIF / ADF)
+
+Señales especializadas en la transmisión y captura de audio:
+
+• **I2Sx_CK, I2Sx_WS**: Reloj y selección de palabra (Word Select) para interfaces I2S.
+
+• **I2Sx_SDI, I2Sx_SDO**: Entrada y salida de datos serie de audio.
+
+• **I2Sx_MCK**: Reloj maestro de audio.
+
+• **SAIx_SCK_y, SAIx_FS_y, SAIx_SD_y**: Reloj serie, sincronización de cuadro y datos serie para los bloques de la interfaz de audio SAI.
+
+• **SAIx_MCLK_y**: Reloj maestro para periféricos de audio externos.
+
+• **SPDIFRX1_INy**: Entradas para el receptor de audio digital SPDIF.
+
+• **ADF1_SDIy, ADF1_CCKx**: Datos y reloj para el filtro de audio digital (micrófonos PDM).
+
+3. Conectividad y Redes (Ethernet / USB / CAN)
+
+• **ETH1_MDC, ETH1_MDIO**: Interfaz de gestión para el transceptor Ethernet (PHY).
+
+• **ETH1_RMII_REF_CLK, ETH1_RGMII_TX_CTL, ETH1_MII_TX_EN**: Señales de control y reloj para los distintos modos físicos de Ethernet (RMII, MII, RGMII).
+
+• **USB_OTGx_HS_DP, USB_OTGx_HS_DM**: Líneas de datos diferenciales de alta velocidad.
+
+• **UCPD1_CC1, UCPD1_CC2**: Pines de configuración de canal para USB Type-C Power Delivery.
+
+• **FDCANx_TX, FDCANx_RX**: Transmisión y recepción para redes CAN de alta velocidad.
+
+4. Memorias y Almacenamiento (FMC / XSPI / SDMMC)
+
+• **FMC_Ax, FMC_Dx / FMC_ADx**: Direcciones y bus de datos (multiplexado o no) para memorias externas.
+
+• **FMC_NEx, FMC_NWE, FMC_NOE, FMC_NBLx**: Señales de habilitación de chip, escritura, lectura y máscara de bytes.
+
+• **FMC_SDCLK, FMC_SDNWE, FMC_SDCKE, FMC_NRAS, FMC_NCAS**: Señales de control específicas para memorias SDRAM.
+
+• **XSPIM_Px_IOy, XSPIM_Px_CLK, XSPIM_Px_DQSx**: Datos, reloj y estrobo de datos para interfaces Octo-SPI.
+
+• **SDMMCx_Dx, SDMMCx_CK, SDMMCx_CMD**: Bus de datos, reloj y comandos para tarjetas SD y eMMC.
+
+5. Control del Sistema y Depuración (SYS / RCC / PWR)
+
+• **MCO1, MCO2**: Salidas de reloj maestro para monitoreo o para proveer reloj a otros chips.
+
+• **JTMS-SWDIO, JTCK-SWCLK, JTDI, JTDO, NJTRST**: Pines para depuración mediante JTAG y Serial Wire Debug.
+
+• **TRACEDx, TRACECLK**: Señales de traza de instrucción en tiempo real.
+
+• **WKUPx**: Pines de despertar desde modos de ultra bajo consumo.
+
+• **TAMP_INx, TAMP_OUTx**: Entradas y salidas de detección de intrusiones (Tamper).
+
+• **EVENTOUT**: Salida de señales de eventos internos hacia pines externos.
+
+• **HDPx**: Puertos de depuración de alta velocidad (**High-speed Debug Port**) para observar señales internas del SoC.
+
+
+## Configuración de ethernet : 
+El funcionamiento del Ethernet en este microcontrolador no consiste en una conexión directa al puerto RJ45, sino en una interfaz digital que comunica el controlador interno con un componente externo llamado **PHY (Physical Layer Transceiver)**. Es este chip PHY externo el que realiza la conversión eléctrica necesaria para conectarse físicamente al cable y al conector RJ45.
+
+A continuación veremos cómo operan estos pines y por qué son necesarios:
+
+1. El rol de los pines de Ethernet
+
+El periférico interno del STM32N6 es un **Gigabit Media Access Control (GMAC)**, que gestiona el protocolo de datos (Capa 2 del modelo OSI). Para que los datos salgan al exterior, el microcontrolador utiliza sus pines para enviar y recibir señales digitales hacia el PHY mediante protocolos estandarizados:
+
+• **MII (Media Independent Interface)**: Interfaz estándar para 10/100 Mbit/s que utiliza una mayor cantidad de pines.
+
+• **RMII (Reduced MII)**: Una versión reducida que ahorra pines, muy común en diseños de 10/100 Mbit/s.
+
+• **RGMII (Reduced Gigabit MII)**: La interfaz necesaria para alcanzar velocidades de **1 Gbit/s (Gigabit Ethernet)**.
+
+2. Tipos de pines y sus funciones
+
+Dentro de las configuraciones de pines que verás en las tablas de funciones alternas (como PF0, PF1, PG11, etc.), existen señales críticas:
+
+• **Pines de Gestión (SMI):** Los pines **ETH1_MDC** y **ETH1_MDIO** se utilizan para que el microcontrolador configure y lea el estado del chip PHY externo (por ejemplo, para saber si el cable está conectado o a qué velocidad está operando).
+
+• **Pines de Datos y Reloj:** Dependiendo del modo (RMII o RGMII), encontrarás pines como **ETH1_TXD[0:3]** para transmitir, **ETH1_RXD[0:3]** para recibir, y pines de reloj como **ETH1_RMII_REF_CLK** o **ETH1_RGMII_GTX_CLK**.
+
+3. ¿Por qué usarías estas configuraciones?
+
+Usarías los pines de Ethernet para integrar el microcontrolador en redes locales o industriales que requieran:
+
+• **Alta velocidad:** Soporte de hasta **1000 Mbit/s** para transferencias masivas de datos.
+
+• **Redes Sensibles al Tiempo (TSN):** El controlador soporta estándares TSN para aplicaciones industriales que requieren una sincronización extremadamente precisa.
+
+• **Protocolos de Internet:** A través de middleware como **LwIP**, puedes implementar pilas completas de TCP/IP sobre esta interfaz física.
+
+4. Configuración en Programación
+
+Desde el punto de vista del software, la configuración se suele realizar en herramientas como **STM32CubeMX**, donde seleccionas el modo de interfaz (MII, RMII o RGMII). Esto asigna automáticamente los pines necesarios en los puertos GPIO con la función alterna correspondiente y permite configurar parámetros como la dirección MAC y los descriptores de DMA para que el periférico mueva datos directamente entre la memoria RAM y la red sin cargar excesivamente al procesador
 
 # Bibliografia de STM32N6...:
 
