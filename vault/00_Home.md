@@ -5,6 +5,30 @@
 
 ---
 
+## Áreas de Conocimiento
+
+> [!col]
+> ### 🎨 Frontend & Mobile
+> [[000_Frontend_and_Mobile_MOC]]
+
+> [!col]
+> ### ⚙️ Backend & Languages
+> [[000_Backend_and_Languages_MOC]]
+
+> [!col]
+> ### ☁️ DevOps & Infra
+> [[000_DevOps_and_Infrastructure_MOC]]
+
+> [!col]
+> ### 🤖 Embedded & IoT
+> [[000_Embedded_and_IoT_MOC]]
+
+> [!col]
+> ### 🛡️ Cybersecurity
+> [[000_Cybersecurity_MOC]]
+
+---
+
 ## Estado Actual
 
 > [!col]

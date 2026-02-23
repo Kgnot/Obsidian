@@ -6,11 +6,11 @@
     "emojiStyle": "native",
     "iconColor": null,
     "recentlyUsedIcons": [
+      "LiAlignCenter",
       "LiActivity",
       "LiImages",
       "LiExcalidrawIcon",
-      "RiBook2Fill",
-      "LiBarChartHorizontalBig"
+      "RiBook2Fill"
     ],
     "recentlyUsedIconsSize": 5,
     "rules": [],
@@ -49,5 +49,6 @@
   },
   "Libros": "RiBook2Fill",
   "images": "LiImages",
-  "Excalidraw": "LiActivity"
+  "Excalidraw": "LiActivity",
+  "Resources": "LiAlignCenter"
 }

@@ -4,21 +4,19 @@
     "type": "split",
     "children": [
       {
-        "id": "5fbf651056464f5c",
+        "id": "0aae115d81eeb428",
         "type": "tabs",
         "children": [
           {
-            "id": "4c848bd73871c819",
+            "id": "c4dc4d908f479bd7",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "image",
               "state": {
-                "file": "Resources/Home/CI-CD.md",
-                "mode": "source",
-                "source": false
+                "file": "images/Pasted image 20251204180323.png"
               },
-              "icon": "lucide-file",
-              "title": "CI-CD"
+              "icon": "lucide-image",
+              "title": "Pasted image 20251204180323"
             }
           }
         ]
@@ -152,13 +150,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Resources/Home/CI-CD.md",
+                "file": "images/Pasted image 20251204180323.png",
                 "followCursor": false,
                 "showSearch": true,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of CI-CD"
+              "title": "Outline of Pasted image 20251204180323"
             }
           },
           {
@@ -205,37 +203,44 @@
       "copilot:Open Copilot Chat": false
     }
   },
-  "active": "4c848bd73871c819",
+  "active": "c4dc4d908f479bd7",
   "lastOpenFiles": [
-    "Resources/Home/Internet de las cosas.md",
-    "Resources/Home/Programación Backend.md",
-    "Resources/Home/Programacion Frontend.md",
-    "Resources/Home/CI-CD.md",
-    "00_Home.md",
-    "Courses/Frameworks para bases de datos java u ORM..md",
-    "Grafico de contribución.md",
+    "Untitled.md",
     "Templates/Roadmap Template.md",
-    "Ideas de Proyectos.md",
-    "Courses/C (Curso).md",
-    "Courses/Rust C-Google (Curso).md",
-    "Courses/Java Avanzado (Curso).md",
-    "Concepto/Arquitectura de aplicaciones web (Concepto).md",
-    "Roadmap/Arquitectura de Software (Roadmap).md",
-    "Courses/Kotlin (Curso).md",
-    "Courses/Nginx (Curso).md",
-    "Courses/Java semi-avanzado (Curso).md",
-    "Courses/Calidad de Código (SonarQube y Codacy ) (Curso).md",
-    "Courses/CSS (Curso).md",
-    "Courses/ESP32 (intento de guía).md",
-    "Courses/Angular (Curso).md",
-    "Courses/NestJS (Curso).md",
-    "Templates/Concept Template.md",
     "Templates/Course Template.md",
-    "Courses/React Native (Curso).md",
+    "Templates/Concept Template.md",
+    "Courses/Frontend & Mobile/Typescript con React o Nextjs (Curso).md",
+    "Courses/Embedded & IoT/Sistemas Embebidos puro C (Curso).md",
+    "Courses/Embedded & IoT/Mosquitto (Curso).md",
+    "Courses/Embedded & IoT/IoT (Curso).md",
+    "Courses/Embedded & IoT/ESP32 (Curso).md",
+    "Courses/Embedded & IoT/C (Curso).md",
+    "Courses/DevOps & Infrastructure/RabbitMQ (Curso).md",
+    "Courses/DevOps & Infrastructure/Nginx (Curso).md",
+    "Courses/DevOps & Infrastructure/InfluxDB (Curso).md",
+    "Courses/Backend & Languages/Frameworks para bases de datos java u ORM. (Curso).md",
+    "Courses/Backend & Languages/000_Backend_and_Languages_MOC.md",
+    "Roadmap/Arquitectura de Software (Roadmap).md",
+    "Roadmap/Backend (Roadmap).md",
+    "Untitled 1.base",
+    "Untitled.base",
+    "Courses/Frontend & Mobile/000_Frontend_and_Mobile_MOC.md",
+    "Concept 1.md",
+    "00_Home.md",
+    "Ideas de Proyectos.md",
+    "Courses/DevOps & Infrastructure/000_DevOps_and_Infrastructure_MOC.md",
+    "URL.md",
+    "Resources/Home/Programacion Frontend.md",
+    "Libros/Recomendaciones iniciales.md",
+    "Resources/Home/CI-CD.md",
+    "Courses/Cybersecurity",
+    "Courses/DevOps & Infrastructure",
+    "Courses/Embedded & IoT",
+    "Courses/Frontend & Mobile",
+    "Courses/Backend & Languages",
     "Templates",
     "Resources/Home",
     "Resources",
-    "Courses/React (Curso).md",
     "Courses/images/Core_crotex.png",
     "Courses/images/Pasted image 20260220192024.png",
     "Courses/images/Pasted image 20260220100354.png",
@@ -246,13 +251,6 @@
     "Courses/images/Pasted image 20260219104221.png",
     "Courses/images/Pasted image 20260217225706.png",
     "Courses/images/Pasted image 20260204085822.png",
-    "copilot/copilot-conversations",
-    "copilot/copilot-custom-prompts",
-    "copilot",
-    "Excalidraw/images",
-    "Untitled.base",
-    "Untitled 1.base",
-    "Excalidraw",
     "Untitled.canvas",
     "Untitled 1.canvas"
   ]
