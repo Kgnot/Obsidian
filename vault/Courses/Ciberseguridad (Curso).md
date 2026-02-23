@@ -1,3 +1,10 @@
+---
+type: course
+status: en_progreso
+tags: [course, Ciberseguridad (Curso)]
+date_started: 2024-05-20
+---
+
 # Ciberseguridad
 
 Curso de Coursera [Google]:

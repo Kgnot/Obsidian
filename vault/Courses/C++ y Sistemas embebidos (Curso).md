@@ -1,3 +1,10 @@
+---
+type: course
+status: en_progreso
+tags: [course, C++ y Sistemas embebidos (Curso)]
+date_started: 2024-05-20
+---
+
 ***
 Este será un curso dedicado a `c+ +`, no será dedicado desde el inicio, tal como principiante. Será más enfocado a llevar y entender las "mañas" que contiene este lenguaje de programación, entender a `c+ + ` como lenguaje y poder adoptar arquitecturas comunes aquí y llevarlo también a cosas embebidas como ESP32.
 ***

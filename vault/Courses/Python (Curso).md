@@ -1,3 +1,10 @@
+---
+type: course
+status: en_progreso
+tags: [course, Python (Curso)]
+date_started: 2024-05-20
+---
+
 # Python
 
 # Tipos:

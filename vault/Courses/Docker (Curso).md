@@ -1,3 +1,10 @@
+---
+type: course
+status: en_progreso
+tags: [course, Docker (Curso)]
+date_started: 2024-05-20
+---
+
 Este será un curso que seguiré de código facilito, de ser necesario me apoyaré en la documentación original de docker.
 El curso consta de 7 módulos: 
 

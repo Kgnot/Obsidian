@@ -1,3 +1,9 @@
+---
+type: concepto
+tags: [concepto, Patrones de diseño (Concepto)]
+date_created: 2024-05-20
+---
+
 
 
 # Patrones de diseño:

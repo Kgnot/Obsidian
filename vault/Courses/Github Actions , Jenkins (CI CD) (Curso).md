@@ -1,3 +1,10 @@
+---
+type: course
+status: en_progreso
+tags: [course, Github Actions , Jenkins (CI CD) (Curso)]
+date_started: 2024-05-20
+---
+
 # Github Actions , Jenkins (CI/CD)
 
 # CI/CD

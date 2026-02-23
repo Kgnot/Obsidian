@@ -1,3 +1,10 @@
+---
+type: course
+status: en_progreso
+tags: [course, Java semi-avanzado (Curso)]
+date_started: 2024-05-20
+---
+
 # Java semi-avanzado
 
 # Streams y expresiones lambda

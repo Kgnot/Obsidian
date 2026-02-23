@@ -1,3 +1,9 @@
+---
+type: concepto
+tags: [concepto, Principios SOLID (Concepto)]
+date_created: 2024-05-20
+---
+
 # Principios SOLID
 
 SOLID es un acrónimo que agrupa 5 principios clave para el desarrollo eficiente, replicable, mantenible y escalable de software. Estos Son:

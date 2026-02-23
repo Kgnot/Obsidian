@@ -1,3 +1,11 @@
+---
+type: course
+status: en_progreso
+tags:
+  - course
+date_started: 2024-05-20
+---
+
 # MyBatis:
 
 MyBatis es un _framework_ de persistencia muy popular que permite un gran control sobre el SQL. A diferencia de ORM (Mapeo Objeto-Relacional) como Hibernate, que abstraen completamente la base de datos, MyBatis te da la libertad de escribir tus propias consultas SQL, lo que es una ventaja clave para la **optimización del rendimiento** y la **eficacia**.

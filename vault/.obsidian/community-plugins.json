@@ -13,5 +13,6 @@
   "editor-width-slider",
   "extended-markdown-syntax",
   "hugo-codeblock-highlight",
-  "copilot"
+  "copilot",
+  "dataview"
 ]

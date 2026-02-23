@@ -1,3 +1,10 @@
+---
+type: course
+status: en_progreso
+tags: [course, Angular Youtube(Curso)]
+date_started: 2024-05-20
+---
+
 Como proyecto final, creare la pagina web de mi papá
 
 ---

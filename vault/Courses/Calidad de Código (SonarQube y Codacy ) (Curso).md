@@ -1,3 +1,10 @@
+---
+type: course
+status: en_progreso
+tags: [course, Calidad de Código (SonarQube y Codacy ) (Curso)]
+date_started: 2024-05-20
+---
+
 # Inicio
 Primero veremos lo que es Codacy que según yo es el más fácil de usar y de aplicar. Primero vamos a la página: 
 ![Pasted image 20250425183750.png](src/Calidad%20de%20C%C3%B3digo%20%28SonarQube%20y%20Codacy/Pasted%20image%2020250425183750.png)

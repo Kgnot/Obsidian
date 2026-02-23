@@ -1,3 +1,10 @@
+---
+type: course
+status: en_progreso
+tags: [course, React Native (Curso)]
+date_started: 2024-05-20
+---
+
 
 # ¿Qué es React Native?
 

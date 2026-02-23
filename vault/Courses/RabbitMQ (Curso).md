@@ -1,3 +1,10 @@
+---
+type: course
+status: en_progreso
+tags: [course, RabbitMQ (Curso)]
+date_started: 2024-05-20
+---
+
 Página oficial: https://www.rabbitmq.com/
 Documentación: https://www.rabbitmq.com/docs
 ***

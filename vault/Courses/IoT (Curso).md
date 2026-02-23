@@ -1,3 +1,10 @@
+---
+type: course
+status: en_progreso
+tags: [course, IoT (Curso)]
+date_started: 2024-05-20
+---
+
 El curso de IoT va a estar con diferentes apartados y fases.
 ***
 # Fase 1: Fundamentos IoT

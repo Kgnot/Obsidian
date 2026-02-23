@@ -1,3 +1,10 @@
+---
+type: course
+status: en_progreso
+tags: [course, Java SpringBoot (Curso)]
+date_started: 2024-05-20
+---
+
 # LOGS: 
 Antes de entrar en el mundo de Springboot debemos entender sobre los logs ya que mas adelante nos será útil. (Aunque ese más adelante sera mucho mucho más adelante por lo que se puede omitir este apartado).
 

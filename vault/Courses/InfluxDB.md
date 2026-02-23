@@ -1,3 +1,10 @@
+---
+type: course
+status: en_progreso
+tags: [course, InfluxDB]
+date_started: 2024-05-20
+---
+
 Vamos a empezar con la documentación de ello, aunque primero un video introductorio
 # Introducción
 InfluxDB es una base de datos orientada a series temporales, diseñada para almacenar, consultar y analizar datos que cambian a lo largo del tiempo con alta frecuencia. Es común en casos donde cada dato tiene una marca temporal asociada. 

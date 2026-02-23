@@ -1,3 +1,10 @@
+---
+type: course
+status: en_progreso
+tags: [course, QT con C++ (Curso)]
+date_started: 2024-05-20
+---
+
 # QT con C++
 
 El primer video consta de los fundamentos principales de Qt Design Studio Workspace.

@@ -1,3 +1,10 @@
+---
+type: course
+status: en_progreso
+tags: [course, Sistemas Embebidos puro C (Curso)]
+date_started: 2024-05-20
+---
+
 # 1. Fundamentos eléctricos y de señal
 Una señal se define como la variación temporal de una magnitud física que se utiliza para codificar información. En el caso de una señal electrónica esa magnitud puede ser una corriente eléctrica, tensión o intensidad luminosa. 
 

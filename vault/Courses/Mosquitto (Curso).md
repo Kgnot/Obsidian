@@ -1,3 +1,10 @@
+---
+type: course
+status: en_progreso
+tags: [course, Mosquitto (Curso)]
+date_started: 2024-05-20
+---
+
 Una vez hemos visto el curso de RabbitMQ, que si no se ha visto se recomienda. 
 
 Para mosquitto no he encontrado muchos cursos, estaré cogiendo la documentación junto con algunas nociones que he ido encontrando en diferentes lados.

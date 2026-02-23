@@ -1,3 +1,10 @@
+---
+type: course
+status: en_progreso
+tags: [course, C (Curso)]
+date_started: 2024-05-20
+---
+
 
 Este curso estará dirigido a específicamente C. 
 

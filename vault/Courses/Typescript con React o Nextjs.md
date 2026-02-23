@@ -1,3 +1,10 @@
+---
+type: course
+status: en_progreso
+tags: [course, Typescript con React o Nextjs]
+date_started: 2024-05-20
+---
+
 Typescript es una herramienta que en sí necesita de un `tsconfig.json` el cual es un archivo de configuración, normalmente descrito de la siguiente forma: 
 ```json
 {

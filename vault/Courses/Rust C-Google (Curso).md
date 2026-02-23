@@ -1,3 +1,10 @@
+---
+type: course
+status: en_progreso
+tags: [course, Rust C-Google (Curso)]
+date_started: 2024-05-20
+---
+
 # Rust Curso-Google
 
 [Estructura del curso - Comprehensive Rust 🦀](https://google.github.io/comprehensive-rust/es/running-the-course/course-structure.html)

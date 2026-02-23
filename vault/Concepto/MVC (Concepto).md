@@ -1,3 +1,9 @@
+---
+type: concepto
+tags: [concepto, MVC (Concepto)]
+date_created: 2024-05-20
+---
+
 ![img_6212df40ef951.png](images/img_6212df40ef951.png)
 
 Este es un dibujo de como se comporta el MVC, aunque se visualiza mejor en UML: 

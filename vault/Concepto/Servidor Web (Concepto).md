@@ -1,3 +1,9 @@
+---
+type: concepto
+tags: [concepto, Servidor Web (Concepto)]
+date_created: 2024-05-20
+---
+
 Para entender lo que son los servidores web debemos entrar en el apartado de la comunicación entre máquinas, es decir, todo lo relacionado con redes informáticas. Todo en redes sigue estrictamente el **modelo OSI** o la versión práctica: **TCP/IP**.
 
 

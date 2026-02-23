@@ -1,3 +1,10 @@
+---
+type: course
+status: en_progreso
+tags: [course, React (Curso)]
+date_started: 2024-05-20
+---
+
 # React
 
 Lo primero que he hecho ha sido: 

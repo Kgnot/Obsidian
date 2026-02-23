@@ -1,3 +1,10 @@
+---
+type: course
+status: en_progreso
+tags: [course, Angular (Curso)]
+date_started: 2024-05-20
+---
+
 # Angular
 
 [https://devtalles.com/files/angular-cheat-sheet-v2.pdf](https://devtalles.com/files/angular-cheat-sheet-v2.pdf)

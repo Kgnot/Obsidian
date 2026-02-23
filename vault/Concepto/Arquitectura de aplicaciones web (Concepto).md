@@ -1,3 +1,9 @@
+---
+type: concepto
+tags: [concepto, Arquitectura de aplicaciones web (Concepto)]
+date_created: 2024-05-20
+---
+
 # Un Análisis Detallado de Arquitecturas de Aplicaciones Web: Del Modelo Clásico a la Single-Page Application (SPA)
 
 

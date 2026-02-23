@@ -1,3 +1,10 @@
+---
+type: course
+status: en_progreso
+tags: [course, Git (Curso)]
+date_started: 2024-05-20
+---
+
 # Git
 
 Git es un controlador de versiones de cualquier cosa, especializado básicamente en código.

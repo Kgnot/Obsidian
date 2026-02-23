@@ -1,3 +1,9 @@
+---
+type: roadmap
+tags: [roadmap, Arquitectura de Software (Roadmap)]
+date_created: 2024-05-20
+---
+
 # Arquitectura de Software
 
 Una de las cosas mas importantes es poder escoger uno o dos lenguajes. Los míos por ahora solo voy en JAVA. 

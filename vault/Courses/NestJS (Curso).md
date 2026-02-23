@@ -1,3 +1,10 @@
+---
+type: course
+status: en_progreso
+tags: [course, NestJS (Curso)]
+date_started: 2024-05-20
+---
+
 **NestJS** es un framework progresista para construir aplicaciones del lado del servidor eficientes y escalables con **Node.js**.
 
 ***

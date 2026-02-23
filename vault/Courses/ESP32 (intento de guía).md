@@ -1,3 +1,10 @@
+---
+type: course
+status: en_progreso
+tags: [course, ESP32 (intento de guía)]
+date_started: 2024-05-20
+---
+
 La ESP32 es un sistema con un chip integrado que contiene las siguientes caracteristicas: 
 - wifi 
 - Bluetooth

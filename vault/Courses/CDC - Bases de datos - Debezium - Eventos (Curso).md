@@ -1,3 +1,10 @@
+---
+type: course
+status: en_progreso
+tags: [course, CDC - Bases de datos - Debezium - Eventos (Curso)]
+date_started: 2024-05-20
+---
+
 Este curso está integrado de muchas cosas tal como se ve en el título.
 
 # Bibliografía: 

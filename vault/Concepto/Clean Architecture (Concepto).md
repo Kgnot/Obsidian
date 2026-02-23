@@ -1,3 +1,9 @@
+---
+type: concepto
+tags: [concepto, Clean Architecture (Concepto)]
+date_created: 2024-05-20
+---
+
 ![1_gNMlCdPkghf_2F8v3MGtqA.png](images/1_gNMlCdPkghf_2F8v3MGtqA.png)
 
 ---

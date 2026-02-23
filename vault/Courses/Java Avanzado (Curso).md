@@ -1,3 +1,10 @@
+---
+type: course
+status: en_progreso
+tags: [course, Java Avanzado (Curso)]
+date_started: 2024-05-20
+---
+
 # Java Avanzado
 
 # Colecciones y estructuras de datos internas
