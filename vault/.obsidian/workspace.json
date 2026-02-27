@@ -4,19 +4,21 @@
     "type": "split",
     "children": [
       {
-        "id": "0aae115d81eeb428",
+        "id": "4509724f8bf84da7",
         "type": "tabs",
         "children": [
           {
-            "id": "c4dc4d908f479bd7",
+            "id": "e7a7b303c61786dc",
             "type": "leaf",
             "state": {
-              "type": "image",
+              "type": "markdown",
               "state": {
-                "file": "images/Pasted image 20251204180323.png"
+                "file": "Courses/DevOps & Infrastructure/Docker (Curso).md",
+                "mode": "source",
+                "source": false
               },
-              "icon": "lucide-image",
-              "title": "Pasted image 20251204180323"
+              "icon": "lucide-file",
+              "title": "Docker (Curso)"
             }
           }
         ]
@@ -51,7 +53,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "",
+                "query": "rabbitmq",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -150,13 +152,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "images/Pasted image 20251204180323.png",
+                "file": "Courses/DevOps & Infrastructure/Docker (Curso).md",
                 "followCursor": false,
                 "showSearch": true,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of Pasted image 20251204180323"
+              "title": "Outline of Docker (Curso)"
             }
           },
           {
@@ -180,7 +182,7 @@
             }
           }
         ],
-        "currentTab": 3
+        "currentTab": 4
       }
     ],
     "direction": "horizontal",
@@ -203,9 +205,13 @@
       "copilot:Open Copilot Chat": false
     }
   },
-  "active": "c4dc4d908f479bd7",
+  "active": "e7a7b303c61786dc",
   "lastOpenFiles": [
+    "00_Home.md",
+    "Courses/DevOps & Infrastructure/RabbitMQ (Curso).md",
+    "Resources/Home/Internet de las cosas.md",
     "Untitled.md",
+    "images/Pasted image 20251204180323.png",
     "Templates/Roadmap Template.md",
     "Templates/Course Template.md",
     "Templates/Concept Template.md",
@@ -215,7 +221,6 @@
     "Courses/Embedded & IoT/IoT (Curso).md",
     "Courses/Embedded & IoT/ESP32 (Curso).md",
     "Courses/Embedded & IoT/C (Curso).md",
-    "Courses/DevOps & Infrastructure/RabbitMQ (Curso).md",
     "Courses/DevOps & Infrastructure/Nginx (Curso).md",
     "Courses/DevOps & Infrastructure/InfluxDB (Curso).md",
     "Courses/Backend & Languages/Frameworks para bases de datos java u ORM. (Curso).md",
@@ -226,13 +231,11 @@
     "Untitled.base",
     "Courses/Frontend & Mobile/000_Frontend_and_Mobile_MOC.md",
     "Concept 1.md",
-    "00_Home.md",
     "Ideas de Proyectos.md",
     "Courses/DevOps & Infrastructure/000_DevOps_and_Infrastructure_MOC.md",
     "URL.md",
     "Resources/Home/Programacion Frontend.md",
     "Libros/Recomendaciones iniciales.md",
-    "Resources/Home/CI-CD.md",
     "Courses/Cybersecurity",
     "Courses/DevOps & Infrastructure",
     "Courses/Embedded & IoT",
@@ -250,7 +253,6 @@
     "Courses/images/Pasted image 20260219131617.png",
     "Courses/images/Pasted image 20260219104221.png",
     "Courses/images/Pasted image 20260217225706.png",
-    "Courses/images/Pasted image 20260204085822.png",
     "Untitled.canvas",
     "Untitled 1.canvas"
   ]

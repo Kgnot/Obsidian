@@ -938,7 +938,7 @@ public class Main {
 }
 ```
 **Cliente:**
- ```java unwrap:false title:RPCClient.java {35,49,67,96} 
+ ```java title:RPCClient.java 
 // Este será el cliente:  
 public class RPCClient implements AutoCloseable {  
   
@@ -1055,7 +1055,7 @@ public class RPCClient implements AutoCloseable {
         connection.close();  
     }  
 }
-```
+ ```
 
 ### Reliable publishing with the publisher confirms:
 
