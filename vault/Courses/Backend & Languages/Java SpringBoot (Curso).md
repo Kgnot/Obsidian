@@ -1,7 +1,8 @@
 ---
 type: course
 status: en_progreso
-tags: [course, Java SpringBoot (Curso)]
+tags:
+  - course
 date_started: 2024-05-20
 ---
 
@@ -3213,8 +3214,970 @@ Antes de seguir con un proyecto de springcloud vamos a empezar con un curso de [
 
 ***
 # CACHE en Spring Boot: 
-Algunos patrones a tener en cuenta: 
-Observer, Listener, Eventos
+
+Vamos a repasar lo que es el caché como tal y como se implementa en springboot de diferentes formas.
+
+Antes de hablar del caché en general, debemos entender como se gestiona la memoria en java, stack vs heap. 
+
+En java la memoria se divide conceptualmente así:
+```plaintext
+Thread
+ ├─ Stack (por thread)
+ │    ├─ variables locales
+ │    ├─ parámetros
+ │    └─ frames de métodos
+ │
+ └─ Heap (compartido)
+      └─ objetos
+```
+
+STACK:
+
+Cada thread o hilo tiene su propio stack:
+Por ejemplo: 
+```java
+public void foo(){
+	int x = 10;
+}
+```
+`x` vive en el stack del thread.
+Si 100 threads llaman a `foo()`, existen 100 copias de `x`.
+Por lo que es thread-safe naturalmente.
+
+HEAP: 
+Los objetos viven el heap compartido. 
+```java
+Map<String,Object> cache = new HashMap<>();
+```
+Ese `HashMap` vive en el heap.
+Esto significa que todos los threads ven el mismo objeto. 
+```text
+Thread A  
+Thread B  
+Thread C  
+	↓  
+	mismo objeto HashMap en Heap
+```
+***
+Algo más en esto es este tema, las variables locales como en el ejemplo del método `foo` son thread-safe porque pertenecen al stack.
+Los atributos del objeto como por ejemplo: 
+```java
+class A {
+	int x; // este atributo
+}
+```
+Estos pertenecen al heap y son compartidos, por lo que no es, a priori thread-safe. Pero si el objeto es singleton, todos los threads apuntarán al mismo atributo.
+
+Con esto en mente vamos a fabricar nuestro caché. No será tan increíble como librerías como `spring-cache` o `caffeine`, o incluso Redis que es bastante bueno en esto. 
+
+Vamos a empezar con un programa super sencillo: 
+
+![[Pasted image 20260305193012.png]]
+
+Aquí nosotros vemos simplemente los repositorios, servicios y controladores habituales. Ahora, en el repositorio de book observamos lo siguiente: 
+```java
+@Repository
+public class RepositoryBookLocal implements RepositoryBook {
+
+    private final Map<Long, BookEntity> books = new ConcurrentHashMap<>();
+    private final RepositoryAuthorLocal authorRepository = new RepositoryAuthorLocal();
+
+    public RepositoryBookLocal() {
+        initializeData();
+    }
+
+    private void initializeData() {
+        // Obtener autores del repositorio de autores
+        AuthorEntity garciaMarquez = authorRepository.findById(1L).orElse(null);
+        AuthorEntity isabelAllende = authorRepository.findById(2L).orElse(null);
+        AuthorEntity borges = authorRepository.findById(3L).orElse(null);
+        AuthorEntity vargasLlosa = authorRepository.findById(4L).orElse(null);
+        AuthorEntity cortazar = authorRepository.findById(5L).orElse(null);
+
+        // Crear libros con sus respectivos autores
+        BookEntity book1 = new BookEntity(1L, "Cien años de soledad", garciaMarquez);
+        BookEntity book2 = new BookEntity(2L, "El amor en los tiempos del cólera", garciaMarquez);
+        BookEntity book3 = new BookEntity(3L, "La casa de los espíritus", isabelAllende);
+        BookEntity book4 = new BookEntity(4L, "Paula", isabelAllende);
+        BookEntity book5 = new BookEntity(5L, "Ficciones", borges);
+        BookEntity book6 = new BookEntity(6L, "El Aleph", borges);
+        BookEntity book7 = new BookEntity(7L, "La ciudad y los perros", vargasLlosa);
+        BookEntity book8 = new BookEntity(8L, "Conversación en La Catedral", vargasLlosa);
+        BookEntity book9 = new BookEntity(9L, "Rayuela", cortazar);
+        BookEntity book10 = new BookEntity(10L, "Bestiario", cortazar);
+
+        // Agregar libros al repositorio
+        books.put(1L, book1);
+        books.put(2L, book2);
+        books.put(3L, book3);
+        books.put(4L, book4);
+        books.put(5L, book5);
+        books.put(6L, book6);
+        books.put(7L, book7);
+        books.put(8L, book8);
+        books.put(9L, book9);
+        books.put(10L, book10);
+    }
+
+    @Override
+    public List<BookEntity> findAll() throws InterruptedException {
+        Thread.sleep(2000); // Simular retraso de 2 segundos
+        return new ArrayList<>(books.values());
+    }
+
+    @Override
+    public Optional<BookEntity> findById(Long id) {
+        return Optional.ofNullable(books.get(id));
+    }
+
+    @Override
+    public BookEntity save(BookEntity book) {
+        if (book.getId() == null) {
+            // Generar nuevo ID
+            Long newId = books.keySet().stream()
+                    .max(Long::compareTo)
+                    .orElse(0L) + 1;
+            book.setId(newId);
+        }
+        books.put(book.getId(), book);
+        return book;
+    }
+
+    @Override
+    public void deleteById(Long id) {
+        books.remove(id);
+    }
+}
+
+```
+
+simulamos dos cosas, los datos y simulamos también un retraso de 2 segundos para los libros. Y ahora estamos preparados para añadir el caché. Un primer vistazo podemos pensar en esto: 
+```java
+@Service  
+public class BookServicesImpl implements BookService {  
+  
+    private final RepositoryBook repositoryBook;  
+    private final Map<String, Object> cache;  
+  
+    public BookServicesImpl(RepositoryBook repositoryBook) {  
+        this.repositoryBook = repositoryBook;  
+        this.cache = new HashMap<>();  
+    }  
+  
+  
+    @Override  
+    public List<BookEntity> findAll() {  
+        List<BookEntity> cached = (List<BookEntity>) cache.get("findAll");  
+        if (cached != null) {  
+            return cached;  
+        }  
+  
+        try {  
+            cache.put("findAll", repositoryBook.findAll());  
+            return new ArrayList<>(repositoryBook.findAll());  
+        } catch (InterruptedException e) {  
+            Thread.currentThread().interrupt();  
+            throw new RuntimeException("Thread was interrupted", e);  
+        }  
+  
+    }  
+    
+	...
+}
+```
+
+Porque claro, tenemos en mente que un caché puede ser de cada servicio, metemos el mapa así nomas y llamamos solamente dentro de cada uno de sus métodos, todo suena bien hasta que entendemos el tema de como accede java a la memoria. El mapa se vuelve inseguro o no es thread-safe, porque es un elemento que todos van a acceder y no estamos manejando `lock`, o `syncronized`. 
+
+Por lo anterior una mejor practica seria solamente hacer: 
+```java
+	...
+public BookServicesImpl(RepositoryBook repositoryBook) {  
+        this.repositoryBook = repositoryBook;  
+        this.cache = new ConcurrentHashMap<>();  
+    }
+    ...
+```
+Ya con esto manejamos mejor el tema; sin embargo, siempre puede haber algo mejor, y es generando el servicio. Ya queda para el lector crear el servicio, es la misma idea, solo que ahora inyectamos el servicio. Con este servicio no solo manejamos fácilmente el caché de un repositorio de datos, sino que también el de todos los que queramos, así, centralizándolo.
+
+Otra forma bastante elegante de crearlo es con el patrón decorador, pensemos, ¿cuál sería el componente?, la base decorador?
+Bueno, puede parecer un poco de sobre ingeniería, pero es importante tocarlo, ya que a lo mejor podríamos añadir una fábrica de cahés. ¿Que cache necesitamos?, uno con largo almacenamiento?, ¿uno con poco?, etc. Entonces tenemos: 
+
+Primeramente nuestro decorador caché.
+```java
+public abstract class CacheDecorator {  
+  
+    protected static final String FIND_ALL_KEY = "books:findAll";  
+    protected final BookService bookService;  
+  
+    protected CacheDecorator(BookService bookService) {  
+        this.bookService = bookService;  
+    }  
+  
+    protected String findByIdKey(Long id) {  
+        return "books:findById:" + id;  
+    }  
+  
+    protected void invalidateFindAll() {  
+        evict(FIND_ALL_KEY);  
+    }  
+  
+    protected void invalidateFindById(Long id) {  
+        if (id != null) {  
+            evict(findByIdKey(id));  
+        }  
+    }  
+  
+    protected abstract <T> T getOrCompute(String key, Supplier<T> supplier);  
+  
+    protected abstract void evict(String key);  
+  
+    protected abstract void clear();  
+}
+```
+
+Luego la implementación que será de BookService, en este caso solo es para nuestro BookService. Con reflexión podríamos hacer algo mucho mejor para cualquier servicio y manejar las anotaciones tipo interfaz pero sería para crear uno propio bastante completo. 
+Como deciamos la implementación se ve de esta forma: 
+```java
+public class CacheBookDecorator extends CacheDecorator implements BookService {  
+  
+    private final Map<String, Object> cache;  
+  
+    public CacheBookDecorator(BookService wrapped) {  
+        super(wrapped);  
+        this.cache = new ConcurrentHashMap<>();  
+    }  
+  
+    @Override  
+    public List<BookEntity> findAll() {  
+        return getOrCompute(FIND_ALL_KEY, bookService::findAll);  
+    }  
+  
+    @Override  
+    public Optional<BookEntity> findById(Long id) {  
+        return getOrCompute(findByIdKey(id), () -> bookService.findById(id));  
+    }  
+  
+    @Override  
+    public BookEntity save(BookEntity book) {  
+        BookEntity saved = bookService.save(book);  
+        invalidateFindAll();  
+        invalidateFindById(saved != null ? saved.getId() : null);  
+        return saved;  
+    }  
+  
+    @Override  
+    public void deleteById(Long id) {  
+        bookService.deleteById(id);  
+        invalidateFindAll();  
+        invalidateFindById(id);  
+    }  
+  
+    @Override  
+    @SuppressWarnings("unchecked")  
+    protected <T> T getOrCompute(String key, Supplier<T> supplier) {  
+        return (T) cache.computeIfAbsent(key, ignored -> supplier.get());  
+    }  
+  
+    @Override  
+    protected void evict(String key) {  
+        cache.remove(key);  
+    }  
+  
+    @Override  
+    protected void clear() {  
+        cache.clear();  
+    }  
+}
+```
+
+En la clase de la implementación identificamos que lo único que hace es añadir al mapa y ya, si no lo delega al servicio como tal que para ver como está, está así: 
+```java
+@Service  
+public class BookServicesImpl implements BookService {  
+  
+    private final RepositoryBook repositoryBook;  
+  
+    public BookServicesImpl(RepositoryBook repositoryBook) {  
+        this.repositoryBook = repositoryBook;  
+    }  
+  
+  
+    @Override  
+    public List<BookEntity> findAll() {  
+        try {  
+            return new ArrayList<>(repositoryBook.findAll());  
+        } catch (InterruptedException e) {  
+            Thread.currentThread().interrupt();  
+            throw new RuntimeException("Thread was interrupted", e);  
+        }  
+    }  
+  
+    @Override  
+    public Optional<BookEntity> findById(Long id) {  
+        return repositoryBook.findById(id);  
+    }  
+  
+    @Override  
+    public BookEntity save(BookEntity book) {  
+        return repositoryBook.save(book);  
+    }  
+  
+    @Override  
+    public void deleteById(Long id) {  
+        repositoryBook.deleteById(id);  
+    }  
+}
+```
+
+Cómo vemos no hay nada extraño, es un servicio normal. Ahora, debemos agregar algo a la configuración: 
+```java
+@Configuration  
+public class ServiceConfig {  
+  
+    @Bean  
+    public BookService bookService(BookService bookServicesImpl) {  
+        return new CacheBookDecorator(bookServicesImpl);  
+    }  
+  
+}
+```
+Esta es la parte más importante, ya que aquí es donde realmente usamos el decorador, aquí es donde decoramos la clase. 
+
+Ahora debemos pensar en el dato, ¿hay datos obsoletos?, ¿existe un crecimiento infinito de memoria con lo que hacemos?, ¿hay inconsistencias en sistemas distribuidos?. Esto son los famosos TTL.
+
+***
+Identifiquemos ciertos atributos del caché: 
+
+Está el caché en memoria o el caché distribuido, el caché en memoria es guardada en la memoria de las aplicaciones tal y como hemos venido haciéndolo, este método es bastante rápido, pero solo aplica a una instancia de la aplicación por lo que puede llegar a ser ineficiente.  Luego tenemos el caché distribuido que es información guardada en un sistema externo y se comparte en múltiples instancias de la aplicación. 
+
+Cómo vimos otro concepto importante es el TTL (Time To Live), esta es la duración por la cual la información debe estar en el caché. Una vez expirado, el caché es automáticamente removido o actualizado para tenerlo al día.
+
+También tenemos los "Eviction Strategies", estos deciden que información remover cuando el caché está totalmente lleno
+- **LRU (Least Recently Used):** Remueve información que no ha sido usada recientemente
+- **LFU(Least Frequently Used):** Remueve información que es menos usada
+- **FIFO(First In, First Out):** Remueve la información que fue añadida primero
+## Caching en SpringBoot:
+
+Ahora, una vez ya visto todo lo anterior, vamos a mirar como es el caché en spring boot. 
+Spring caché es una abstracción de caching.
+
+No implementa el caché directamente. Lo que hace es proveer una API uniforme para distintos motores de caché
+La dependencia necesaria: 
+```xml
+<dependency>
+ <groupId>org.springframework.boot</groupId>
+ <artifactId>spring-boot-starter-cache</artifactId>
+</dependency>
+```
+
+La arquitectura conceptual: 
+```text
+Application
+     ↓
+Spring Cache Abstraction
+     ↓
+Cache Provider
+     ├─ Caffeine
+     ├─ Redis
+     ├─ Ehcache
+     └─ Simple Map
+```
+
+Algunos ejemplos de proveedores son> 
+- Redis
+- Caffeine
+- Ehcache
+### Arquitectura interna de Spring Cache
+
+Los componentes principales 
+```text
+@Cacheable
+	↓
+AOP Proxy
+	↓
+CacheInterceptor
+	↓
+CacheManager
+	↓
+Cache provider
+```
+Es decir, Spring usa AOP para interceptar el método (Luego veremos AOP a profundidad)
+Así cuando llamamos por ejemplo a: `bookService.findAll()`
+Lo que realmente ocurre es: 
+```text
+Proxy
+   ↓
+Cache check
+   ↓
+Method execution
+```
+Vamos a ver prontamente lo que son las anotaciones, sin embargo hay algo que debemos entender primero y es el procesao de una anotación especifica: 
+```java
+@Cacheable("books")
+public List<Book> findAll() {
+    return repository.findAll();
+}
+```
+Esto hace: 
+```text
+1 request llega
+2 proxy intercepta método
+3 genera clave
+4 revisa cache
+5 hit → devuelve
+6 miss → ejecuta método
+7 guarda resultado
+8 devuelve resultado
+```
+
+### Sistema de caché
+Primero debemos activar el sistema de caché: 
+```java
+@SpringBootApplication  
+@EnableCaching   // Esta es la importante
+public class AprenderCacheApplication {  
+  
+    public static void main(String[] args) {  
+        SpringApplication.run(AprenderCacheApplication.class, args);  
+    }  
+  
+}
+```
+Podemos hacerlo de la forma de arriba o también de la siguiente forma:
+```java
+@Configuration  
+@EnableCaching  
+public class AppConfig {  
+	...
+}
+```
+Ya que es una configuración directa, podríamos decirlo.
+Hacer todo eso registra:
+- CacheInterceptor
+- CacheManager
+- CacheResolver
+
+#### Rol de cada componente que registra: 
+- `@EnableCaching`: Es la señal que le damos a Spring para que empiece a aplicar las reglas de caché en la aplicación. Sin esto spring ignora todas las anotaciones de caché en general.
+- `CacheInterceptor`: Es el que intercepta las peticiones o llamadas a un método que tiene anotación de caché como `@Cacheable`. Su trabajo es decidir, siguiendo las reglas, si debe buscar en el caché  y devolverlo directamente o si debe ejecutar el método para luego si guardarlo, es el ejecutor de la política caché.
+- `CacheManager`: Es el Jefe del caché, quien lo maneja. Es quien conoce todos los caché que existen y sabe como gestionarlos. Cuando el `CacheInterceptor` necesita algún "estante" llamado PRODUCTOS, le pregunta al este `CacheManager` y este le devuelve sin importar si usa `ConcurrentMap` o usa algo más sofisticado como `Ehcache` o un almacén externo como Redis. Actua como un acceso unificado para todas las cache.
+- `CacheResolver`: Es el especializado de encontrar el "estante" correcto. Es una pieza más avanzada. Por defecto, el `CacheManager` resuelve las cachés solo por su nombre. El `CacheResolver` te permite escribir lógica personalizada para decidir qué caché o cachés se deben usar para una invocación de método en particular, basandose en el contexto de la llamada
+#### El cache provider:
+Claro, después de todo eso debe de haber un lugar físico en el cual se guarden los datos. Ahí es donde entra el cache provider.
+
+El `CacheManager` es una interfaz. Necesitas una implementación concreta que sea la que realmente guarde los datos en memoria, en disco, o en un sistema remoto. Y Spring ya incluye uno por defecto para empezar sin una configuración adicional. 
+
+- El proveedor por defecto: `ConcurrentMapCacheManager`.
+	- Cuando tienes `@EnableCaching`, pero no has configurado nada más, Spring Boot o Spring Framework, asume automáticamente un proveedor "Simple". Este proveedor es el `ConcurrentMapCacheManager`, que como su nombre indica, utiliza un `ConcurrentHashMap` de Java para almacenar los objetos en caché.
+- Otros proveedores: 
+	- Spring Boot es inteligente y puedeautoconfigurarr otros `CacheManager` si detecta las librerías necesarias en el classpath. Esto nos permite cambiar el almacenamiento subyacente sin modificar nuestro código. Algunos ejemplos son:
+		- [Ejemplo](https://docs.spring.io/spring-boot/docs/1.3.0.M5/reference/html/boot-features-caching.html)
+		- [Ejemplo 2 aunque está en chino xd](https://www.ucloud.cn/yun/73389.html)
+
+
+### En programa: 
+Vamos a ver las anotaciones principales, ya vimos la que configura, en general, todo además de habilitar.
+***
+#### `@Cacheable`
+
+Esta es la más importante, ya que si existe en caché, devuelve, y si no ejecuta el método y guarda, un ejemplo: 
+```java
+@Cacheable("books")  
+public Book findById(Long id) {  
+return repository.findById(id);  
+}
+```
+La clave generada: 
+```text
+cacheName: books
+key: id
+```
+
+Aqui hay algo importante y es el SpEL en java (Spring Expression Language), cosa que no vamos a tocar en profundidad, pero podemos observar que en los valores de Caché se implementa ese mecanismo.
+
+El parámetro `value` técnicamente define el nombre de la caché (o cachés) donde se almacenará el resultado. El `CacheManager` usa este nombre para resolver la instancia concreta de `Cache` (vía `CacheResolver`). Puede ser un `String[]` si se quiere almacenar en múltiples cachés simultáneamente. 
+El parámetro `key` (y SpEL) utiliza el spring expression language para evaluar dinámicamente la clave de caché en tiempo de ejecución. El contexto de evaluación proporciona:
+- `#root.args`: Array de todos los argumentos del método
+- `#root.methodName`: Nombre del método
+- `#root.target`: Objeto target (el bean)
+- `#root.caches`: Array de las cachés actuales
+- Y básicamente todos los parámetros del método por nombre
+
+***
+#### `@CachePut`
+
+Aqui ejecuta el método y actualiza el caché:
+```java
+@CachePut(value = "books" , key = "#book.id")
+public Book update(Book book){
+	return repository.save(book);
+}
+```
+
+Para dar un ejemplo más completo para este apartado vamos a realizar lo siguiente en nuestro programa: 
+
+Primero vamos a generar un buen servicio un poco más completo: 
+```java
+@Service  
+public class BookServicesImpl implements BookService {  
+  
+    private final BookRepository bookRepository;  
+  
+    public BookServicesImpl(BookRepository bookRepository) {  
+        this.bookRepository = bookRepository;  
+    }  
+  
+  
+    @Override  
+    @Cacheable("books")  
+    public List<BookEntity> findAll() {  
+        try {  
+            return new ArrayList<>(bookRepository.findAll());  
+        } catch (InterruptedException e) {  
+            Thread.currentThread().interrupt();  
+            throw new RuntimeException("Thread was interrupted", e);  
+        }  
+    }  
+  
+    @Override  
+    @Cacheable(value = "books", key = "#id")  
+    public Optional<BookEntity> findById(Long id) {  
+        try {  
+            return bookRepository.findById(id);  
+        } catch (InterruptedException e) {  
+            throw new RuntimeException(e);  
+        }  
+    }  
+  
+    @Override  
+    @CachePut(value = "books", key = "#book.id")  
+    public BookEntity save(BookEntity book) {  
+        return bookRepository.save(book);  
+    }  
+  
+    @Override  
+    public void deleteById(Long id) {  
+        bookRepository.deleteById(id);  
+    }  
+}
+```
+
+Lo importante es que tenemos un `@Cacheable` en `findById` y tenemos el `@CachePut` en donde guardamos para buscar el `id` de forma ya cacheable, la buscamos en el método `findById()`. Entonces, para que eso pase vamos a completar el código: 
+
+En el controlador
+```java
+@RestController  
+@RequestMapping("/books")  
+public class BookController {  
+  
+    private final BookService bookService;  
+    private final Mediator mediator;  
+  
+  
+    public BookController(BookService bookService,  
+                          @Qualifier("createBookMediator") Mediator mediator) {  
+        this.bookService = bookService;  
+        this.mediator = mediator;  
+    }  
+  
+  
+    @GetMapping  
+    public List<BookEntity> getBooks() {  
+        return bookService.findAll();  
+    }  
+  
+    @GetMapping("/{id}")  
+    public ResponseEntity<BookEntity> getBookById(@PathVariable Long id) {  
+        return bookService.findById(id)  
+                .map(ResponseEntity::ok)  
+                .orElse(ResponseEntity.notFound().build());  
+    }  
+  
+    @PostMapping  
+    public ResponseEntity<Void> save(@RequestBody BookRequest request) {  
+        mediator.notify(request, "bookCreated");  
+        return ResponseEntity.status(HttpStatus.CREATED).build();  
+    }  
+}
+```
+
+Dentro de save hay un mediador, para mostrar cómo funciona: 
+```java
+public interface Mediator {  
+  
+    void notify(Object sender, String event);  
+}
+
+//---
+
+@Component  
+@Qualifier("createBookMediator")  
+public class CreateBookMediator implements Mediator {  
+  
+    private final BookService bookService;  
+    private final AuthorService authorService;  
+  
+    public CreateBookMediator(BookService bookService, AuthorService authorService) {  
+        this.bookService = bookService;  
+        this.authorService = authorService;  
+    }  
+  
+    @Override  
+    public void notify(Object sender, String event) {  
+        // primero vamos a que el objeto sea un libro enviado, es decir, bookRequest  
+        var bookRequest = (BookRequest) sender;  
+        if (event.equals("bookCreated")) {  
+            var author = authorService.findById(bookRequest.authorId());  
+            if (author.isPresent()) {  
+                var bookEntity = BookMapper.requestToEntity(bookRequest);  
+                // añadimos el autor por set, ya que no es del dominio, si lo fuera set está prohibido  
+                bookEntity.setAuthor(author.get());  
+                // guardamos el libro  
+                bookService.save(bookEntity);  
+            } else {  
+                throw new RuntimeException("Author not found");  
+            }  
+        }  
+    }  
+}
+```
+Y como vimos debemos agregar un timer: 
+```java
+@Repository  
+public class BookRepositoryLocal implements BookRepository {
+
+	...
+	
+	@Override  
+	public Optional<BookEntity> findById(Long id) throws InterruptedException {  
+	    Thread.sleep(2000);  
+	    return Optional.ofNullable(books.get(id));  
+	}  
+	  
+	@Override  
+	public BookEntity save(BookEntity book) {  
+	    if (book.getId() == null) {  
+	        // Generar nuevo ID  
+	        Long newId = books.keySet().stream()  
+	                .max(Long::compareTo)  
+	                .orElse(0L) + 1;  
+	        book.setId(newId);  
+	    }  
+	    books.put(book.getId(), book);  
+	    return book;  
+	}
+	
+	...
+}
+```
+
+Ya luego hacemos las pruebas en insomnia, postman, curl o en el que mejor se adapte: 
+
+Primero miraremos cuanto dura para buscar un ID: 
+![[Pasted image 20260306221101.png]]
+
+Luego vamos a crear nuestro libro: 
+![[Pasted image 20260306221148.png]]
+
+Y por último ... ¿Cuánto demorará si buscamos el número 11 que acabamos de añadir?:
+![[Pasted image 20260306221249.png]]
+
+Aquí es donde observamos cómo funciona el `@CachePut`
+
+***
+
+#### `@CacheEvict`
+
+Básicamente elimina los datos del caché.
+Este es un ejemplo bastante sencillo, solo debemos de poner lo siguiente: 
+
+```java
+@Service  
+public class BookServicesImpl implements BookService {  
+  
+    ...
+  
+    @Override  
+    @CacheEvict(value = "books", key = "#id")  
+    public void deleteById(Long id) {  
+        bookRepository.deleteById(id);  
+    }  
+}
+```
+Y vamos de paso a cerar el apartado del controlador:
+
+```java
+@RestController  
+@RequestMapping("/books")  
+public class BookController {  
+  
+    private final BookService bookService;  
+    private final Mediator mediator;  
+  
+  
+    public BookController(BookService bookService,  
+                          @Qualifier("createBookMediator") Mediator mediator) {  
+        this.bookService = bookService;  
+        this.mediator = mediator;  
+    }  
+  
+  
+    @GetMapping  
+    public List<BookEntity> getBooks() {  
+        return bookService.findAll();  
+    }  
+  
+    @GetMapping("/{id}")  
+    public ResponseEntity<BookEntity> getBookById(@PathVariable Long id) {  
+        return bookService.findById(id)  
+                .map(ResponseEntity::ok)  
+                .orElse(ResponseEntity.notFound().build());  
+    }  
+  
+    @PostMapping  
+    public ResponseEntity<?> save(@RequestBody BookRequest request) {  
+        EventApplication event = new CreateBookEvent(request);  
+        var ret = (BookEntity) mediator.notify(event);  
+        return new ResponseEntity<>(  
+                BookCreatedResponse.success(ret.getId(), ret.getTitle())  
+                , HttpStatus.CREATED);  
+    }  
+  
+	  // PARTE IMPORTANTE
+  
+    @DeleteMapping("/{id}")  
+    public ResponseEntity<Void> delete(@PathVariable Long id) {  
+        bookService.deleteById(id);  
+        return ResponseEntity.noContent().build();  
+    }  
+}
+```
+
+Vamos a hacer una prueba, si nosotros NO usamos el `CacheEvict` sucede esto: 
+Creamos el libro: 
+![[Pasted image 20260307122153.png]]
+Buscamos y en efecto encontramos el libro: 
+![[Pasted image 20260307122208.png]]
+Eliminamos el libro: 
+![[Pasted image 20260307122225.png]]
+SI NOSOTROS NO USAMOS EL `@CacheEvict`, cuando hacemos el get de nuevo: 
+![[Pasted image 20260307122257.png]]
+Vemos que se encuentra aunque realmente no esté. Si hacemos el mismo proceso con el `@CacheEvict`: 
+![[Pasted image 20260307122403.png]]
+Con esto concluimos el porque y la necesidad de esta anotación, aunque de ultima forma, podemos eliminar todo un apartado de esta forma: 
+```java
+@CacheEvict(value = "books", allEntries = true) // Esto limpia TODO el value = books
+```
+
+***
+#### `@Caching`
+
+Este permite combinar operaciones.
+Básicamente, puede coordinar múltiples operaciones en un solo método, vamos a ver como es el su anatomía: 
+```java
+@Target({ElementType.TYPE, ElementType.METHOD})  
+@Retention(RetentionPolicy.RUNTIME)  
+@Inherited  
+@Documented  
+@Reflective  
+public @interface Caching {  
+    Cacheable[] cacheable() default {};  
+  
+    CachePut[] put() default {};  
+  
+    CacheEvict[] evict() default {};  
+}
+```
+
+Aquí es impórtate mencionar que los arrays se ejecutan en este orden: 
+1. `evict` (primero limpia)
+2. `cacheable` (Después se verifica/busca)
+3. `put` finalmente se guarda
+
+Los escenarios practicos para esto es algo que rara vez vamos a poder utiizar, aunque siempre puede ser buena idea conocer,  por ejemplo imaginemos que al actualziar un libro dee actualizar cache del libro, limpiar cache de busquedas y actualizar la caché del autor. Entonces: 
+
+```java
+@Service
+public class BookService {
+    
+    @Caching(
+        // Primero: Limpiar cachés derivadas
+        evict = {
+            @CacheEvict(value = "bookSearch", allEntries = true), // Limpia TODAS las búsquedas
+            @CacheEvict(value = "authorBooks", key = "#book.authorId") // Limpia solo del autor específico
+        },
+        // Luego: Actualizar la caché principal del libro
+        put = {
+            @CachePut(value = "books", key = "#book.id") // Actualiza el libro
+        }
+    )
+    public BookEntity updateBook(BookEntity book) {
+        return bookRepository.save(book);
+    }
+}
+```
+
+Otro escenario puede ser el de busqueda múltiple de caché con diferentes claves: 
+```java
+public class UserService {
+    
+    @Caching(
+        cacheable = {
+            @Cacheable(value = "users", key = "#userId"),           // Busca por ID
+            @Cacheable(value = "usersByEmail", key = "#email")      // Busca por email
+        },
+        put = {
+            @CachePut(value = "userProfiles", key = "#result.profileId") // Guarda el perfil asociado
+        }
+    )
+    public User getUserWithProfile(Long userId, String email) {
+        // Lógica que obtiene usuario y su perfil
+        return userRepository.findByIdAndEmail(userId, email);
+    }
+}
+```
+
+También pueden ser operaciones condicionales: 
+
+```java
+public class InventoryService {
+    
+    @Caching(
+        evict = {
+            @CacheEvict(value = "productList", condition = "#product.stock == 0"), // Solo si stock es 0
+            @CacheEvict(value = "categoryProducts", key = "#product.categoryId", 
+                       condition = "#product.price > 1000") // Solo si es caro
+        },
+        put = {
+            @CachePut(value = "products", key = "#product.id", 
+                     unless = "#product.status == 'INACTIVE'") // No guardar si está inactivo
+        }
+    )
+    public ProductEntity updateProduct(ProductEntity product) {
+        return productRepository.save(product);
+    }
+}
+```
+
+Algo invalido es: 
+```java
+// ❌ CÓDIGO INVÁLIDO - NO COMPILA
+@CachePut(value = "books", key = "#book.id")
+@CacheEvict(value = "searchCache", allEntries = true)
+public BookEntity save(BookEntity book) {
+    return repository.save(book);
+}
+```
+
+No podemos combinar, para eso necesitamos el `@Caching` específicamente.
+
+***
+
+### Tip y casos de uso: 
+
+Un tip necesario es colocar configuración a nivel de clases, y combinar los caching, por ejemplo: 
+```java
+@CacheConfig(cacheNames = "books") // Configuración a nivel de clase
+@Service
+public class AdvancedBookService {
+    
+    @Caching(
+        evict = {
+            @CacheEvict(key = "#id"), // Hereda "books" de @CacheConfig
+            @CacheEvict(value = "searchCache", allEntries = true)
+        }
+    )
+    public void deleteBook(Long id) {
+        repository.deleteById(id);
+    }
+    
+    @Caching(
+        put = {
+            @CachePut(key = "#result.id"), // Hereda "books"
+            @CachePut(value = "bookDetails", key = "#result.isbn")
+        }
+    )
+    public BookEntity saveWithDetails(BookEntity book) {
+        return repository.save(book);
+    }
+}
+```
+
+#### Caso de uso: 
+Aplicar caching indiscriminadamente es una receta para problemas de memoria, overhead de invalidation y datos obsoletos. Los candidatos ideales son aquellos que cumplen con la mayoría de estos criterios: son operaciones costosas en CPU o base de datos, se ejecutan con alta frecuencia, tienen un conjunto de claves reutilizable (baja cardinalidad), pueden tolerar cierto grado de obsolescencia y su lentitud impacta directamente en la experiencia del usuario (altos percentiles P95/P99) [](https://blog.sentry.io/ai-driven-caching-strategies-instrumentation/?original_referrer=https%3A%2F%2Fblog.sentry.io%2F2023%2F02%2F15%2Fgetting-started-with-jetpack-compose%2F%3Futm_source%3Ddevto%26utm_medium%3Dpaid-community%26utm_campaign%3Dgeneral-fy26q1-mims%26utm_content%3Dstatic-ad-acid-startfree). 
+Por el contrario, debes evitar cachear datos con alta cardinalidad (como consultas con muchos filtros únicos o IDs de usuario), información altamente volátil que requiere frescura inmediata, o datos personalizados donde un error en la clave podría filtrar información. Cachear respuestas que ya son rápidas o cuyo costo de serialización es mayor que el beneficio tampoco tiene sentido, y hay que tener cuidado con patrones que pueden causar estampidas o sobrecargar la memoria si los payloads son muy grandes [](https://docs.spryker.com/docs/dg/dev/guidelines/performance-guidelines/custom-code-performance-guidelines)[](https://blog.sentry.io/ai-driven-caching-strategies-instrumentation/?original_referrer=https%3A%2F%2Fblog.sentry.io%2F2023%2F02%2F15%2Fgetting-started-with-jetpack-compose%2F%3Futm_source%3Ddevto%26utm_medium%3Dpaid-community%26utm_campaign%3Dgeneral-fy26q1-mims%26utm_content%3Dstatic-ad-acid-startfree).
+
+Para definir tu caso de uso, necesitas un estudio basado en datos de producción, no en suposiciones. Debes comenzar por identificar los cuellos de botella reales: busca en tus herramientas de monitoreo las transacciones con peor rendimiento (P95/P99 alto), las consultas a base de datos más pesadas y repetitivas, y los endpoints que están en la ruta crítica de las operaciones más frecuentes [](https://blog.sentry.io/ai-driven-caching-strategies-instrumentation/?original_referrer=https%3A%2F%2Fblog.sentry.io%2F2023%2F02%2F15%2Fgetting-started-with-jetpack-compose%2F%3Futm_source%3Ddevto%26utm_medium%3Dpaid-community%26utm_campaign%3Dgeneral-fy26q1-mims%26utm_content%3Dstatic-ad-acid-startfree). 
+Analiza los patrones de acceso: ¿los mismos datos se solicitan una y otra vez con los mismos parámetros? Por ejemplo, en un endpoint paginado, es probable que solo la página 1 y los filtros más comunes tengan alta reutilización, mientras que las páginas profundas tienen cardinalidad casi infinita y no deberían cachearse [](https://blog.sentry.io/ai-driven-caching-strategies-instrumentation/?original_referrer=https%3A%2F%2Fblog.sentry.io%2F2023%2F02%2F15%2Fgetting-started-with-jetpack-compose%2F%3Futm_source%3Ddevto%26utm_medium%3Dpaid-community%26utm_campaign%3Dgeneral-fy26q1-mims%26utm_content%3Dstatic-ad-acid-startfree).
+
+Las métricas clave para evaluar el éxito son, principalmente, la tasa de aciertos (hit ratio), que debe alinearse con tus expectativas (no buscar el 100% ciegamente); la reducción en la latencia de respuesta (especialmente en los percentiles altos); y la disminución en la carga de tu base de datos o servicios externos [](https://www.zenml.io/llmops-database/multi-layered-caching-architecture-for-ai-metadata-service-scalability)[](https://www.devx.com/web-development-zone/database-caching-patterns-for-performance-optimization/). 
+Una buena implementación se valida cuando, por ejemplo, reduces la latencia de 400ms a menos de 1ms para los hits y observas una caída significativa en las consultas a la base de datos, todo mientras monitoreas que las tasas de error no se disparen y que el consumo de memoria del caché se mantenga dentro de lo planificado
+
+## Caffeine y Redis
+
+# Eventos En Spring Boot
+
+## Fundamentos: 
+1. El patrón Observer y su implementación en Spring
+2. ApplicationEventPublisher: inyección y método publishEvent
+3. @EventListener: detección por tipo de parámetro
+4. Eventos síncronos vs asíncronos (@Async + @EnableAsync)
+5. Orden de ejecución con @Order
+## Tipos de eventos
+6. Eventos simples (POJOs)
+    
+7. Eventos que extienden ApplicationEvent (legado)
+    
+8. Eventos genéricos y type erasure (ResolvableType)
+    
+9. Múltiples eventos en un mismo listener
+    
+10. Listeners con retorno (generan nuevos eventos)
+## Control avanzado
+11. @TransactionalEventListener y sus fases (BEFORE_COMMIT, AFTER_COMMIT, AFTER_ROLLBACK)
+    
+12. Condition con SpEL en @EventListener(condition = "...")
+    
+13. Manejo de excepciones en listeners (ErrorHandler)
+    
+14. Eventos con prioridad y orden
+    
+15. Propagación de eventos en jerarquías de ApplicationContext
+## Arquitectura y Diseño
+16. Estrategias de naming y organización de eventos
+    
+17. Eventos por dominio vs eventos genéricos (DDD)
+    
+18. Event versionado y compatibilidad hacia atrás
+    
+19. Payload mínimo vs payload completo
+    
+20. Eventos como contrato entre módulos/bounded contexts
+## Integración y performance
+21. Eventos y transacciones (rollback, consistencia)
+    
+22. Thread pooling para @Async eventos (custom Executor)
+    
+23. Monitoreo: métricas de latencia y throughput
+    
+24. Debugging: trace de eventos con logs
+    
+25. Testing: @SpringBootTest con @MockBean de listeners
+
+## Escalabilidad
+26. Eventos en memoria vs eventos con broker externo (RabbitMQ, Kafka)
+    
+27. Bridge entre ApplicationEvent y mensajes JMS
+    
+28. Event replay y event sourcing
+    
+29. Eventos distribuidos vs locales
+    
+30. Patrones: Saga, CQRS y Event-Driven Architecture con Spring
+
+## 
+
+# Security context en Spring Boot
 
 # Bibliografía: 
 - [Spring Cloud Video](https://www.youtube.com/watch?v=EWqAY_-R57A)

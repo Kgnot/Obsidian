@@ -1,7 +1,8 @@
 ---
 type: course
 status: en_progreso
-tags: [course, RabbitMQ (Curso)]
+tags:
+  - course
 date_started: 2024-05-20
 ---
 

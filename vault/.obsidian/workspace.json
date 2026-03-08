@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Courses/DevOps & Infrastructure/Docker (Curso).md",
+                "file": "Courses/Backend & Languages/Java SpringBoot (Curso).md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Docker (Curso)"
+              "title": "Java SpringBoot (Curso)"
             }
           }
         ]
@@ -44,7 +44,7 @@
                 "autoReveal": false
               },
               "icon": "lucide-folder-closed",
-              "title": "Files"
+              "title": "Explorador de archivos"
             }
           },
           {
@@ -78,7 +78,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 430.5
+    "width": 430.5,
+    "collapsed": true
   },
   "right": {
     "id": "ca31238cd924bf6a",
@@ -152,13 +153,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Courses/DevOps & Infrastructure/Docker (Curso).md",
+                "file": "Courses/Backend & Languages/Java SpringBoot (Curso).md",
                 "followCursor": false,
                 "showSearch": true,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of Docker (Curso)"
+              "title": "Esquema de Java SpringBoot (Curso)"
             }
           },
           {
@@ -190,14 +191,14 @@
   },
   "left-ribbon": {
     "hiddenItems": {
-      "bases:Create new base": false,
-      "switcher:Open quick switcher": false,
-      "graph:Open graph view": false,
-      "canvas:Create new canvas": false,
-      "daily-notes:Open today's daily note": false,
-      "templates:Insert template": false,
-      "command-palette:Open command palette": false,
-      "workspaces:Manage workspace layouts": false,
+      "switcher:Abrir selector rápido": false,
+      "graph:Abrir vista gráfica": false,
+      "canvas:Crear nuevo lienzo": false,
+      "daily-notes:Abrir la nota de hoy": false,
+      "templates:Insertar plantilla": false,
+      "command-palette:Abrir paleta de comandos": false,
+      "workspaces:Gestionar disposiciones de espacio de trabajo": false,
+      "bases:Crear nueva base": false,
       "table-editor-obsidian:Advanced Tables Toolbar": false,
       "homepage:Open homepage": false,
       "obsidian-git:Open Git source control": false,
@@ -207,11 +208,25 @@
   },
   "active": "e7a7b303c61786dc",
   "lastOpenFiles": [
-    "00_Home.md",
+    "Courses/Backend & Languages/Java SpringBoot (Curso).md",
+    "Courses/Backend & Languages/images/Pasted image 20260307122403.png",
+    "Courses/Backend & Languages/images/Pasted image 20260307122257.png",
+    "Courses/Backend & Languages/images/Pasted image 20260307122225.png",
+    "Courses/Backend & Languages/images/Pasted image 20260307122208.png",
+    "Courses/Backend & Languages/images/Pasted image 20260307122153.png",
+    "Courses/Backend & Languages/Java semi-avanzado (Curso).md",
+    "Courses/Backend & Languages/images/Pasted image 20260306221249.png",
+    "Courses/Backend & Languages/images/Pasted image 20260306221148.png",
+    "Courses/Backend & Languages/images/Pasted image 20260306221101.png",
+    "Courses/Backend & Languages/Kotlin (Curso).md",
+    "Courses/Backend & Languages/images/Pasted image 20260305193012.png",
+    "Courses/Backend & Languages/images/Pasted image 20260305193008.png",
+    "Courses/Backend & Languages/images",
     "Courses/DevOps & Infrastructure/RabbitMQ (Curso).md",
+    "Courses/DevOps & Infrastructure/Docker (Curso).md",
+    "00_Home.md",
     "Resources/Home/Internet de las cosas.md",
     "Untitled.md",
-    "images/Pasted image 20251204180323.png",
     "Templates/Roadmap Template.md",
     "Templates/Course Template.md",
     "Templates/Concept Template.md",
@@ -231,11 +246,6 @@
     "Untitled.base",
     "Courses/Frontend & Mobile/000_Frontend_and_Mobile_MOC.md",
     "Concept 1.md",
-    "Ideas de Proyectos.md",
-    "Courses/DevOps & Infrastructure/000_DevOps_and_Infrastructure_MOC.md",
-    "URL.md",
-    "Resources/Home/Programacion Frontend.md",
-    "Libros/Recomendaciones iniciales.md",
     "Courses/Cybersecurity",
     "Courses/DevOps & Infrastructure",
     "Courses/Embedded & IoT",
@@ -243,16 +253,6 @@
     "Courses/Backend & Languages",
     "Templates",
     "Resources/Home",
-    "Resources",
-    "Courses/images/Core_crotex.png",
-    "Courses/images/Pasted image 20260220192024.png",
-    "Courses/images/Pasted image 20260220100354.png",
-    "Courses/images/Pasted image 20260220082053.png",
-    "Courses/images/Pasted image 20260219214622.png",
-    "Courses/images/Pasted image 20260219143421.png",
-    "Courses/images/Pasted image 20260219131617.png",
-    "Courses/images/Pasted image 20260219104221.png",
-    "Courses/images/Pasted image 20260217225706.png",
     "Untitled.canvas",
     "Untitled 1.canvas"
   ]
