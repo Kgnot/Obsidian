@@ -1873,4 +1873,4 @@ fn main() {
 - En el caso de un tipo de resultado devuelto, significa que este es un tipo concreto que implementa el trait, sin nombrar el tipo. Esto puede
 ser útil cuando no quieres exponer el tipo concreto en una API pública.
     
-    La inferencia es más complicada en la posición de retorno. Una función que devuelve `impl Foo` elige el tipo concreto que devuelve, sin escribirlo en el código fuente. Una función que devuelve un tipo genérico como `collect<B>() -> B` puede devolver cualquier tipo que cumpla `B`, y es posible que el llamador tenga que elegir uno, como con `let x: Vec<_> = foo.collect()` o con la sintaxis turbofish, `foo.collect::<Vec<_>>()`.
+La inferencia es más complicada en la posición de retorno. Una función que devuelve `impl Foo` elige el tipo concreto que devuelve, sin escribirlo en el código fuente. Una función que devuelve un tipo genérico como `collect<B>() -> B` puede devolver cualquier tipo que cumpla `B`, y es posible que el llamador tenga que elegir uno, como con `let x: Vec<_> = foo.collect()` o con la sintaxis turbofish, `foo.collect::<Vec<_>>()`.

@@ -312,7 +312,9 @@
     "classpath",
     "insomnia",
     "postman",
-    "caching"
+    "caching",
+    "Caffeine",
+    "AplicationEventPublisher"
   ],
   "newFileLocation": "root",
   "newFileFolderPath": "courses/src/images",

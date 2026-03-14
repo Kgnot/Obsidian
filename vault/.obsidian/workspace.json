@@ -11,14 +11,10 @@
             "id": "e7a7b303c61786dc",
             "type": "leaf",
             "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Courses/Backend & Languages/Java SpringBoot (Curso).md",
-                "mode": "source",
-                "source": false
-              },
+              "type": "empty",
+              "state": {},
               "icon": "lucide-file",
-              "title": "Java SpringBoot (Curso)"
+              "title": "Nueva pestaña"
             }
           }
         ]
@@ -78,8 +74,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 430.5,
-    "collapsed": true
+    "width": 430.5
   },
   "right": {
     "id": "ca31238cd924bf6a",
@@ -153,13 +148,12 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Courses/Backend & Languages/Java SpringBoot (Curso).md",
                 "followCursor": false,
                 "showSearch": true,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Esquema de Java SpringBoot (Curso)"
+              "title": "Esquema"
             }
           },
           {
@@ -170,16 +164,6 @@
               "state": {},
               "icon": "git-pull-request",
               "title": "Source Control"
-            }
-          },
-          {
-            "id": "b898100b8b4461f8",
-            "type": "leaf",
-            "state": {
-              "type": "copilot-chat-view",
-              "state": {},
-              "icon": "message-square",
-              "title": "Copilot"
             }
           }
         ],
@@ -202,27 +186,40 @@
       "table-editor-obsidian:Advanced Tables Toolbar": false,
       "homepage:Open homepage": false,
       "obsidian-git:Open Git source control": false,
-      "obsidian-excalidraw-plugin:New drawing": false,
-      "copilot:Open Copilot Chat": false
+      "obsidian-excalidraw-plugin:New drawing": false
     }
   },
   "active": "e7a7b303c61786dc",
   "lastOpenFiles": [
+    "Courses/Backend & Languages/Python (Curso).md",
+    "Courses/DevOps & Infrastructure/RabbitMQ (Curso).md",
+    "Courses/DevOps & Infrastructure/Github Actions , Jenkins (CI CD) (Curso).md",
+    "Courses/Backend & Languages/Rust C-Google (Curso).md",
+    "Courses/Backend & Languages/NestJS (Curso).md",
     "Courses/Backend & Languages/Java SpringBoot (Curso).md",
+    "Courses/Backend & Languages/images/Pasted image 20260312121200.png",
+    "Courses/Backend & Languages/Frameworks para bases de datos java u ORM. (Curso).md",
+    "Courses/Backend & Languages/000_Backend_and_Languages_MOC.md",
+    "Concepto/Arquitectura de aplicaciones web (Concepto).md",
+    "Concepto/Clean Architecture (Concepto).md",
+    "Concepto/MQTT (Concepto).md",
+    "Concepto/MVC (Concepto).md",
+    "Concepto/Servidor Web (Concepto).md",
+    "Courses/Backend & Languages/Java Avanzado (Curso).md",
+    "Courses/Backend & Languages/Java (Curso).md",
+    "Courses/Backend & Languages/Java semi-avanzado (Curso).md",
+    "Courses/Backend & Languages/Kotlin (Curso).md",
+    "Courses/Backend & Languages/images/Pasted image 20260312102838.png",
+    "Courses/Backend & Languages/SpringBoot ACM (Curso).md",
     "Courses/Backend & Languages/images/Pasted image 20260307122403.png",
     "Courses/Backend & Languages/images/Pasted image 20260307122257.png",
     "Courses/Backend & Languages/images/Pasted image 20260307122225.png",
     "Courses/Backend & Languages/images/Pasted image 20260307122208.png",
     "Courses/Backend & Languages/images/Pasted image 20260307122153.png",
-    "Courses/Backend & Languages/Java semi-avanzado (Curso).md",
     "Courses/Backend & Languages/images/Pasted image 20260306221249.png",
     "Courses/Backend & Languages/images/Pasted image 20260306221148.png",
     "Courses/Backend & Languages/images/Pasted image 20260306221101.png",
-    "Courses/Backend & Languages/Kotlin (Curso).md",
-    "Courses/Backend & Languages/images/Pasted image 20260305193012.png",
-    "Courses/Backend & Languages/images/Pasted image 20260305193008.png",
     "Courses/Backend & Languages/images",
-    "Courses/DevOps & Infrastructure/RabbitMQ (Curso).md",
     "Courses/DevOps & Infrastructure/Docker (Curso).md",
     "00_Home.md",
     "Resources/Home/Internet de las cosas.md",
@@ -231,21 +228,8 @@
     "Templates/Course Template.md",
     "Templates/Concept Template.md",
     "Courses/Frontend & Mobile/Typescript con React o Nextjs (Curso).md",
-    "Courses/Embedded & IoT/Sistemas Embebidos puro C (Curso).md",
-    "Courses/Embedded & IoT/Mosquitto (Curso).md",
-    "Courses/Embedded & IoT/IoT (Curso).md",
-    "Courses/Embedded & IoT/ESP32 (Curso).md",
-    "Courses/Embedded & IoT/C (Curso).md",
-    "Courses/DevOps & Infrastructure/Nginx (Curso).md",
-    "Courses/DevOps & Infrastructure/InfluxDB (Curso).md",
-    "Courses/Backend & Languages/Frameworks para bases de datos java u ORM. (Curso).md",
-    "Courses/Backend & Languages/000_Backend_and_Languages_MOC.md",
-    "Roadmap/Arquitectura de Software (Roadmap).md",
-    "Roadmap/Backend (Roadmap).md",
     "Untitled 1.base",
     "Untitled.base",
-    "Courses/Frontend & Mobile/000_Frontend_and_Mobile_MOC.md",
-    "Concept 1.md",
     "Courses/Cybersecurity",
     "Courses/DevOps & Infrastructure",
     "Courses/Embedded & IoT",

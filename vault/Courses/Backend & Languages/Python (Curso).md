@@ -7,24 +7,40 @@ date_started: 2024-05-20
 
 # Python
 
+Python es un sistema interpretado, no es compilado por lo que es muy fácil de ejecutar código en cualquier sitio, mayor portabilidad, etc. Por ejemplo, los lenguajes compilados el código fuente se transforma completamente a código máquina antes de ejecutarse mediante un compilador. 
+
+Interpretado es que se ejecuta directamente mediante un intérprete en tiempo de ejecución. 
+
+|Aspecto|Compilado|Interpretado|
+|---|---|---|
+|Traducción|Antes de ejecutar|Durante la ejecución|
+|Velocidad|Alta|Menor|
+|Binario final|Sí|Normalmente no|
+|Detección de errores|En compilación|En ejecución|
+|Portabilidad|Menor|Mayor|
+Es un tipo de lenguaje de alto nivel -> Más cerca al humano que a la máquina
+
+Es un lenguaje de proposito general.
+
+Es un lenguaje multi-paradigma
 # Tipos:
 
 En python al igual que en otros lenguajes hay diferentes tipos de variables, en java pueden verse como String, int, float, double y su contraparte de Objeto. En python son: 
 
-| `int` | `int` (Java), `int` (C++) | Representa números enteros. En Python, el tamaño es ilimitado (arbitrario). |
-| --- | --- | --- |
-| `float` | `double` (Java), `float` (C++) | Representa números de punto flotante (decimales). En Python, es equivalente a un `double` en C++. |
-| `complex` | `Complex` (Java), N/A (C++) | Representa números complejos (con parte real e imaginaria). No tiene equivalente directo en C++. |
-| `str` | `String` (Java), `std::string` (C++) | Representa cadenas de texto. En Python, las cadenas son inmutables. |
-| `bool` | `boolean` (Java), `bool` (C++) | Representa valores booleanos (`True` o `False`). |
-| `list` | `ArrayList` (Java), `std::vector` (C++) | Representa una colección ordenada y mutable de elementos. |
-| `tuple` | N/A (Java), `std::tuple` (C++) | Representa una colección ordenada e inmutable de elementos. |
-| `set` | `HashSet` (Java), `std::set` (C++) | Representa una colección desordenada de elementos únicos. |
-| `frozenset` | N/A (Java), `std::set` (C++) | Representa un conjunto inmutable (similar a `set`, pero no se puede modificar). |
-| `dict` | `HashMap` (Java), `std::map` (C++) | Representa un diccionario (colección de pares clave-valor). |
-| `NoneType` | `null` (Java), `nullptr` (C++) | Representa la ausencia de valor. En Python, el único valor posible es `None`. |
-| `bytes` | `byte[]` (Java), `std::vector<uint8_t>` (C++) | Representa una secuencia inmutable de bytes. |
-| `bytearray` | `byte[]` (Java), `std::vector<uint8_t>` (C++) | Representa una secuencia mutable de bytes. |
+| `int`       | `int` (Java), `int` (C++)                     | Representa números enteros. En Python, el tamaño es ilimitado (arbitrario).                       |
+| ----------- | --------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `float`     | `double` (Java), `float` (C++)                | Representa números de punto flotante (decimales). En Python, es equivalente a un `double` en C++. |
+| `complex`   | `Complex` (Java), N/A (C++)                   | Representa números complejos (con parte real e imaginaria). No tiene equivalente directo en C++.  |
+| `str`       | `String` (Java), `std::string` (C++)          | Representa cadenas de texto. En Python, las cadenas son inmutables.                               |
+| `bool`      | `boolean` (Java), `bool` (C++)                | Representa valores booleanos (`True` o `False`).                                                  |
+| `list`      | `ArrayList` (Java), `std::vector` (C++)       | Representa una colección ordenada y mutable de elementos.                                         |
+| `tuple`     | N/A (Java), `std::tuple` (C++)                | Representa una colección ordenada e inmutable de elementos.                                       |
+| `set`       | `HashSet` (Java), `std::set` (C++)            | Representa una colección desordenada de elementos únicos.                                         |
+| `frozenset` | N/A (Java), `std::set` (C++)                  | Representa un conjunto inmutable (similar a `set`, pero no se puede modificar).                   |
+| `dict`      | `HashMap` (Java), `std::map` (C++)            | Representa un diccionario (colección de pares clave-valor).                                       |
+| `NoneType`  | `null` (Java), `nullptr` (C++)                | Representa la ausencia de valor. En Python, el único valor posible es `None`.                     |
+| `bytes`     | `byte[]` (Java), `std::vector<uint8_t>` (C++) | Representa una secuencia inmutable de bytes.                                                      |
+| `bytearray` | `byte[]` (Java), `std::vector<uint8_t>` (C++) | Representa una secuencia mutable de bytes.                                                        |
 
 ---
 
@@ -63,6 +79,30 @@ bytes_data = b"datos"
 bytearray_data = bytearray(b"datos")
 ```
 
+```python
+
+# for fila in range(1,n+1):
+#     print(" "*(n-fila), end="")
+#     for num in range(1,fila+1):
+#         print(num, end = " ")
+#     print()
+
+# for fila in range(n,1,-1):
+#     print(" "*(n-fila+1), end="")
+#     for num in range(1,fila):
+#         print(num, end = " ")
+#     print()
+
+def rombo_parte(rango,n):
+    for fila in rango:
+        print(" "*(n-fila), end="")
+        for num in range(1,fila+1):
+            print(num, end = " ")
+        print()
+
+rombo_parte(range(1,n),n)
+rombo_parte(range(n,0,-1),n)
+```
 # Variables
 
 A la hora de crear variables es de lo mas increible de este lenguaje, debido a que es simplemente: 
@@ -108,10 +148,165 @@ int(float("3.14"))
 ```
 
 ---
+# Bucles
+Los bucles son estructuras que nos permiten ejecutar un bloque de código múltiples veces.
+## While:
+
+La idea principal y detras de este bucle es el repetir mientras se cumple una condición inicial.
+```python
+while condicion:
+	# código
+```
+
+Un ejemplo práctico:
+```python
+contador = 1
+
+while contador < 5 : 
+	print(f"Vuelta numero: {contador}")
+	contador + =1
+```
+## For: 
+El bucle for se usa para iterar sobre secuencias,  ¿qué son secuencias?, son: listas, tuplas, strings, diccionarios, rangos, etc.
+la sintaxis general es:
+```python
+for (variable individual de lo que se quiere operar) in (el operando):
+	# lógica
+```
+por lo que podemos hacer varias cosas como: 
+```python
+frutas = ["manzana","banana","cereza"]
+
+for fruta in frutas:
+	print(f"Me gusta comer {fruta}")
+	
+for palabra in "hola":
+	print(f"letra: {palabra}")
+# range : 
+#range(stop)
+#range(start,stop)
+#range(start,stop,step)
+for i in range(2,8,2):
+	print(i)
+```
+## Continue y break
+
+`continue` y break` `son dos palabras reservadas del sistema cuya funciones son: 
+- `continue`: omitir el resto del proceso y seguir con el siguiente iterando
+- `break`: romper con el bucle directamente
+```python
+print("Imprimiendo solo números pares:")
+for numero in range(1, 11):
+    if numero % 2 == 0:
+        print(f"Número par: {numero}")
+        continue # Si fuera break entonces rompería con el primero que encuentra 
+
+```
+## else con bucles
+
+Esto es una caracteristica especial de python donde al terminar un bucle en su completitud se ejecuta, solo si no hay un break de por medio: 
+```python
+print("Buscando un número mayor que 5:")
+numeros = [2, 4, 6, 8, 10]
+for num in numeros:
+    if num > 5:
+        print(f"Encontré {num}, es mayor que 5. ¡Break activado!")
+        break
+    print(f"Revisando: {num}")
+else:
+    print("No se encontró ningún número mayor que 5")
+
+print("-" * 30)
+
+print("Buscando un número mayor que 10:")
+numeros = [2, 4, 6, 8, 10]
+for num in numeros:
+    if num > 10:
+        print(f"Encontré {num}, es mayor que 10. ¡Break activado!")
+        break
+    print(f"Revisando: {num}")
+else:
+    print("No se encontró ningún número mayor que 10")  # ¡Este se ejecuta!
+```
+## Recorrer un diccionario:
+```python
+estudiante = {
+    "nombre": "Ana",
+    "edad": 25,
+    "carrera": "Ingeniería"
+}
+
+# Iterar claves
+print("Claves:")
+for clave in estudiante:
+    print(clave)
+
+print("\nValores:")
+# Iterar valores
+for valor in estudiante.values():
+    print(valor)
+
+print("\nPares clave-valor:")
+# Iterar items (clave y valor)
+for clave, valor in estudiante.items():
+    print(f"{clave}: {valor}")
+```
+
+## Creando listas con for
+
+```python
+# Forma tradicional
+cuadrados = []
+for i in range(1, 6):
+    cuadrados.append(i**2)
+print(f"Cuadrados (tradicional): {cuadrados}")
+
+# Con list comprehension
+cuadrados_lc = [i**2 for i in range(1, 6)]
+print(f"Cuadrados (LC): {cuadrados_lc}")
+
+# Con condición (solo pares)
+pares_cuadrados = [i**2 for i in range(1, 11) if i % 2 == 0]
+print(f"Cuadrados de pares: {pares_cuadrados}")
+
+# Transformando strings
+nombres = ["ana", "carlos", "maria"]
+nombres_capitalizados = [nombre.capitalize() for nombre in nombres]
+print(f"Nombres capitalizados: {nombres_capitalizados}")
+```
+## Enumerate
+Enumerate es una forma en la que generamos una numeración sobre una lista:
+```python
+lista_nombres = ["n1","n2"]
+
+for index,nombre in enumerate(lista_nombres,start=1):
+	print(f"{index} - {nombre} ")
+
+
+```
+
+## ZIP:
+El método `zip` sirve para iterar múltiples secuencias en "paralelo"
+```python
+nombres = ["Ana", "Carlos", "María"]
+edades = [25, 30, 28]
+ciudades = ["Madrid", "Barcelona", "Valencia"]
+
+print("Datos de estudiantes:")
+for nombre, edad, ciudad in zip(nombres, edades, ciudades):
+    print(f"{nombre} tiene {edad} años y vive en {ciudad}")
+
+# Con listas de diferente longitud, zip se detiene en la más corta
+print("\nCon listas desiguales:")
+a = [1, 2, 3, 4]
+b = ['a', 'b', 'c']
+for num, letra in zip(a, b):
+    print(f"{num} -> {letra}")
+```
 
 # Condicionales:
 
-Los booleanos condicionales en expresiones de verdadero y falso tinene los siguientes modos: 
+Los booleanos condicionales en expresiones de verdadero y falso tiene los siguientes modos: 
 
 ```python
 x!=y # x no es igual a y
@@ -124,6 +319,7 @@ x is not y # x no es el mismo que y
 x==y # x es igual a y
 isinstance(*valor,tipo_dato*) # Si el valor es instancia de un tipo de dato
 ```
+
 
 # Indentación:
 

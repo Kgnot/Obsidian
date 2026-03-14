@@ -4115,14 +4115,497 @@ Una buena implementación se valida cuando, por ejemplo, reduces la latencia de 
 
 ## Caffeine y Redis
 
+### Caffeine
+
+Vamos a hablar de Caffeine primero, este es una biblioteca Java de alto rendimiento para crear y gestionar cachés en memoria. Este no es un simple mapa donde se guardan cosas. Lo que lo hace especial es cómo gestiona el espacio y decide que datos conservar y cuáles eliminar. Como la memoria no es infinita, tiene que ser selectivo. 
+
+Su funcionamiento se basa en dos conceptos claves: 
+1. **Política de expulsión** Son las reglas para decidir que datos sacar del caché cuando está lleno
+	- Basada en tamaño (no quiero que el caché sobrepase los 100 MB)
+	- Basada en tiempo (Elimina los datos después de 10 minutos de guardado, o si no se han usado en al menos 5 minutos)
+2. **Política de eliminación** La parte más inteligente es cómo decide qué es "menos útil". Caffeine utiliza un algoritmo llamado *Window TinyLFU (Least Frequently Used)*
+	- **Frecuencia:** Sigue un registro de qué elementos se piden más veces. Los que se piden mucho, se quedan. Los que apenas se usan, son los primeros en irse si hace falta espacio.
+	- **Ventana de frescura:** Añade una pequeña "ventana" especial para dar una oportunidad a los elementos nuevos. Imagina un artículo de hoy que de repente se vuelve viral. Sin esta ventana, se eliminaría rápidamente por no tener un historial de uso, pero gracias a ella, tiene tiempo de demostrar que es popular y pasar a la zona de "frecuentes".
+	- **Filtro de frecuencia:** Usa una estructura de datos muy eficiente para recordar aproximadamente cuántas veces se ha usado un elemento, sin gastar mucha memoria en ello.
+
+**Caffeine es una caché "autogestionada" que aprende de los patrones de acceso de tu aplicación para mantener siempre disponibles los datos que más le pides, optimizando el uso de la memoria y haciendo tu programa mucho más rápido.**
+
+#### Cómo se usa:
+
+Debemos añadir, en primer lugar, el `spring-boot-starter-cache` y `caffeine` como dependencias de java en, ya sea maven o gradle.
+```xml
+ <dependency>
+	<groupId>com.github.ben-manes.caffeine</groupId>
+	<artifactId>caffeine</artifactId>
+</dependency>
+```
+
+No debemos olvidar el `@EnableCaching`.
+
+Un dato importante es configurar el cachée mediante las propiedades o mediante el yml:
+```yml
+spring.cache.type=caffeine  
+# Especificacion de caffeine  
+spring.cache.caffeine.spec=maximumSize=100,expireAfterAccess=5m  
+#nombres de las caches  
+spring.cache.cache-names=cacheLibros,cacheAutores
+```
+En los nombres se recomienda pero no es obligatorio.
+
+Otra forma de hacerlo de forma más "programable" es mediante beans: 
+```java
+@Configuration
+@EnableCaching
+public class CacheConfig {
+
+    @Bean
+    public CacheManager cacheManager() {
+        CaffeineCacheManager cacheManager = new CaffeineCacheManager("usuarios", "productos");
+        cacheManager.setCaffeine(caffeineCacheBuilder());
+        return cacheManager;
+    }
+
+    private Caffeine<Object, Object> caffeineCacheBuilder() {
+        return Caffeine.newBuilder()
+                .initialCapacity(100)           // Tamaño inicial
+                .maximumSize(500)                // Máximo 500 entradas
+                .expireAfterAccess(10, TimeUnit.MINUTES)  // Expira por falta de acceso
+                .expireAfterWrite(1, TimeUnit.HOURS)      // Expira 1 hora después de escribir
+                .recordStats()                   // Activar estadísticas
+                .weakKeys()                       // Usar referencias débiles para las keys
+                .softValues();                     // Usar referencias suaves para los values
+    }
+}
+```
+
+Y pensaremos: ¿Cómo se usa? se usa las mismas anotaciones con el mismo grado que se usó al inicio.
+#### Monitoreo
+Para activar el monitoreo es mediante el bean:
+```java
+@Bean
+public CacheManager cacheManager(){
+	CaffeineCacheManager cacheManager = new CaffeineCacheManager();
+	cacheManager.setCaffeine(Caffeine.newBuilder()
+		.maximumSize(10_000)
+		.recordStats() // Esto activa las estadisticas
+	);
+	return cacheManager;
+}
+```
+Y la manera para acceder a estas estadisticas a va a ser por medio de un componente: 
+
+```java
+@Component
+public class CacheMonitor {
+    
+    private final CacheManager cacheManager;
+    
+    public CacheMonitor(CacheManager cacheManager) {
+        this.cacheManager = cacheManager;
+    }
+    
+    @Scheduled(fixedDelay = 60000) // Cada minuto
+    public void reportarEstadisticas() {
+        Cache cache = cacheManager.getCache("usuarios");
+        if (cache != null) {
+            Object nativeCache = cache.getNativeCache();
+            if (nativeCache instanceof com.github.benmanes.caffeine.cache.Cache) {
+                com.github.benmanes.caffeine.cache.Cache caffeineCache = 
+                    (com.github.benmanes.caffeine.cache.Cache) nativeCache;
+                
+                CacheStats stats = caffeineCache.stats();
+                System.out.println("=== Estadísticas de caché 'usuarios' ===");
+                System.out.println("Solicitudes totales: " + stats.requestCount());
+                System.out.println("Aciertos (hit): " + stats.hitCount());
+                System.out.println("Fallos (miss): " + stats.missCount());
+                System.out.println("Tasa de aciertos: " + stats.hitRate());
+                System.out.println("Tiempo promedio carga (ns): " + stats.averageLoadPenalty());
+            }
+        }
+    }
+}
+```
+
+Podríamos aqui indexar un archivo de logs o usar `new relic` o algún tipo de forma que pueda generarnos trazabilidad.
+### Redis
+Con Redis pasa algo muy similar y es la magia de las interfaces, debemos colocar la dependencia: 
+```xml
+<dependency>
+	<groupId>org.springframework.boot</groupId>
+	<artifactId>spring-boot-starter-data-redis</artifactId>
+</dependency>
+```
+
+Spring usa Lettuce como cliente Redis, antes usaba Jedis, solo que Lettuce es reactivo y no bloqueante.
+
+Ahora habilitamos el caché con `@EnableCaching` y luego se vienen las configuraciones: 
+```properties
+# Tipo de caché
+spring.cache.type=redis
+
+# Conexión a Redis
+spring.redis.host=localhost
+spring.redis.port=6379
+# spring.redis.password=tu-contraseña  # si tienes contraseña
+# spring.redis.ssl.enabled=true         # si usas SSL
+
+# Configuración de TTL global para la caché (opcional)
+spring.cache.redis.time-to-live=600000  # 10 minutos en milisegundos
+
+# Si quieres permitir valores null en caché (por defecto true)
+spring.cache.redis.cache-null-values=false
+
+# Usar prefijos en las keys de Redis (recomendado)
+spring.cache.redis.use-key-prefix=true
+spring.cache.redis.key-prefix=mi-app:
+```
+
+Y para hacerlo por medio de código: 
+
+```java
+@Configuration
+@EnableCaching
+public class RedisCacheConfig {
+
+    @Bean
+    public RedisCacheManager cacheManager(RedisConnectionFactory connectionFactory) {
+        // Configuración por defecto para todas las cachés
+        RedisCacheConfiguration defaultCacheConfig = RedisCacheConfiguration.defaultCacheConfig()
+                // Formato de las keys: prefijo::nombre
+                .computePrefixWith(cacheName -> "mi-app:" + cacheName + ":")
+                // TTL por defecto: 10 minutos
+                .entryTtl(Duration.ofMinutes(10))
+                // No cachear valores null
+                .disableCachingNullValues()
+                // Serializar valores como JSON
+                .serializeValuesWith(
+                        RedisSerializationContext.SerializationPair.fromSerializer(
+                                new GenericJackson2JsonRedisSerializer()
+                        )
+                );
+
+        // Configuraciones específicas para cachés concretas
+        Map<String, RedisCacheConfiguration> cacheConfigurations = new HashMap<>();
+        
+        cacheConfigurations.put("usuarios", RedisCacheConfiguration.defaultCacheConfig()
+                .entryTtl(Duration.ofHours(1))  // Usuarios: 1 hora
+                .disableCachingNullValues());
+        
+        cacheConfigurations.put("productos", RedisCacheConfiguration.defaultCacheConfig()
+                .entryTtl(Duration.ofMinutes(30))  // Productos: 30 minutos
+                .disableCachingNullValues());
+
+        return RedisCacheManager.builder(connectionFactory)
+                .cacheDefaults(defaultCacheConfig)
+                .withInitialCacheConfigurations(cacheConfigurations)
+                .transactionAware()  // Integración con transacciones Spring
+                .build();
+    }
+}
+```
+
+**Detalles importantes de la configuración** [](https://tsecurity.de/de/2671036/IT+Programmierung/Caching+in+Spring+Boot+with+Redis/de/17/IT+Betriebssysteme/Android+Tipps/)[](https://multidev.redis.io/learn/develop/java/redis-and-spring-course/lesson_9):
+
+- **Serialización**: Por defecto Redis guarda bytes. Con `GenericJackson2JsonRedisSerializer` guardas como JSON, legible y compatible [ref](https://tsecurity.de/de/2671036/IT+Programmierung/Caching+in+Spring+Boot+with+Redis/de/17/IT+Betriebssysteme/Android+Tipps/)
+- **TTL (Time-To-Live)** : Define cuánto tiempo vive cada entrada antes de expirar automáticamente [ref](https://multidev.redis.io/learn/develop/java/redis-and-spring-course/lesson_9)
+- **Prefijos**: Ayudan a organizar las keys en Redis y evitar colisiones [ref](https://multidev.redis.io/learn/develop/java/redis-and-spring-course/lesson_9)
+
+Lo que debemos hacer es levantar redis y tenerlo en la misma maquina, que pueda acceder, ya sea con Docker o manualmente.
+
+El Caching funciona totalmente igual.
+
 # Eventos En Spring Boot
 
 ## Fundamentos: 
-1. El patrón Observer y su implementación en Spring
-2. ApplicationEventPublisher: inyección y método publishEvent
-3. @EventListener: detección por tipo de parámetro
-4. Eventos síncronos vs asíncronos (@Async + @EnableAsync)
-5. Orden de ejecución con @Order
+
+Vamos a hablar de lo que es el patrón observer y la implementación en spring boot. El patrón observer es el más común a la hora de hablar en relación de eventos, ya que reparte de manera secuencial un evento. Viendo el diseño de las clases del patrón tenemos: 
+
+![[Pasted image 20260312102838.png]]
+
+Aqui observamos la necesidad de un publicador un suscriptor y suscriptores específicos. El hacerlo manual hace que podamos manejar diferentes publicadores y suscriptores, aunque esto haga más tedioso o complicado debido a modularidad. 
+Para hacerlo de forma sencilla creamos estas clases: 
+
+```java
+public interface EventApplication {  
+}
+```
+
+Luego heredamos el evento: 
+```java
+public record SaveBookEvent(String email, String subject, String body) implements EventApplication {  
+}
+```
+Ahora vamos a crear el Subscriptor: 
+```java
+public interface Subscriber {  
+    void update(EventApplication app);  
+}
+```
+
+Este hará algo con el evento que quiera.
+Y el publicador: 
+```java
+@Component  
+public class PublisherEmail {  
+  
+    private final List<Subscriber> subscribers;  
+  
+    public PublisherEmail() {  
+        this.subscribers = new ArrayList<>();  
+    }  
+  
+    public void subscribe(Subscriber subscriber) {  
+        subscribers.add(subscriber);  
+    }  
+  
+    public void unsubscribe(Subscriber subscriber) {  
+        subscribers.remove(subscriber);  
+    }  
+  
+    public void notify(EventApplication event) {  
+        for (Subscriber subscriber : subscribers) {  
+            subscriber.update(event);  
+        }  
+    }  
+}
+```
+
+Con esto damos paso a que se puedan suscribir cualquier tipo de servicio a un determinado evento:
+```java
+@Service  
+@Qualifier("sendEmail")  
+public class SendEmail implements Subscriber {  
+  
+  
+    public void sendEmail(String email, String subject, String body) {  
+        System.out.println("Sending email to: " + email);  
+        System.out.println("Subject: " + subject);  
+        System.out.println("Body: " + body);  
+    }  
+  
+  
+    @Override  
+    public void update(EventApplication app) {  
+        if (app instanceof SaveBookEvent emailEvent) {  
+            sendEmail(emailEvent.email(), emailEvent.subject(), emailEvent.body());  
+        }  
+    }  
+}
+```
+
+Aqui implementamos un update que recive el evento querido, y en la configuración:
+```java
+@Configuration  
+public class AppConfig {    
+    @Bean  
+    public PublisherEmail publisherEmail(  
+            @Qualifier("sendEmail") Subscriber subscriber  
+    ) {  
+        var publisherEmail = new PublisherEmail();  
+        publisherEmail.subscribe(subscriber);  
+        return publisherEmail;  
+    }  
+
+}
+```
+
+De esta forma suscribimos a quien sea a nuestro publicador.
+
+Esta es la forma más rudimentaria podríamos mejorarla, como por ejemplo evitando usar `instanceof` y manejar un genérico en el `subscriber` , o agregar un mapa de eventos y sus suscriptores en el `EventPublisher` que pondríamos como publicador genérico en vez del nuestro. Con eso ganamos desacoplamiento, como ejemplo de código: 
+```java
+@Component
+public class EventPublisher {
+
+    private final Map<Class<?>, List<Subscriber<?>>> subscribers = new HashMap<>();
+
+    public <T extends EventApplication> void subscribe(Class<T> type, Subscriber<T> subscriber) {
+        subscribers.computeIfAbsent(type, k -> new ArrayList<>()).add(subscriber);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T extends EventApplication> void publish(T event) {
+        List<Subscriber<?>> subs = subscribers.getOrDefault(event.getClass(), List.of());
+
+        for (Subscriber<?> sub : subs) {
+            ((Subscriber<T>) sub).update(event);
+        }
+    }
+}
+```
+
+Pero como veníamos viendo existe una alternativa ya de Spring Boot que es `ApplicationEventPublisher`.
+
+### AplicationEventPublisher
+
+Esta es una interfaz de Spring para publicar eventos dentro del contenedor de la aplicación. Forma parte del sistema de Spring Events, que implementa un mecanismo interno de Observer / Pub-Sub.
+
+La idea es desacoplar componentes: Un objeto publica un evento y cualquier otro componente puede escucharlo sin que ambos coexistan entre sí.
+
+Para implementarlo vamos a inyectar esta clase: 
+```java
+@Service  
+public class BookServiceImpl implements BookService {  
+  
+    private final BookRepository bookRepository;  
+    private final ApplicationEventPublisher applicationEventPublisher;  
+  
+    public BookServiceImpl(BookRepository bookRepository, ApplicationEventPublisher applicationEventPublisher) {  
+        this.bookRepository = bookRepository;  
+        this.applicationEventPublisher = applicationEventPublisher;  
+    }  
+  
+    @Cacheable("books")  
+    public List<BookEntity> findAll() throws InterruptedException {  
+        return bookRepository.findAll();  
+    }  
+  
+    public void save(BookEntity book) {  
+        bookRepository.save(book);  
+        applicationEventPublisher.publishEvent(  
+                new SaveBookEvent(  
+                        "junior@gmail.com",  
+                        "Book Saved",  
+                        "A new book with title '" + book.getTitle() + "' was saved to the repository."  
+                )  
+        );  
+    }  
+}
+```
+Aquí como vemos ya no usamos nuestro publicador, con esto también ayudamos a que tenga más sentido este publicador.
+Ahora vamos a nuestro servicio de email: 
+```java
+@Service  
+public class SendEmail{  
+  
+    public void sendEmail(String email, String subject, String body) {  
+        System.out.println("Sending email to: " + email);  
+        System.out.println("Subject: " + subject);  
+        System.out.println("Body: " + body);  
+    }  
+}
+```
+
+Por ahora así quedaría (que igualmente en nuestro propio publicador de eventos podiamos hacer). Y crearemos una clase nueva que será nuestro centralizador de los eventos: 
+```java
+@Component  
+public class BookEvents {  
+  
+    public final SendEmail sendEmail;  
+  
+    public BookEvents(SendEmail sendEmail) {  
+        this.sendEmail = sendEmail;  
+    }  
+  
+    @EventListener  
+    public void userCreatedHandleMail(SaveBookEvent event) {  
+        sendEmail.sendEmail(event.email(), event.subject(), event.body());  
+    }  
+  
+}
+```
+
+Y cuando corremos nuestro servidor y enviamos el contenido correspondiente: 
+![[Pasted image 20260312121200.png]]
+
+En nuestro lloger observamos lo siguiente:
+```bash
+2026-03-12 12:06:24.663 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-8080"]
+2026-03-12 12:06:24.664 [main] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2026-03-12 12:06:24.664 [main] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/11.0.18]
+2026-03-12 12:06:24.687 [main] INFO  o.s.b.w.c.s.WebApplicationContextInitializer - Root WebApplicationContext: initialization completed in 632 ms
+2026-03-12 12:06:25.193 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-8080"]
+2026-03-12 12:06:25.200 [main] INFO  o.s.boot.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/'
+2026-03-12 12:06:25.205 [main] INFO  com.cache.CacheApplication - Started CacheApplication in 1.489 seconds (process running for 1.824)
+2026-03-12 12:06:30.564 [http-nio-8080-exec-1] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-03-12 12:06:30.564 [http-nio-8080-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2026-03-12 12:06:30.565 [http-nio-8080-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 1 ms
+Sending email to: junior@gmail.com
+Subject: Book Saved
+Body: A new book with title 'null' was saved to the repository.
+```
+
+Aquí vemos que en efecto el evento se publicó, y podemos seguir añadiendo eventos de esta forma, luego veremos una arquitectura completa orientada a esto. Aún podemos seguir viendo cosas que son interesantes. 
+
+Vamos a añadir un `@Transactional` entonces: 
+```java
+public Class BookServiceImpl implements BookService {
+
+...
+
+@Transactional  
+public void save(BookEntity book) {  
+    bookRepository.save(book);  
+      
+    applicationEventPublisher.publishEvent(  
+            new SaveBookEvent(  
+                    "junior@gmail.com",  
+                    "Book Saved",  
+                    "A new book with title '" + book.getTitle() + "' was saved to the repository."  
+            )  
+    );  
+}
+
+}
+```
+Vamos a probar con dos ideas, la primera es esta, y usaremos en nuestros eventos, enriqueciéndola de la siguiente forma: 
+```java
+@Component  
+public class BookEvents {  
+    public static final Logger log = LoggerFactory.getLogger(BookEvents.class.getName());  
+    public final SendEmail sendEmail;  
+  
+    public BookEvents(SendEmail sendEmail) {  
+        this.sendEmail = sendEmail;  
+    }  
+  
+    @EventListener  
+    public void userCreatedHandleMail(SaveBookEvent event) {  
+        sendEmail.sendEmail(event.email(), event.subject(), event.body());  
+    }  
+  
+    @TransactionalEventListener  
+    public void afterCommit(SaveBookEvent event) {  
+        log.info("After commit of event: {} ", event);  
+    }  
+  
+}
+```
+
+Para terminar configuraremos H2 DataBase para que exista la transacción. Luego de ser configurada (que debe ser trivial para el lector) Observaremos esto: 
+```bash
+2026-03-12 12:35:26.978 [http-nio-8080-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 1 ms
+Sending email to: junior@gmail.com
+Subject: Book Saved
+Body: A new book with title 'El viento nos robo la vida' was saved to the repository.
+2026-03-12 12:35:27.129 [http-nio-8080-exec-1] INFO  com.cache.events.BookEvents - After commit of event: SaveBookEvent[email=junior@gmail.com, subject=Book Saved, body=A new book with title 'El viento nos robo la vida' was saved to the repository.] 
+
+```
+Como observamos se ejecuta el `afterCommit` ahora, y ¿si falla?, observemos que sucede: 
+```java
+@Component  
+public class BookEvents {  
+    public static final Logger log = LoggerFactory.getLogger(BookEvents.class.getName());  
+    public final SendEmail sendEmail;  
+  
+    public BookEvents(SendEmail sendEmail) {  
+        this.sendEmail = sendEmail;  
+    }  
+  
+    @EventListener  
+    public void userCreatedHandleMail(SaveBookEvent event) {  
+        sendEmail.sendEmail(event.email(), event.subject(), event.body());  
+    }  
+  
+    @TransactionalEventListener  
+    public void afterCommit(SaveBookEvent event) {  
+        log.info("After commit of event: {} ", event);  
+    }  
+  
+}
+```
+
+2. Eventos síncronos vs asíncronos (@Async + @EnableAsync)
+3. Orden de ejecución con @Order
 ## Tipos de eventos
 6. Eventos simples (POJOs)
     
@@ -4174,8 +4657,6 @@ Una buena implementación se valida cuando, por ejemplo, reduces la latencia de 
 29. Eventos distribuidos vs locales
     
 30. Patrones: Saga, CQRS y Event-Driven Architecture con Spring
-
-## 
 
 # Security context en Spring Boot
 
