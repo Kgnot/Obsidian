@@ -4604,28 +4604,328 @@ public class BookEvents {
 }
 ```
 
-2. Eventos síncronos vs asíncronos (@Async + @EnableAsync)
-3. Orden de ejecución con @Order
+Y como podemos hacer algo mucho más explícito:
+
+```java
+@Component  
+public class MyListener implements ApplicationListener<SaveBookEvent> {  
+  
+	@Override  
+	public void onApplicationEvent(SaveBookEvent event) {  
+	  
+	}  
+}
+```
+Pero en lógica sigue siendo lo mismo.
+
+### Eventos sincronos y asincronos en springboot: 
+
+En springboot, los eventos del sistema  (`ApplicationEventPublisher`) pueden ejecutarse de dos formas:
+1. Sincrónica (syncrhonous events)
+2. Asincrónica (asyncrhonous events)
+La diferencia fundamental es cómo se ejecutan los listeners respecto al thread que publica el evento.
+
+#### Eventos Sincrónicos:
+Es el comportamiento por defecto en Spring.
+
+Cuando se publica un evento:
+
+```java
+publishear.publishEvent(event)
+```
+Entonces spring ejectua todos los listeners en el mismo hilo que publicó el evento.
+
+Básicamente:
+```text
+Thread principal
+      |
+      v
+publishEvent()
+      |
+      v
+Listener 1
+      |
+Listener 2
+      |
+Listener 3
+      |
+continúa ejecución
+```
+Y el método no termina hasta que todos los listeners terminan. Lo único en lo que tiene un problema es a la hora de tareas pesadas y los listeners lentos afectan la latencia.
+
+#### Eventos Asincrónicos
+En modo asincrónico, los listeners se ejecutan en otro thread.
+
+El publisher no espera a que el listener termine.
+
+Básicamente:
+```text
+Thread principal
+      |
+publishEvent()
+      |
+continúa ejecución
+      |
+Thread pool
+      |
+Listener
+```
+
+Para este estado de asíncrono tenemos que activarlo desde las configuraciones. 
+```java
+@Configuration
+@EnableConfiguration // aquí específicamente
+public class AsyncConfig{
+}
+```
+Y la utilización del listener asincrónico: 
+```java
+@Component
+public class EmailListener {
+
+	@Async
+	@EventListener
+	public void handle(OrderCreatedEvent event){
+		... // lógica
+	}
+}
+```
+
+##### Thread Pool interno
+
+Cuando nosotros usamos `@Async`, Spring usa un TaskExecutor.
+Por defecto: 
+```text
+SimpleAsyncTaskExecutor
+```
+En produccion conviene configurar uno.
+Por ejemplo:
+```java
+@Configuration
+@EnableAsync
+public class AsyncConfig {
+
+	@Bean
+	public Executor taskExecutor(){
+		ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+		executor.setCorePoolSize(5);
+		executor.setMaxPoolSize(10);
+		executor.setQueueCapacity(50);
+		executor.setThreadNamePrefix("event-");
+		executor.initialize();
+	
+		return executor;
+	}
+
+}
+```
+Esto controla: 
+- Concurrencia
+- Número de threads
+- cola de tareas
+
+### ¿Cómo funciona el `@Order`?
+
+La regla es bastante simple y es que en menor orden es mayor la prioridad.
+
+Por ejemplo: 
+```java
+@Component
+@Order(1)
+public class FirstListener {
+
+    @EventListener
+    public void handle(OrderCreatedEvent event) {
+        System.out.println("First");
+    }
+}
+```
+```java
+@Component
+@Order(2)
+public class SecondListener {
+
+    @EventListener
+    public void handle(OrderCreatedEvent event) {
+        System.out.println("Second");
+    }
+}
+```
+
+Así podemos garantizar un orden de ejecución. Aunque la verdad son muy extraño de qu pueda ser utilizado, ya que si se usa puede significar un error de diseño en la arquitectura.
+
 ## Tipos de eventos
-6. Eventos simples (POJOs)
-    
-7. Eventos que extienden ApplicationEvent (legado)
-    
-8. Eventos genéricos y type erasure (ResolvableType)
-    
-9. Múltiples eventos en un mismo listener
-    
-10. Listeners con retorno (generan nuevos eventos)
+
+Cuando nosotros publicamos un evento generalmente publicamos un evento POJO, por ejemplo: 
+```java
+public record UserCreatedEvent(
+        Long userId,
+        String email
+) {}
+```
+
+Y al ser pasado esto es lo que se publica. Pero no siempre fue de esta forma. Antes se tenía que heredar directamente de `ApplicationEvent` era la única diferencia, pero esto fue dejado de lado, ya que acoplaba la dependencia de un evento al framework.
+```java
+public class UserCreatedEvent extends ApplicationEvent {
+
+    private final String email;
+
+    public UserCreatedEvent(Object source, String email) {
+        super(source);
+        this.email = email;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+}
+
+/// ---- 
+publisher.publishEvent(new UserCreatedEvent(this, email));
+
+```
+
+Esto se dejó de utilizar debido a ese acoplamiento. 
+
+### Eventos genericos y type erasure: 
+
+Aqui hay algo interesante y es el tema de como se procesan los genéricos. 
+
+Dentro de los genericos se presenta un problema y es que si simplemente los mandamos y evaluamos, por ejemplo: 
+
+```java 
+public record SaveEvent<T>(T entity) implements EventApplication{  
+}
+```
+```java
+@Service  
+public class BookServiceImpl implements BookService {  
+  
+    ....
+  
+    @Transactional  
+    public void save(BookEntity book) {  
+  
+        applicationEventPublisher.publishEvent(  
+                new SaveEvent<>(book)  
+        );  
+        applicationEventPublisher.publishEvent(  
+                new SaveEvent<>(  
+                        new OtroEntity(null,  
+                                "otro publicado", "xD"))  
+        );  
+  
+        bookRepository.save(book);  
+  
+    }  
+}
+```
+
+Y después:
+```java
+@Component  
+public class BookEvents {  
+    public static final Logger log = LoggerFactory.getLogger(BookEvents.class.getName());  
+    public final SendEmail sendEmail;  
+  
+    public BookEvents(SendEmail sendEmail) {  
+        this.sendEmail = sendEmail;  
+    }  
+  
+    @EventListener  
+    public void userCreatedHandleMail(SaveEvent<BookEntity> event) {  
+        sendEmail.sendEmail("Juan@gmail.com",  
+                "Creacion de un libro bro",  
+                "Hola amigo se creo un libro, sabes cual es? , mira: "+event.entity());  
+    }  
+  
+    @TransactionalEventListener  
+    public void afterCommit(SaveEvent<BookEntity> event) {  
+        log.info("After commit of event: {} ", event);  
+    }  
+  
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_ROLLBACK)  
+    public void afterRollback(SaveEvent<BookEntity> event){  
+        log.info("After rollback of event: {} ", event);  
+    }  
+  
+}
+```
+
+Al final no se evidenciará absolutamente nada. No sucederá nada porque en sí no se puede generar esa distinción de tipo, pues funciona de la siguiente forma.
+
+Hay 3 momentos del código java. 
+El tiempo de compilación es cuando `javac` (el compilador de Java) transforma el código `.java` a bytecode `.class`. En este momento hace 3 cosas: 
+1. El compilador verifica los tipos, si escribimos `SaveEvent<BookEntity>`, el compilador sabe que `T = BookEntity` y válida que todo sea consistente.
+2. El compilador verifica que los métodos existen, por lo que si llamamos a `book.getId()`, verifica que `BookEntity`, tenga ese método.
+3. Los genéricos se verifican completamente aquí. Si intentas meter un String donde espera un `BookEntity`, el compilador te lo rechaza.
+Ahora, en tiempo de ejecución (Runtime)
+Es cuando la JVM ejecuta los archivos `.class`. Aquí es donde nuestra aplicación realmente corre, Spring levanta el contexto, se crean beans, se procesa request HTTP, etc. La diferencia clave con la compilación: Java aplica "type erasure" (borrado de tipos) a los genéricos.
+
+Entonces en si, el corazón del problema es el `Type erasure`. Entonces cuando el compilador termina, **==borra toda la información de los genéricos==** del bytecode. Es decir:
+```java
+// En nuestro código en tiempo de compilación
+SaveEvent<BookEntity> evento = new SaveEvent<>(book);
+SaveEvent<OtroEntity> evento2 = new SaveEvent<>(otro);
+
+// Lo que nuestr JVM ve en el runtime despues del Type erasure:
+SaveEvent evento = new SaveEvent(book);
+SaveEvent evento2 = new SaveEvent(otro);
+```
+
+Por esta razón en `Runtime` ambos eventos que parecen ser diferente realmente es el mismo tipo. La JVM no tiene idea de que uno era `<BookEntity` y el otro `<OtroEntity>`. Y esta es la razón de que los eventos en Spring se rompan. Y o se desepachan todos o no se despachan, generalmente no se hace. 
+
+La solución fueron los `ResolvableTypeProvider`.
+Spring creó esta interfaz exactamente para resolver este problema. Cuando tu `SaveEvent` implemente `ResolvableTypeProvider`:
+```java
+public record SaveEvent<T>(T entity) implements ResolvableTypeProvider {
+    @Override
+    public ResolvableType getResolvableType() {
+        return ResolvableType.forClassWithGenerics(
+            getClass(),
+            ResolvableType.forInstance(this.entity)
+        );
+    }
+}
+```
+Lo que sucede ahora en runtime: 
+```text
+Spring: "Recibí un SaveEvent. ¿Qué tipo genérico tiene?"
+Spring: "Ah, implementa ResolvableTypeProvider. Le pregunto."
+SaveEvent: "Mi entity es de tipo BookEntity (lo sé porque this.entity.getClass() = BookEntity.class)"
+Spring: "Entonces eres SaveEvent<BookEntity>. Te despacho a userCreatedHandleMail."
+Es decir, ResolvableTypeProvider le da a Spring un mecanismo alternativo para recuperar la información de tipo que Java borró. En lugar de depender del genérico (que fue borrado), mira el tipo real del objeto contenido en runtime usando this.entity.getClass().
+```
+![[Pasted image 20260317211831.png]]
+
+***
+Con esto explicado entonces, ya sabemos como es que funcionan los eventos con genéricos.
+
+### Múltiples listeners
+Algo que no se ha tocado es el tema de los múltiples listeners que puede tener un mismo método, entonces, observemos de forma inmediata y rápida. La idea es que múltiples eventos publiquen ciertas cosas, y si existe un método en común en vez de replicar, este escuche a los dos. 
+Entonces, la manera en que esto se puede hacer es la siguiente:
+```java
+@Component
+public class UserEventsListener {
+
+    @EventListener({
+        UserCreatedEvent.class,
+        UserDeletedEvent.class
+    })
+    public void handleUserEvents(Object event) {
+
+        System.out.println("User event occurred: " + event.getClass().getSimpleName());
+    }
+}
+```
+Esto tiene más sentido cuando se comparte un comportamiento real, para logging o auditoria, o métricas. De resto no tiene mucho sentido ya que podriamos estar llenando métodos de `instanceof`
 ## Control avanzado
-11. @TransactionalEventListener y sus fases (BEFORE_COMMIT, AFTER_COMMIT, AFTER_ROLLBACK)
     
 12. Condition con SpEL en @EventListener(condition = "...")
     
 13. Manejo de excepciones en listeners (ErrorHandler)
     
-14. Eventos con prioridad y orden
-    
-15. Propagación de eventos en jerarquías de ApplicationContext
+14. Propagación de eventos en jerarquías de ApplicationContext
 ## Arquitectura y Diseño
 16. Estrategias de naming y organización de eventos
     
@@ -4636,16 +4936,12 @@ public class BookEvents {
 19. Payload mínimo vs payload completo
     
 20. Eventos como contrato entre módulos/bounded contexts
-## Integración y performance
-21. Eventos y transacciones (rollback, consistencia)
+## Integración y performance    
+21. Monitoreo: métricas de latencia y throughput
     
-22. Thread pooling para @Async eventos (custom Executor)
+22. Debugging: trace de eventos con logs
     
-23. Monitoreo: métricas de latencia y throughput
-    
-24. Debugging: trace de eventos con logs
-    
-25. Testing: @SpringBootTest con @MockBean de listeners
+23. Testing: @SpringBootTest con @MockBean de listeners
 
 ## Escalabilidad
 26. Eventos en memoria vs eventos con broker externo (RabbitMQ, Kafka)

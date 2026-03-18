@@ -314,7 +314,14 @@
     "postman",
     "caching",
     "Caffeine",
-    "AplicationEventPublisher"
+    "AplicationEventPublisher",
+    "beans",
+    "Runtime",
+    "bytecode",
+    "String",
+    "bytecode",
+    "Testeabilidad",
+    "Modificabilidad"
   ],
   "newFileLocation": "root",
   "newFileFolderPath": "courses/src/images",

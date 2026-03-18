@@ -20,6 +20,7 @@
 ### Arquitectura de Software
 - **[Arquitectura]** *Fundamentals of Software Architecture: An Engineering Approach* — Mi favorito de arquitectura. Cubre mucho y está bien escrito.
 - **[Arquitectura]** *Building Microservices* — Otro muy bueno, tiene una linda introducción a problemas de arquitectura distribuida.
+- **[Arquitectura]** *Software  Architecture In Practice, Second Edition* 
 
 ### Blockchain
 - **[Blockchain]** *The Blockchain Developer* — Super hands-on, linda explicación de varios protocolos.

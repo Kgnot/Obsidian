@@ -1393,6 +1393,18 @@ Ahí es donde entra **SCM**. Jenkins **se conecta a tu repositorio de código** 
 
 Es **el sistema que se encarga de guardar, versionar y gestionar el código fuente de tu proyecto**.
 
+---
+
+# Jenkins v2: 
+
+Ahora vamos a tocar jenkins para manejar un sistema de trabajos, vamos a automatizar su verificación de código usando sonarQube y vamos a separarlo de la mejor forma: 
+![[Pasted image 20260314185245.png]]
+
+
+Primero entrando a la suite de Jenkins
+
+
+
 # Bibliografía
 - [GitHub Actions documentation - GitHub Docs](https://docs.github.com/en/actions)
 - [Marketplace](https://github.com/marketplace)
