@@ -321,7 +321,9 @@
     "String",
     "bytecode",
     "Testeabilidad",
-    "Modificabilidad"
+    "Modificabilidad",
+    "modificabilidad",
+    "testabilidad"
   ],
   "newFileLocation": "root",
   "newFileFolderPath": "courses/src/images",
